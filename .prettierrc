@@ -1,0 +1,8 @@
+{
+  "printWidth": 80,
+  "singleQuote": true,
+  "trailingComma": "none",
+  "htmlWhitespaceSensitivity": "strict",
+  "proseWrap": "never",
+  "plugins": ["prettier-plugin-organize-imports", "prettier-plugin-packagejson"]
+}
