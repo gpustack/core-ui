@@ -1,6 +1,6 @@
 // build entry point
 
 export * from './components';
-export * from './config';
-export * from './hooks';
-export * from './utils';
+export * as config from './config';
+export * as hooks from './hooks';
+export * as utils from './utils';

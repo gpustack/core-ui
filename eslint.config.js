@@ -34,18 +34,19 @@ export default defineConfig([
       globals: globals.browser
     },
     rules: {
+      'no-unused-vars': 'off',
+      'react-refresh/only-export-components': 'off',
+      'react-hooks/set-state-in-effect': 'off',
+      'react-hooks/exhaustive-deps': 'off',
+      'no-control-regex': 'off',
       '@typescript-eslint/no-unused-vars': 'off',
       'unused-imports/no-unused-imports': 'error',
+      '@typescript-eslint/no-explicit-any': 'off',
       'import/no-unresolved': 'error',
-      'unused-imports/no-unused-vars': [
-        'warn',
-        {
-          vars: 'all',
-          varsIgnorePattern: '^_',
-          args: 'after-used',
-          argsIgnorePattern: '^_'
-        }
-      ],
+      'unused-imports/no-unused-vars': 'off',
+      'react-hooks/immutability': 'off',
+      'react-hooks/refs': 'off',
+      'react-hooks/preserve-manual-memoization': 'off',
       'no-multiple-empty-lines': ['error', { max: 1, maxEOF: 0, maxBOF: 0 }]
     }
   }

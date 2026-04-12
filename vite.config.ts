@@ -18,10 +18,18 @@ export default defineConfig({
       }
     })
   ],
+  css: {
+    modules: {
+      generateScopedName: '[name]__[local]___[hash:base64:5]'
+    }
+  },
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src')
     }
+  },
+  optimizeDeps: {
+    include: ['monaco-editor']
   },
   build: {
     lib: {
