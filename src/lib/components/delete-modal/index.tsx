@@ -1,5 +1,3 @@
-import useBodyScroll from '@/lib/hooks/use-body-scroll';
-import { useIntl } from '@/lib/hooks/useIntl';
 import { ExclamationCircleFilled } from '@ant-design/icons';
 import {
   Button,
@@ -12,6 +10,8 @@ import {
 import { createStyles } from 'antd-style';
 import { forwardRef, useImperativeHandle, useState } from 'react';
 import styled from 'styled-components';
+import useBodyScroll from '../../../lib/hooks/use-body-scroll';
+import { useIntl } from '../../../lib/hooks/useIntl';
 
 const useStyles = createStyles(({ css }) => ({
   'delete-modal-content': css`

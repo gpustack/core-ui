@@ -1,8 +1,8 @@
-import IconFont from '@/lib/components/icon-font';
-import { useIntl } from '@/lib/hooks/useIntl';
 import { Button, Checkbox } from 'antd';
 import _ from 'lodash';
 import React from 'react';
+import IconFont from '../../../../lib/components/icon-font';
+import { useIntl } from '../../../../lib/hooks/useIntl';
 
 interface HeaderPrefixProps {
   expandable?: boolean | React.ReactNode;

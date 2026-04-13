@@ -1,8 +1,8 @@
-import HotKeys from '@/lib/config/hotkeys';
 import { createStyles } from 'antd-style';
 import { throttle } from 'lodash';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
+import HotKeys from '../../lib/config/hotkeys';
 import { useIntl } from './useIntl';
 
 const useStyles = createStyles(({ css, token }) => ({

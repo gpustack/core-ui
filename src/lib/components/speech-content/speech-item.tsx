@@ -1,5 +1,3 @@
-import AudioAnimation from '@/lib/components/audio-animation';
-import { useIntl } from '@/lib/hooks/useIntl';
 import {
   DownloadOutlined,
   PauseCircleOutlined,
@@ -17,6 +15,8 @@ import React, {
   useRef,
   useState
 } from 'react';
+import AudioAnimation from '../../../lib/components/audio-animation';
+import { useIntl } from '../../../lib/hooks/useIntl';
 import RawAudioPlayer from '../audio-player/raw-audio-player';
 import './styles/index.less';
 import './styles/slider-progress.less';

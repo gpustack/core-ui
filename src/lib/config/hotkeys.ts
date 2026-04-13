@@ -1,4 +1,4 @@
-import { platformCall } from '@/lib/utils';
+import { platformCall } from '../../lib/utils';
 
 const platform = platformCall();
 const KeybindingsMap = {

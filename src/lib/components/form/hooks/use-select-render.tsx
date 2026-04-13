@@ -1,5 +1,5 @@
-import AutoTooltip from '@/lib/components/auto-tooltip';
 import React, { useMemo } from 'react';
+import AutoTooltip from '../../../../lib/components/auto-tooltip';
 
 interface SelectRenderProps {
   maxTagWidth?: number;

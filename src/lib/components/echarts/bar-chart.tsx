@@ -1,8 +1,8 @@
-import Chart from '@/lib/components/echarts/chart';
-import useChartConfig from '@/lib/components/echarts/config';
-import EmptyData from '@/lib/components/empty-data';
 import _ from 'lodash';
 import React, { memo, useMemo } from 'react';
+import Chart from '../../../lib/components/echarts/chart';
+import useChartConfig from '../../../lib/components/echarts/config';
+import EmptyData from '../../../lib/components/empty-data';
 import { type ChartProps } from './types';
 
 const BarChart: React.FC<ChartProps> = (props) => {

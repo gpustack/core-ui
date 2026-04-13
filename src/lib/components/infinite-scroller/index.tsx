@@ -1,7 +1,7 @@
-import { useIntl } from '@/lib/hooks/useIntl';
 import { DoubleRightOutlined } from '@ant-design/icons';
 import { Button, FloatButton } from 'antd';
 import React from 'react';
+import { useIntl } from '../../../lib/hooks/useIntl';
 
 import {
   useInfiniteScroll,

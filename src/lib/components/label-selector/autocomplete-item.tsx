@@ -1,9 +1,9 @@
-import AutoComplete from '@/lib/components/form/auto-complete';
-import { useIntl } from '@/lib/hooks/useIntl';
 import { MinusOutlined } from '@ant-design/icons';
 import { Button, Tooltip } from 'antd';
 import _ from 'lodash';
 import React, { useMemo, useState } from 'react';
+import AutoComplete from '../../../lib/components/form/auto-complete';
+import { useIntl } from '../../../lib/hooks/useIntl';
 import { useLabelSelectorContext } from './context';
 import './styles/label-item.less';
 interface LabelItemProps {

@@ -1,6 +1,6 @@
-import { parseParamsString } from '@/lib/utils';
 import _ from 'lodash';
 import React, { useEffect } from 'react';
+import { parseParamsString } from '../../../lib/utils';
 import Wrapper from '../label-selector/wrapper';
 import ListItem from './list-item';
 

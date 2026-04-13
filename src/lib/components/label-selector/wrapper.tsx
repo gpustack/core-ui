@@ -1,9 +1,9 @@
-import LabelInfo from '@/lib/components/form/components/label-info';
-import { useIntl } from '@/lib/hooks/useIntl';
 import { PlusOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import React from 'react';
 import styled from 'styled-components';
+import LabelInfo from '../../../lib/components/form/components/label-info';
+import { useIntl } from '../../../lib/hooks/useIntl';
 
 interface WrapperProps {
   required?: boolean;

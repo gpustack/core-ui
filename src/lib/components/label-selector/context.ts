@@ -1,6 +1,6 @@
 import React from 'react';
 
-interface LabelSelectorContextProps {
+export interface LabelSelectorContextProps {
   options?: Array<{
     label: string;
     value: string | number;

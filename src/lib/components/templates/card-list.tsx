@@ -1,8 +1,8 @@
-import ResizeContainer from '@/lib/components/resize-container';
-import CardSkeleton from '@/lib/components/templates/card-skeleton';
 import { Spin } from 'antd';
 import React from 'react';
 import styled from 'styled-components';
+import ResizeContainer from '../../../lib/components/resize-container';
+import CardSkeleton from '../../../lib/components/templates/card-skeleton';
 import InfiniteScroller from '../infinite-scroller';
 import { useScrollerContext } from '../infinite-scroller/use-scroller-context';
 

@@ -1,4 +1,3 @@
-import IconFont from '@/lib/components/icon-font';
 import {
   ApiOutlined,
   CopyOutlined,
@@ -15,6 +14,7 @@ import {
   ThunderboltOutlined
 } from '@ant-design/icons';
 import React from 'react';
+import IconFont from '../../../lib/components/icon-font';
 
 const icons = {
   EditOutlined: React.createElement(EditOutlined),

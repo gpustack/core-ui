@@ -1,10 +1,10 @@
-import { useIntl } from '@/lib/hooks/useIntl';
 import { PictureOutlined } from '@ant-design/icons';
 import { Button, Tooltip, Upload } from 'antd';
 import type { UploadFile } from 'antd/es/upload';
 import { type RcFile } from 'antd/es/upload';
 import { debounce, round } from 'lodash';
 import React, { useCallback, useMemo, useRef } from 'react';
+import { useIntl } from '../../../lib/hooks/useIntl';
 
 const acceptImageType = ['image/png', 'image/jpg', 'image/jpeg'];
 

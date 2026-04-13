@@ -1,11 +1,11 @@
-import IconFont from '@/lib/components/icon-font';
-import { useIntl } from '@/lib/hooks/useIntl';
-import { isNotEmptyValue } from '@/lib/utils/index';
 import type { CascaderAutoProps } from 'antd';
 import { Cascader, Empty, Form } from 'antd';
 import classNames from 'classnames';
 import _, { cloneDeep } from 'lodash';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import IconFont from '../../../lib/components/icon-font';
+import { useIntl } from '../../../lib/hooks/useIntl';
+import { isNotEmptyValue } from '../../../lib/utils/index';
 import AutoTooltip from '../auto-tooltip';
 import { SealFormItemProps } from './types';
 import Wrapper from './wrapper';

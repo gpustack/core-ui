@@ -1,4 +1,3 @@
-import { useIntl } from '@/lib/hooks/useIntl';
 import {
   DownOutlined,
   UpOutlined,
@@ -6,6 +5,7 @@ import {
 } from '@ant-design/icons';
 import { Button, Tooltip } from 'antd';
 import React from 'react';
+import { useIntl } from '../../../lib/hooks/useIntl';
 import './styles/pagination.less';
 
 interface LogsPaginationProps {

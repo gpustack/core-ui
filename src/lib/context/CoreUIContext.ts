@@ -6,7 +6,7 @@ import { type TableFetchType } from '../types/table-fetch';
 export interface CoreUIConfig {
   apiBaseUrl: string;
   iconUrl?: string;
-  theme?: 'light' | 'dark';
+  theme?: 'light' | 'realDark' | 'dark';
   isDarkTheme?: boolean;
 }
 

@@ -1,7 +1,7 @@
-import { type HandlerOptions } from '@/lib/hooks/use-chunk-fetch';
-import useDownloadStream from '@/lib/hooks/use-download-stream';
 import { Progress, notification } from 'antd';
 import dayjs from 'dayjs';
+import { type HandlerOptions } from '../../lib/hooks/use-chunk-fetch';
+import useDownloadStream from '../../lib/hooks/use-download-stream';
 import { useIntl } from './useIntl';
 
 const renderMessage = (title: string) => {

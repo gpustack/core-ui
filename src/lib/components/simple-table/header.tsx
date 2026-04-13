@@ -1,5 +1,5 @@
-import { useIntl } from '@/lib/hooks/useIntl';
 import React from 'react';
+import { useIntl } from '../../../lib/hooks/useIntl';
 
 interface TableHeaderProps {
   columns: any[];

@@ -1,7 +1,7 @@
-import { isNotEmptyValue } from '@/lib/utils/index';
 import type { InputNumberProps } from 'antd';
 import { Form, InputNumber } from 'antd';
 import React, { useEffect, useRef, useState } from 'react';
+import { isNotEmptyValue } from '../../../lib/utils/index';
 import { type SealFormItemProps } from './types';
 import Wrapper from './wrapper';
 import InputWrapper from './wrapper/input';

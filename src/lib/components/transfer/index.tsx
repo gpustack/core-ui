@@ -1,7 +1,7 @@
-import { useIntl } from '@/lib/hooks/useIntl';
 import { MoreOutlined } from '@ant-design/icons';
 import { Transfer, type TransferProps } from 'antd';
 import styled from 'styled-components';
+import { useIntl } from '../../../lib/hooks/useIntl';
 
 type TransferKey = string | number | bigint;
 

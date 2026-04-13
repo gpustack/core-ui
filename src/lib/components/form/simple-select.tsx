@@ -1,9 +1,9 @@
-import { useIntl } from '@/lib/hooks/useIntl';
 import type { SelectProps } from 'antd';
 import { Checkbox, Tag } from 'antd';
 import { type CheckboxChangeEvent } from 'antd/es/checkbox';
 import React, { forwardRef, useEffect, useImperativeHandle } from 'react';
 import styled from 'styled-components';
+import { useIntl } from '../../../lib/hooks/useIntl';
 import AutoTooltip from '../auto-tooltip';
 import BaseSelect from './base/select';
 

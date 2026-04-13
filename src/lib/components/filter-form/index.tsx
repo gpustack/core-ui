@@ -1,9 +1,9 @@
-import OverlayScroller from '@/lib/components/overlay-scroller';
-import { useIntl } from '@/lib/hooks/useIntl';
 import { CloseOutlined } from '@ant-design/icons';
 import { Button, Form } from 'antd';
 import classNames from 'classnames';
 import React, { forwardRef, useImperativeHandle } from 'react';
+import OverlayScroller from '../../../lib/components/overlay-scroller';
+import { useIntl } from '../../../lib/hooks/useIntl';
 import filterFormCss from './style.module.less';
 
 const FilterForm: React.FC<

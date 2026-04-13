@@ -1,8 +1,8 @@
-import { createAxiosToken } from '@/lib/hooks/use-chunk-request';
 import { useMemoizedFn, useRequest } from 'ahooks';
 import { message } from 'antd';
 import { type CancelTokenSource } from 'axios';
 import { useEffect, useRef, useState } from 'react';
+import { createAxiosToken } from '../../lib/hooks/use-chunk-request';
 
 /**
 

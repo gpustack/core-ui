@@ -1,4 +1,4 @@
-import { KeyMap } from '@/lib/config/hotkeys';
+import { KeyMap } from '../../../lib/config/hotkeys';
 export default [
   {
     scope: 'playground',

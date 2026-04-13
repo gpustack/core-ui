@@ -1,7 +1,7 @@
-import IconFont from '@/lib/components/icon-font';
 import type { SelectProps } from 'antd';
 import { Select } from 'antd';
 import React, { forwardRef, useImperativeHandle } from 'react';
+import IconFont from '../../../../lib/components/icon-font';
 import NotFoundContent from '../components/not-found-content';
 import SelectCss from './styles.module.less';
 

@@ -1,9 +1,9 @@
-import CopyButton from '@/lib/components/copy-button';
-import EditorWrap from '@/lib/components/editor-wrap';
-import HighlightCode from '@/lib/components/highlight-code';
-import SegmentLine from '@/lib/components/segment-line';
 import React from 'react';
 import styled from 'styled-components';
+import CopyButton from '../../../lib/components/copy-button';
+import EditorWrap from '../../../lib/components/editor-wrap';
+import HighlightCode from '../../../lib/components/highlight-code';
+import SegmentLine from '../../../lib/components/segment-line';
 
 interface ViewerProps {
   code: string;

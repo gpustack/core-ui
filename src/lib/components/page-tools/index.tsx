@@ -1,5 +1,3 @@
-import DropDownActions from '@/lib/components/drop-down-actions';
-import { useIntl } from '@/lib/hooks/useIntl';
 import {
   CloseCircleFilled,
   DeleteOutlined,
@@ -10,10 +8,12 @@ import {
 } from '@ant-design/icons';
 import { Button, Input, Space } from 'antd';
 import React, { useMemo } from 'react';
+import DropDownActions from '../../../lib/components/drop-down-actions';
+import { useIntl } from '../../../lib/hooks/useIntl';
 import BaseSelect from '../form/base/select';
 import IconFont from '../icon-font';
 import filtersButtonCss from './filters-button.module.less';
-import './index.module.less';
+import pageToolsCss from './index.module.less';
 
 type PageToolsProps = {
   left?: React.ReactNode;
@@ -86,9 +86,9 @@ const PageTools: React.FC<PageToolsProps> = (props) => {
   }, [marginBottom, marginTop, pageStyle]);
 
   return (
-    <div className="page-tools" style={newStyle}>
-      <div className="left">{left}</div>
-      <div className="right">{right}</div>
+    <div className={pageToolsCss['page-tools']} style={newStyle}>
+      <div className={pageToolsCss.left}>{left}</div>
+      <div className={pageToolsCss.right}>{right}</div>
     </div>
   );
 };

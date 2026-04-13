@@ -1,8 +1,8 @@
-import AutoTooltip from '@/lib/components/auto-tooltip';
-import { useIntl } from '@/lib/hooks/useIntl';
 import { CaretDownOutlined, CaretUpOutlined } from '@ant-design/icons';
 import classNames from 'classnames';
 import React from 'react';
+import AutoTooltip from '../../../../lib/components/auto-tooltip';
+import { useIntl } from '../../../../lib/hooks/useIntl';
 import '../styles/header.less';
 
 import { type TableHeaderProps } from '../types';

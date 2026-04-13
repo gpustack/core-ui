@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { statusType } from '../config/types';
+import { type statusType } from '../config/types';
 
 export default function useValidateFields(params: {
   requiredFields?: string[];

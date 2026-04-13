@@ -5,14 +5,18 @@
   "type": "module",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.esm.js",
-      "require": "./dist/index.cjs.js"
+      "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "require": "./src/index.ts"
     },
-    "./style.css": "./dist/style.css"
+    "./lib/*": {
+      "import": "./src/lib/*",
+      "require": "./src/lib/*"
+    },
+    "./style.css": "./src/styles/index.less"
   },
   "files": [
-    "dist"
+    "src"
   ],
   "scripts": {
     "build": "pnpm clean && vite build",

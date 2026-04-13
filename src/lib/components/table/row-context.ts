@@ -1,6 +1,6 @@
 import React from 'react';
 
-interface RowContextType {
+export interface RowContextType {
   row: Record<string, any>;
   onCell?: (
     record: any,

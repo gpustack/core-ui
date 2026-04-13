@@ -1,6 +1,6 @@
-import { breakpoints } from '@/lib/config';
 import _ from 'lodash';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { breakpoints } from '../../lib/config';
 
 export default function useWindowResize() {
   const [size, setSize] = useState<{ width: number; height: number }>({

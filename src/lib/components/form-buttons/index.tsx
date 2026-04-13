@@ -1,5 +1,5 @@
-import { useIntl } from '@/lib/hooks/useIntl';
 import { Button, Space } from 'antd';
+import { useIntl } from '../../../lib/hooks/useIntl';
 
 type FormButtonsProps = {
   onOk?: () => void;

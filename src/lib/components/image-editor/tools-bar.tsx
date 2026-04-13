@@ -1,7 +1,3 @@
-import IconFont from '@/lib/components/icon-font';
-import UploadImg from '@/lib/components/upload-image';
-import { KeyMap } from '@/lib/config/hotkeys';
-import { useIntl } from '@/lib/hooks/useIntl';
 import {
   ClearOutlined,
   DownloadOutlined,
@@ -12,6 +8,10 @@ import {
 import { Button, Checkbox, Slider, Tooltip } from 'antd';
 import { type CheckboxChangeEvent } from 'antd/es/checkbox';
 import React from 'react';
+import IconFont from '../../../lib/components/icon-font';
+import UploadImg from '../../../lib/components/upload-image';
+import { KeyMap } from '../../../lib/config/hotkeys';
+import { useIntl } from '../../../lib/hooks/useIntl';
 import imageCss from './index.module.less';
 
 interface ToolsBarProps {

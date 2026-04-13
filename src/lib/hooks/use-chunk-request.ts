@@ -1,13 +1,13 @@
-import { WatchEventType } from '@/lib/config';
+import axios, { type CancelTokenSource } from 'axios';
+import _ from 'lodash';
+import { useEffect, useRef, useState } from 'react';
+import { WatchEventType } from '../../lib/config';
 import {
   cancelWatchRequest,
   clearWatchRequestId,
   updateWatchIDValue,
   updateWatchRequest
-} from '@/lib/utils/watch-request';
-import axios, { type CancelTokenSource } from 'axios';
-import _ from 'lodash';
-import { useEffect, useRef, useState } from 'react';
+} from '../../lib/utils/watch-request';
 import useCoreUIContext from './useCoreUIContext';
 
 interface RequestConfig {

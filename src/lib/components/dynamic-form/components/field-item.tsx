@@ -1,7 +1,7 @@
-import ComponentsMap from '@/lib/components/form/config/components';
-import { SealFormItemProps } from '@/lib/components/form/types';
 import { Form } from 'antd';
 import React from 'react';
+import ComponentsMap from '../../../../lib/components/form/config/components';
+import { SealFormItemProps } from '../../../../lib/components/form/types';
 
 interface FieldItemProps extends SealFormItemProps {
   widget: keyof typeof ComponentsMap;

@@ -1,9 +1,9 @@
-import useAddImage from '@/lib/hooks/use-add-image';
-import { useIntl } from '@/lib/hooks/useIntl';
 import { DeleteOutlined } from '@ant-design/icons';
 import { Button, Input, Tooltip } from 'antd';
 import classNames from 'classnames';
 import React, { useState } from 'react';
+import useAddImage from '../../../lib/hooks/use-add-image';
+import { useIntl } from '../../../lib/hooks/useIntl';
 import SmallCloseButton from '../small-close-button';
 import ThumbImg from '../thumb-image';
 import './styles/row-textarea.less';

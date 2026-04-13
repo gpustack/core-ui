@@ -1,8 +1,8 @@
-import SegmentLine from '@/lib/components/segment-line';
 import { useMemoizedFn } from 'ahooks';
 import _ from 'lodash';
 import React, { forwardRef, useImperativeHandle } from 'react';
 import styled from 'styled-components';
+import SegmentLine from '../../../lib/components/segment-line';
 import useFieldScroll from './use-field-scroll';
 
 const SegmentedHeader = styled.div<{ $top?: number }>`

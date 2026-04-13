@@ -1,8 +1,8 @@
-import useBodyScroll from '@/lib/hooks/use-body-scroll';
-import useOverlayScroller from '@/lib/hooks/use-overlay-scroller';
 import { Modal, type ModalProps } from 'antd';
 import React from 'react';
 import styled from 'styled-components';
+import useBodyScroll from '../../../lib/hooks/use-body-scroll';
+import useOverlayScroller from '../../../lib/hooks/use-overlay-scroller';
 import { ScrollerContext } from './use-scroller-context';
 
 const Wrapper = styled.div<{ $maxHeight?: number | string }>`

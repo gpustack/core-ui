@@ -1,6 +1,6 @@
-import AutoComplete from '@/lib/components/form/auto-complete';
 import _ from 'lodash';
 import React from 'react';
+import AutoComplete from '../../../lib/components/form/auto-complete';
 
 interface HintInputProps {
   value: string;

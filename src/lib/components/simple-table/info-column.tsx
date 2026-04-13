@@ -1,7 +1,7 @@
 import React from 'react';
 
-import { useIntl } from '@/lib/hooks/useIntl';
 import { Divider } from 'antd';
+import { useIntl } from '../../../lib/hooks/useIntl';
 
 interface InfoColumnProps {
   fieldList: {

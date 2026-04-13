@@ -1,8 +1,8 @@
-import { useCoreUIContext } from '@/lib/hooks';
 import { SettingOutlined } from '@ant-design/icons';
 import { Button, Checkbox, Col, Popover, Row, Tooltip } from 'antd';
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
+import { useCoreUIContext } from '../../../lib/hooks';
 import { useIntl } from '../../hooks/useIntl';
 import OverlayScroller from '../overlay-scroller';
 

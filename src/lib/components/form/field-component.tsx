@@ -1,6 +1,6 @@
-import { useIntl } from '@/lib/hooks/useIntl';
-import { type ParamsSchema } from '@/lib/types';
 import React, { useCallback, useMemo } from 'react';
+import { useIntl } from '../../../lib/hooks/useIntl';
+import { type ParamsSchema } from '../../../lib/types';
 import LabelInfo from './components/label-info';
 import componentsMap from './config/components';
 

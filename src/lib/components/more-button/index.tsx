@@ -1,8 +1,8 @@
-import { useIntl } from '@/lib/hooks/useIntl';
 import { DoubleRightOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import React from 'react';
 import styled from 'styled-components';
+import { useIntl } from '../../../lib/hooks/useIntl';
 
 interface MoreButtonProps {
   show: boolean;

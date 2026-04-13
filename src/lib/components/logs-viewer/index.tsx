@@ -1,4 +1,3 @@
-import useSetChunkFetch from '@/lib/hooks/use-chunk-fetch';
 import { useMemoizedFn } from 'ahooks';
 import { Spin } from 'antd';
 import classNames from 'classnames';
@@ -11,6 +10,7 @@ import React, {
   useRef,
   useState
 } from 'react';
+import useSetChunkFetch from '../../../lib/hooks/use-chunk-fetch';
 import LogsList from './logs-list';
 import LogsPagination from './logs-pagination';
 import './styles/index.less';
