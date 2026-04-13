@@ -8,8 +8,8 @@ import { StatusColorMap } from '../../../lib/config';
 import { type StatusType } from '../../../lib/types';
 import CopyButton from '../copy-button';
 import { TooltipOverlayScroller } from '../overlay-scroller';
-import CopyStyle from './copy-btn.module.less';
-import './index.module.less';
+import './copy-btn.less';
+import './index.less';
 
 const Text = styled.span`
   white-space: nowrap;
@@ -105,7 +105,7 @@ const StatusTag: React.FC<StatusTagProps> = ({
   };
 
   const renderTitle = (
-    <div className={CopyStyle['status-content-wrapper']}>
+    <div className={'status-content-wrapper'}>
       <div className="copy-button-wrapper">
         <CopyButton
           style={{ color: 'rgba(255,255,255,.8)' }}

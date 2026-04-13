@@ -1,9 +1,7 @@
 import { MoreOutlined } from '@ant-design/icons';
 import { Button, Dropdown, Space, Tooltip, type MenuProps } from 'antd';
-import classNames from 'classnames';
 import _ from 'lodash';
 import React from 'react';
-import styled from 'styled-components';
 import { useIntl } from '../../../lib/hooks/useIntl';
 import dropdownButtonCss from './index.module.less';
 
@@ -19,17 +17,6 @@ interface DropdownButtonsProps {
   extra?: React.ReactNode;
   onSelect: (val: any, item?: any) => void;
 }
-
-const DropdownWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  background-color: var(--ant-color-bg-elevated);
-  padding: 5px;
-  align-items: flex-start;
-  border-radius: var(--border-radius-base);
-  box-shadow: var(--ant-box-shadow-secondary);
-  min-width: 160px;
-`;
 
 const DropdownButtons: React.FC<
   DropdownButtonsProps & { items: MenuProps['items'] }
@@ -66,9 +53,7 @@ const DropdownButtons: React.FC<
       {items?.length === 1 ? (
         <Tooltip title={intl.formatMessage({ id: headItem?.label })}>
           <Button
-            className={classNames(dropdownButtonCss['dropdown-button'], [
-              dropdownButtonCss[size]
-            ])}
+            className={dropdownButtonCss[size]}
             icon={headItem?.icon}
             size={size}
             {...headItem?.props}
@@ -82,9 +67,7 @@ const DropdownButtons: React.FC<
               <Button
                 {...headItem?.props}
                 disabled={headItem?.disabled || disabled}
-                className={classNames(dropdownButtonCss['dropdown-button'], [
-                  dropdownButtonCss[size]
-                ])}
+                className={dropdownButtonCss[size]}
                 onClick={handleButtonClick}
                 size={size}
                 icon={headItem?.icon}
@@ -103,9 +86,7 @@ const DropdownButtons: React.FC<
               >
                 <Button
                   {...headItem?.props}
-                  className={classNames(dropdownButtonCss['dropdown-button'], [
-                    dropdownButtonCss[size]
-                  ])}
+                  className={dropdownButtonCss[size]}
                   onClick={handleButtonClick}
                   size={size}
                   icon={headItem?.icon}
@@ -144,7 +125,7 @@ const DropdownButtons: React.FC<
               key="menu"
               variant={variant}
               color="default"
-              className={classNames('dropdown-button', size)}
+              className={dropdownButtonCss[size]}
             ></Button>
           </Dropdown>
         </Space.Compact>

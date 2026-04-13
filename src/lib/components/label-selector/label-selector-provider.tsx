@@ -3,11 +3,12 @@ import {
   type LabelSelectorContextProps
 } from './context';
 
-const LabelSelectorProvider: React.FC<
-  LabelSelectorContextProps & { children: React.ReactNode }
-> = ({ children, ...contextValue }) => {
+const LabelSelectorProvider: React.FC<{
+  children: React.ReactNode;
+  value: LabelSelectorContextProps;
+}> = ({ children, value }) => {
   return (
-    <LabelSelectorContext.Provider value={contextValue}>
+    <LabelSelectorContext.Provider value={value}>
       {children}
     </LabelSelectorContext.Provider>
   );
