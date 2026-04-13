@@ -28,7 +28,7 @@ export type UseTableFetchReturn<T> = {
     totalPage: number;
   };
   rowSelection: ReturnType<
-    typeof import('@/lib/hooks/use-table-row-selection').default
+    typeof import('../hooks/use-table-row-selection').default
   >;
   sortOrder: ReturnType<
     typeof import('../hooks/use-table-sort').useTableMultiSort

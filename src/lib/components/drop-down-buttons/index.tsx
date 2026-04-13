@@ -1,10 +1,10 @@
-import { useIntl } from '@/lib/hooks/useIntl';
 import { MoreOutlined } from '@ant-design/icons';
 import { Button, Dropdown, Space, Tooltip, type MenuProps } from 'antd';
 import classNames from 'classnames';
 import _ from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
+import { useIntl } from '../../../lib/hooks/useIntl';
 import dropdownButtonCss from './index.module.less';
 
 type Trigger = 'click' | 'hover';

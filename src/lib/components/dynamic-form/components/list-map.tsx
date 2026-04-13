@@ -1,8 +1,8 @@
-import Wrapper from '@/lib/components/label-selector/wrapper';
 import { MinusOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import React, { useEffect, useMemo } from 'react';
 import styled from 'styled-components';
+import Wrapper from '../../../../lib/components/label-selector/wrapper';
 import { statusType } from '../config/types';
 import FormWidget from './form-widget';
 

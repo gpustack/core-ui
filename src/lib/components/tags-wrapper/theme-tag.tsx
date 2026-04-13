@@ -1,7 +1,7 @@
-import { useCoreUIContext } from '@/lib/hooks';
 import { Tag, type TagProps } from 'antd';
 import React from 'react';
 import styled from 'styled-components';
+import { useCoreUIContext } from '../../../lib/hooks';
 
 const TagWrapper = styled(Tag)`
   display: flex;

@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react';
 
-interface ScrollerContextProps {
+export interface ScrollerContextProps {
   total: number; // total pages
   current: number;
   loading: boolean;

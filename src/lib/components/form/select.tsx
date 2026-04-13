@@ -1,9 +1,9 @@
-import { useIntl } from '@/lib/hooks/useIntl';
-import { isNotEmptyValue } from '@/lib/utils/index';
 import type { SelectProps } from 'antd';
 import { Form } from 'antd';
 import { cloneDeep } from 'lodash';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useIntl } from '../../../lib/hooks/useIntl';
+import { isNotEmptyValue } from '../../../lib/utils/index';
 import BaseSelect from './base/select';
 import NotFoundContent from './components/not-found-content';
 import { type SealFormItemProps } from './types';

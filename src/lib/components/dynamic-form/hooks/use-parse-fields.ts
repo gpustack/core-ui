@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { FieldSchema } from '../config/types';
+import { type FieldSchema } from '../config/types';
 
 interface ParsedField {
   name: (string | number)[];

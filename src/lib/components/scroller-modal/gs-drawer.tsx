@@ -1,7 +1,7 @@
-import { useEscHint } from '@/lib/hooks/use-esc-hint';
 import { CloseOutlined } from '@ant-design/icons';
 import { Button, Drawer, type DrawerProps } from 'antd';
 import React from 'react';
+import { useEscHint } from '../../../lib/hooks/use-esc-hint';
 
 /**
  * use ColumnWrapper to wrap content in Drawer with scroller

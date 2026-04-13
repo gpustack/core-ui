@@ -1,7 +1,7 @@
-import { useIntl } from '@/lib/hooks/useIntl';
 import { CheckCircleFilled, CopyOutlined } from '@ant-design/icons';
 import { Button, message, Tooltip } from 'antd';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useIntl } from '../../../lib/hooks/useIntl';
 import AutoTooltip from '../auto-tooltip';
 
 type CopyButtonProps = {

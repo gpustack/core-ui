@@ -1,7 +1,7 @@
-import AutoTooltip from '@/lib/components/auto-tooltip';
 import _ from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
+import AutoTooltip from '../../../lib/components/auto-tooltip';
 
 const LabelsWrapper = styled.div`
   display: flex;

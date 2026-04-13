@@ -1,7 +1,7 @@
-import { useIntl } from '@/lib/hooks/useIntl';
 import { UploadOutlined } from '@ant-design/icons';
 import { Button, Tooltip, Upload, message } from 'antd';
 import React from 'react';
+import { useIntl } from '../../../lib/hooks/useIntl';
 import { convertFileSize } from '../../utils';
 
 interface UploadAudioProps {

@@ -1,9 +1,9 @@
-import CInput from '@/lib/components/form/input';
-import { useIntl } from '@/lib/hooks/useIntl';
 import { MinusOutlined } from '@ant-design/icons';
 import { Button, Tooltip } from 'antd';
 import _ from 'lodash';
 import React, { useState } from 'react';
+import CInput from '../../../lib/components/form/input';
+import { useIntl } from '../../../lib/hooks/useIntl';
 import './styles/label-item.less';
 interface LabelItemProps {
   label: {

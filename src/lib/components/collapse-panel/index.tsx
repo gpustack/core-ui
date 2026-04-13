@@ -1,7 +1,7 @@
-import IconFont from '@/lib/components/icon-font';
 import { Collapse, type CollapseProps } from 'antd';
 import React from 'react';
 import styled from 'styled-components';
+import IconFont from '../../../lib/components/icon-font';
 
 const CollapseInner = styled(Collapse)`
   .ant-collapse-header {

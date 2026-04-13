@@ -1,9 +1,9 @@
-import { useIntl } from '@/lib/hooks/useIntl';
 import { CheckOutlined, FormOutlined, UndoOutlined } from '@ant-design/icons';
 import { Button, Input, InputNumber, Tooltip } from 'antd';
 import _ from 'lodash';
 import React, { useContext } from 'react';
 import styled from 'styled-components';
+import { useIntl } from '../../../../lib/hooks/useIntl';
 import RowContext from '../row-context';
 import { type CellContentProps } from '../types';
 

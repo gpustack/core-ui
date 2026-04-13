@@ -1,7 +1,7 @@
-import { breakpoints } from '@/lib/config';
 import { useMemoizedFn } from 'ahooks';
 import _ from 'lodash';
 import { useState } from 'react';
+import { breakpoints } from '../../lib/config';
 
 const useResponsive = ({ defaultSpan = 8 }: { defaultSpan?: number }) => {
   const [span, setSpan] = useState(defaultSpan);

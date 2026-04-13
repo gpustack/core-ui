@@ -1,9 +1,9 @@
-import IconFont from '@/lib/components/icon-font';
 import { Button, Checkbox } from 'antd';
 import classNames from 'classnames';
 import _ from 'lodash';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
+import IconFont from '../../../../lib/components/icon-font';
 
 const ButtonWrapper = styled.div`
   width: 30px;

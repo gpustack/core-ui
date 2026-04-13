@@ -1,5 +1,3 @@
-import { useIntl } from '@/lib/hooks/useIntl';
-import { formatTime } from '@/lib/utils/index';
 import {
   FastBackwardOutlined,
   FastForwardOutlined,
@@ -14,6 +12,8 @@ import React, {
   useEffect,
   useImperativeHandle
 } from 'react';
+import { useIntl } from '../../../lib/hooks/useIntl';
+import { formatTime } from '../../../lib/utils/index';
 import playerCss from './index.module.less';
 
 interface AudioPlayerProps {

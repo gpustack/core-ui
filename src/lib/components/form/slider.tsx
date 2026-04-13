@@ -1,6 +1,6 @@
-import { INPUT_WIDTH } from '@/lib/constants';
 import { Form, InputNumber, Slider, type SliderSingleProps } from 'antd';
 import React from 'react';
+import { INPUT_WIDTH } from '../../../lib/constants';
 import LabelInfo from './components/label-info';
 import Wrapper from './wrapper';
 import SliderWrapper from './wrapper/slider';

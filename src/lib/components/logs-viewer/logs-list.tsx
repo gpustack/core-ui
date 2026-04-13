@@ -1,4 +1,3 @@
-import useOverlayScroller from '@/lib/hooks/use-overlay-scroller';
 import classNames from 'classnames';
 import _, { throttle } from 'lodash';
 import React, {
@@ -9,6 +8,7 @@ import React, {
   useRef,
   useState
 } from 'react';
+import useOverlayScroller from '../../../lib/hooks/use-overlay-scroller';
 import './styles/logs-list.less';
 
 interface LogsListProps {

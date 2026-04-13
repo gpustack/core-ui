@@ -1,7 +1,7 @@
-import IconFont from '@/lib/components/icon-font';
 import { Breadcrumb, type BreadcrumbProps } from 'antd';
 import React from 'react';
 import styled from 'styled-components';
+import IconFont from '../../../lib/components/icon-font';
 
 const StyledBreadcrumb = styled(Breadcrumb)`
   .ant-breadcrumb-link {

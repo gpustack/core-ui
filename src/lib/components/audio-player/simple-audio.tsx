@@ -1,5 +1,3 @@
-import { useIntl } from '@/lib/hooks/useIntl';
-import { formatTime } from '@/lib/utils/index';
 import { DeleteOutlined, DownloadOutlined } from '@ant-design/icons';
 import { Button, Dropdown, Slider, type MenuProps } from 'antd';
 import { createStyles } from 'antd-style';
@@ -12,6 +10,8 @@ import React, {
   useMemo
 } from 'react';
 import styled from 'styled-components';
+import { useIntl } from '../../../lib/hooks/useIntl';
+import { formatTime } from '../../../lib/utils/index';
 import AutoTooltip from '../auto-tooltip';
 import IconFont from '../icon-font';
 

@@ -3,7 +3,7 @@ import TableContext from './table-context';
 type TableProviderProps = {
   value: {
     allChildren?: Record<string, any>[];
-    setDisableExpand?: (row: Record<string, any>) => boolean;
+    setDisableExpand?: (row: any) => boolean;
   };
   children: React.ReactNode;
 };

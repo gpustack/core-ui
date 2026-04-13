@@ -1,9 +1,9 @@
-import IconFont from '@/lib/components/icon-font';
 import { Card } from 'antd';
 import { createStyles } from 'antd-style';
 import classNames from 'classnames';
 import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
+import IconFont from '../../../lib/components/icon-font';
 
 const CardStyled = styled(Card)`
   box-shadow: none !important;
@@ -72,7 +72,7 @@ const useStyles = createStyles(({ css, token }) => {
   };
 });
 
-export interface CollapsibleContainerProps {
+export interface CollapseContainerProps {
   title?: React.ReactNode;
   subtitle?: React.ReactNode;
   right?: React.ReactNode;

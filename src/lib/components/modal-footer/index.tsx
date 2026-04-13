@@ -1,7 +1,7 @@
-import { useIntl } from '@/lib/hooks/useIntl';
 import { Button, Space } from 'antd';
 import React from 'react';
 import styled from 'styled-components';
+import { useIntl } from '../../../lib/hooks/useIntl';
 
 type ModalFooterProps = {
   onOk?: () => void;

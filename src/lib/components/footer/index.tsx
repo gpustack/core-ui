@@ -1,7 +1,7 @@
-import { useIntl } from '@/lib/hooks/useIntl';
 import { Button, Divider, Modal, Typography } from 'antd';
 import { createStyles } from 'antd-style';
 import styled from 'styled-components';
+import { useIntl } from '../../../lib/hooks/useIntl';
 
 const CompanyWrapper = styled.div`
   display: flex;

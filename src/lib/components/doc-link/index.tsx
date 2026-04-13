@@ -1,7 +1,7 @@
-import { useIntl } from '@/lib/hooks/useIntl';
 import { Button } from 'antd';
 import React from 'react';
 import styled from 'styled-components';
+import { useIntl } from '../../../lib/hooks/useIntl';
 import IconFont from '../icon-font';
 
 const Wrapper = styled.div`

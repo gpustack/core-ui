@@ -1,9 +1,9 @@
-import { createAxiosToken } from '@/lib/hooks/use-chunk-request';
 import { useMemoizedFn } from 'ahooks';
 import { Col, Row, Spin } from 'antd';
 import classNames from 'classnames';
 import _ from 'lodash';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { createAxiosToken } from '../../../../lib/hooks/use-chunk-request';
 import RowContext from '../row-context';
 import TableContext from '../table-context';
 import { type RowContextProps, type TableProps } from '../types';

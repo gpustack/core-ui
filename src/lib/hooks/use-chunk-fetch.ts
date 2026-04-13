@@ -1,7 +1,7 @@
-import { convertFileSize } from '@/lib/utils';
 import { useMemoizedFn } from 'ahooks';
 import qs from 'query-string';
 import { useEffect, useRef } from 'react';
+import { convertFileSize } from '../../lib/utils';
 import useCoreUIContext from './useCoreUIContext';
 
 export interface HandlerOptions {

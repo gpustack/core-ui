@@ -1,8 +1,8 @@
-import { useCoreUIContext } from '@/lib/hooks';
 import React, { useEffect } from 'react';
 import SimpleBar from 'simplebar-react';
 import 'simplebar-react/dist/simplebar.min.css';
 import styled from 'styled-components';
+import { useCoreUIContext } from '../../../lib/hooks';
 
 const Wrapper = styled.div`
   .simplebar-scrollbar::before {

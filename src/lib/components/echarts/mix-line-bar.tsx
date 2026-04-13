@@ -1,10 +1,10 @@
-import Chart from '@/lib/components/echarts/chart';
-import useChartConfig from '@/lib/components/echarts/config';
-import EmptyData from '@/lib/components/empty-data';
-import { genColors } from '@/lib/utils';
 import _ from 'lodash';
 import React, { useMemo } from 'react';
 import echarts from '.';
+import Chart from '../../../lib/components/echarts/chart';
+import useChartConfig from '../../../lib/components/echarts/config';
+import EmptyData from '../../../lib/components/empty-data';
+import { genColors } from '../../../lib/utils';
 import { type ChartProps } from './types';
 
 const LinearGradient = echarts.graphic.LinearGradient;

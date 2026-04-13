@@ -1,8 +1,8 @@
-import { useCoreUIContext } from '@/lib/hooks';
-import { formatLargeNumber } from '@/lib/utils';
 import { theme } from 'antd';
 import { isFunction } from 'lodash';
 import { useMemo } from 'react';
+import { useCoreUIContext } from '../../../lib/hooks';
+import { formatLargeNumber } from '../../../lib/utils';
 
 export const grid = {
   left: 0,

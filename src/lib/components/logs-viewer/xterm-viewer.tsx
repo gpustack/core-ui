@@ -1,4 +1,3 @@
-import useSetChunkRequest from '@/lib/hooks/use-chunk-request';
 import { FitAddon } from '@xterm/addon-fit';
 import { Terminal } from '@xterm/xterm';
 import '@xterm/xterm/css/xterm.css';
@@ -11,6 +10,7 @@ import {
   useRef,
   useState
 } from 'react';
+import useSetChunkRequest from '../../../lib/hooks/use-chunk-request';
 import { replaceLineRegex } from './config';
 import './styles/xterm-viewer.less';
 import useSize from './use-size';

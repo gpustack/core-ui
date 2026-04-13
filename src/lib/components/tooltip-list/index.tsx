@@ -1,6 +1,6 @@
-import { useIntl } from '@/lib/hooks/useIntl';
 import React from 'react';
 import styled from 'styled-components';
+import { useIntl } from '../../../lib/hooks/useIntl';
 
 const UL = styled.ul`
   list-style: none;

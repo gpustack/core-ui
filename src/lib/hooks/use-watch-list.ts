@@ -1,8 +1,8 @@
-import useSetChunkRequest from '@/lib/hooks/use-chunk-request';
-import useUpdateChunkedList from '@/lib/hooks/use-update-chunk-list';
 import { useMemoizedFn } from 'ahooks';
 import _ from 'lodash';
 import { useEffect, useRef, useState } from 'react';
+import useSetChunkRequest from '../../lib/hooks/use-chunk-request';
+import useUpdateChunkedList from '../../lib/hooks/use-update-chunk-list';
 import useCoreUIContext from './useCoreUIContext';
 
 export default function useWatchList<T = Record<string, any>>(API: string) {

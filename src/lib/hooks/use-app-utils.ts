@@ -1,5 +1,5 @@
-import { useIntl } from '@/lib/hooks/useIntl';
 import { message } from 'antd';
+import { useIntl } from '../../lib/hooks/useIntl';
 
 type MessageType = 'input' | 'select';
 

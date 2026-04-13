@@ -1,8 +1,8 @@
-import { useIntl } from '@/lib/hooks/useIntl';
 import { LoadingOutlined } from '@ant-design/icons';
 import { Empty, Typography } from 'antd';
 import React from 'react';
 import styled from 'styled-components';
+import { useIntl } from '../../../../lib/hooks/useIntl';
 
 const { Link } = Typography;
 

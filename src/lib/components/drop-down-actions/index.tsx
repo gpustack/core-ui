@@ -1,7 +1,7 @@
-import { useIntl } from '@/lib/hooks/useIntl';
 import { Dropdown, type DropdownProps } from 'antd';
 import _ from 'lodash';
 import React, { useMemo } from 'react';
+import { useIntl } from '../../../lib/hooks/useIntl';
 
 const DropDownActions: React.FC<DropdownProps> = (props) => {
   const {

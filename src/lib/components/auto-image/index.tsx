@@ -1,4 +1,3 @@
-import fallbackImg from '@/assets/images/img_fallback.png';
 import {
   DownloadOutlined,
   EyeOutlined,
@@ -12,6 +11,7 @@ import {
 import { Image as AntImage, type ImageProps, Space } from 'antd';
 import { round } from 'lodash';
 import React, { useCallback, useEffect, useState } from 'react';
+import fallbackImg from '../../../assets/images/img_fallback.png';
 import toolbarCss from './index.module.less';
 
 const AutoImage: React.FC<

@@ -1,5 +1,5 @@
-import useResizeObserver from '@/lib/components/logs-viewer/use-size';
 import React, { useEffect, useState } from 'react';
+import useResizeObserver from '../../../lib/components/logs-viewer/use-size';
 import audioAnimationCss from './style.module.less';
 
 interface AudioAnimationProps {

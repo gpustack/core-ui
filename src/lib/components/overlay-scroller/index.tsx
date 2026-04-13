@@ -1,9 +1,9 @@
-import useOverlayScroller, {
-  type OverlayScrollerOptions
-} from '@/lib/hooks/use-overlay-scroller';
 import { Tooltip, type TooltipProps } from 'antd';
 import classNames from 'classnames';
 import React from 'react';
+import useOverlayScroller, {
+  type OverlayScrollerOptions
+} from '../../../lib/hooks/use-overlay-scroller';
 import s from './index.module.less';
 
 // export OverlayScrollerOptions

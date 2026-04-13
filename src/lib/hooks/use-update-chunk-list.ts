@@ -1,5 +1,5 @@
-import { WatchEventType } from '@/lib/config';
 import { useEffect, useRef } from 'react';
+import { WatchEventType } from '../../lib/config';
 
 interface ChunkedCollection {
   ids: string[] | number[];

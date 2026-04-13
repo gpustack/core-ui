@@ -1,11 +1,11 @@
-import { StatusColorMap } from '@/lib/config';
-import { type StatusType } from '@/lib/types';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { Button, Divider, Tooltip } from 'antd';
 import classNames from 'classnames';
 import _ from 'lodash';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
+import { StatusColorMap } from '../../../lib/config';
+import { type StatusType } from '../../../lib/types';
 import CopyButton from '../copy-button';
 import { TooltipOverlayScroller } from '../overlay-scroller';
 import CopyStyle from './copy-btn.module.less';

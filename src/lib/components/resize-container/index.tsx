@@ -1,6 +1,6 @@
-import useResponsive from '@/lib/hooks/use-responsive';
 import { Col, Row } from 'antd';
 import ResizeObserver from 'rc-resize-observer';
+import useResponsive from '../../hooks/use-responsive';
 
 interface ResizeObserverContainerProps {
   dataList: any[];

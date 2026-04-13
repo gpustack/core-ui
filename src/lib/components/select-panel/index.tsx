@@ -1,8 +1,8 @@
-import { useIntl } from '@/lib/hooks/useIntl';
 import { SearchOutlined } from '@ant-design/icons';
 import { Button, Checkbox, Empty, Input } from 'antd';
 import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
+import { useIntl } from '../../../lib/hooks/useIntl';
 import List from './list';
 import SelectedList from './selected-list';
 

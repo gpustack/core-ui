@@ -1,8 +1,8 @@
-import useSetChunkFetch, {
-  type HandlerOptions
-} from '@/lib/hooks/use-chunk-fetch';
 import { message } from 'antd';
 import { useEffect, useRef } from 'react';
+import useSetChunkFetch, {
+  type HandlerOptions
+} from '../../lib/hooks/use-chunk-fetch';
 
 export default function useDownloadStream() {
   const chunkRequestRef = useRef<any>(null);
@@ -97,7 +97,7 @@ export default function useDownloadStream() {
     logParseWorker.current?.terminate?.();
 
     logParseWorker.current = new Worker(
-      new URL('@/lib/components/logs-viewer/parse-worker.ts', import.meta.url),
+      new URL('../components/logs-viewer/parse-worker.ts', import.meta.url),
       {
         type: 'module'
       }

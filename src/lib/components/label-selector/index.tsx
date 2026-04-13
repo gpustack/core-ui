@@ -1,6 +1,6 @@
-import { useIntl } from '@/lib/hooks/useIntl';
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
+import { useIntl } from '../../../lib/hooks/useIntl';
 import Inner from './inner';
 
 interface LabelSelectorProps {

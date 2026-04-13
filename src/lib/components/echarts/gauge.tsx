@@ -1,7 +1,7 @@
-import Chart from '@/lib/components/echarts/chart';
-import useChartConfig from '@/lib/components/echarts/config';
-import EmptyData from '@/lib/components/empty-data';
 import React from 'react';
+import Chart from '../../../lib/components/echarts/chart';
+import useChartConfig from '../../../lib/components/echarts/config';
+import EmptyData from '../../../lib/components/empty-data';
 import { type ChartProps } from './types';
 
 const strokeColorFunc = (percent: number) => {

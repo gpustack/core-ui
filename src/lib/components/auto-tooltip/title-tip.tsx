@@ -1,5 +1,5 @@
-import { OverlayScroller } from '@/lib/components/overlay-scroller';
 import React from 'react';
+import { OverlayScroller } from '../../../lib/components/overlay-scroller';
 
 interface TitleTipProps {
   isOverflowing: boolean;
