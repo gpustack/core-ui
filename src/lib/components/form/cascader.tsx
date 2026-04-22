@@ -7,7 +7,7 @@ import IconFont from '../../../lib/components/icon-font';
 import { useIntl } from '../../../lib/hooks/useIntl';
 import { isNotEmptyValue } from '../../../lib/utils/index';
 import AutoTooltip from '../auto-tooltip';
-import { SealFormItemProps } from './types';
+import { type SealFormItemProps } from './types';
 import Wrapper from './wrapper';
 import SelectWrapper from './wrapper/select';
 

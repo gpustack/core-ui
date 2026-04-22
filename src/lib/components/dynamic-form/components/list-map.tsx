@@ -3,7 +3,7 @@ import { Button } from 'antd';
 import React, { useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 import Wrapper from '../../../../lib/components/label-selector/wrapper';
-import { statusType } from '../config/types';
+import type { statusType } from '../config/types';
 import FormWidget from './form-widget';
 
 const RowWrapper = styled.div`

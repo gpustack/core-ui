@@ -1,5 +1,5 @@
 import ComponentsMap from '../../../../lib/components/form/config/components';
-import { FormWidgetProps } from '../config/types';
+import type { FormWidgetProps } from '../config/types';
 
 const FormWidget: React.FC<
   FormWidgetProps & {
