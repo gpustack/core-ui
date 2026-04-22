@@ -6,6 +6,7 @@ import dts from 'vite-plugin-dts';
 
 //
 export default defineConfig({
+  base: './',
   plugins: [
     react(),
     dts({
@@ -35,12 +36,34 @@ export default defineConfig({
     },
     cssCodeSplit: true,
     rollupOptions: {
-      external: ['react', 'react-dom', 'antd'],
+      external: [
+        'react',
+        'react-dom',
+        'react/jsx-runtime',
+        'react/jsx-dev-runtime',
+        'antd'
+      ],
       output: {
+        chunkFileNames: (chunkInfo) => {
+          if (chunkInfo.name === 'monaco-editor') {
+            return 'monaco-editor-[hash].js';
+          }
+
+          return '[name]-[hash].js';
+        },
         globals: {
           react: 'React',
           'react-dom': 'ReactDOM',
           antd: 'antd'
+        },
+        manualChunks: (id) => {
+          if (
+            id.includes('/node_modules/monaco-editor/') ||
+            id.includes('/node_modules/@monaco-editor/react/') ||
+            id.includes('/node_modules/monaco-yaml/')
+          ) {
+            return 'monaco-editor';
+          }
         }
       }
     }
