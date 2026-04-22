@@ -8,6 +8,7 @@ export interface CoreUIConfig {
   iconUrl?: string;
   theme?: 'light' | 'realDark' | 'dark';
   isDarkTheme?: boolean;
+  defaultColorPrimary?: string;
 }
 
 // i18n
@@ -38,9 +39,15 @@ export interface RequestService {
 
 export interface Services {
   request: RequestService;
+  router?: {
+    push: (path: string) => void;
+    replace: (path: string) => void;
+    goBack: () => void;
+  };
 }
 
 export interface CoreHooks {
+  useIntl: () => CoreUII18n;
   usePaginationStatus?: (key: string) => {
     pagination: any;
     getPaginationStatus: () => any;
@@ -62,6 +69,10 @@ export interface CoreHooks {
     themeData: any;
     componentSize: string;
   };
+  useUserSettingsStorage?: () => {
+    setStorageUserSettings: (value: Record<string, any>) => void;
+    getStorageUserSettings: () => any;
+  };
 }
 export interface CoreUIContextProps {
   config: CoreUIConfig;
@@ -69,7 +80,7 @@ export interface CoreUIContextProps {
   i18n: CoreUII18n;
   locale: CoreUILocale;
   services: Services;
-  hooks?: CoreHooks;
+  hooks: CoreHooks;
   localStore?: {
     readColumnSettings: (key: string) => string[] | null;
     readState: (key: string) => void;
@@ -90,6 +101,12 @@ const CoreUIContext = createContext<CoreUIContextProps>({
   locale: {
     getAllLocales: () => [],
     setLocale: () => {}
+  },
+  hooks: {
+    useIntl: () => ({
+      locale: 'en-US',
+      formatMessage: (descriptor: { id: string }, values?: any) => descriptor.id
+    })
   },
   tokens: {},
   services: {

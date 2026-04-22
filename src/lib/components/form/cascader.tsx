@@ -91,10 +91,14 @@ const SealCascader: React.FC<
   let status = '';
 
   // the status can be controlled by Form.Item
-  if (isInFormItems) {
-    const statusData = Form?.Item?.useStatus?.();
-    status = props.status || statusData?.status || '';
-  } else {
+  try {
+    if (isInFormItems) {
+      const statusData = Form?.Item?.useStatus?.();
+      status = props.status || statusData?.status || '';
+    } else {
+      status = props.status || '';
+    }
+  } catch (error) {
     status = props.status || '';
   }
 

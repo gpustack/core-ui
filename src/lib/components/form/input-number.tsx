@@ -20,10 +20,15 @@ const SealInputNumber: React.FC<InputNumberProps & SealFormItemProps> = (
   const [isFocus, setIsFocus] = useState(false);
   const inputRef = useRef<any>(null);
   let status = '';
-  if (isInFormItems) {
-    const statusData = Form?.Item?.useStatus?.();
-    status = props.status || statusData?.status || '';
-  } else {
+
+  try {
+    if (isInFormItems) {
+      const statusData = Form?.Item?.useStatus?.();
+      status = props.status || statusData?.status || '';
+    } else {
+      status = props.status || '';
+    }
+  } catch (error) {
     status = props.status || '';
   }
 
