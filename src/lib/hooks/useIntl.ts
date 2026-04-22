@@ -1,7 +1,8 @@
 import useCoreUIContext from './useCoreUIContext';
 
 export const useIntl = () => {
-  const { i18n } = useCoreUIContext();
+  const { hooks } = useCoreUIContext();
+  const i18n = hooks?.useIntl?.();
 
   const tl = (descriptor: { id: string }, values?: any) => {
     if (i18n && i18n.formatMessage) {
@@ -12,6 +13,7 @@ export const useIntl = () => {
 
   return {
     ...i18n,
+    locale: i18n?.locale || 'en-US',
     formatMessage: tl
   };
 };

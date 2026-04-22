@@ -34,9 +34,14 @@ const SealSlider: React.FC<SealSliderProps> = (props) => {
   } = props;
 
   let status = '';
-  if (isInFormItems) {
-    const statusData = Form?.Item?.useStatus?.();
-    status = statusData?.status || '';
+
+  try {
+    if (isInFormItems) {
+      const statusData = Form?.Item?.useStatus?.();
+      status = statusData?.status || '';
+    }
+  } catch (error) {
+    status = '';
   }
 
   const handleChange = (value: number) => {

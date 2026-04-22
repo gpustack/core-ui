@@ -40,9 +40,13 @@ const SealAutoComplete: React.FC<
   const [isFocus, setIsFocus] = useState(false);
   const inputRef = useRef<any>(null);
   let status = '';
-  if (isInFormItems) {
-    const statusData = Form?.Item?.useStatus?.();
-    status = statusData?.status || '';
+  try {
+    if (isInFormItems) {
+      const statusData = Form?.Item?.useStatus?.();
+      status = statusData?.status || '';
+    }
+  } catch (error) {
+    status = '';
   }
 
   useEffect(() => {
