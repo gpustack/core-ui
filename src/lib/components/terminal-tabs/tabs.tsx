@@ -4,7 +4,7 @@ import { throttle } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import XTerminal from '../x-terminal';
-import ResizeContainer from './resize-container';
+import ResizeContainer from './resize-panel';
 import { type TerminalProps } from './types';
 
 const TabsContainer = styled.div`
