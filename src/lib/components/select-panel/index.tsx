@@ -37,6 +37,12 @@ interface SelectPanelProps {
   selectedKeys: string[];
   notFoundContent?: React.ReactNode;
   onSelectChange: (selectedKeys: string[]) => void;
+  styles?: {
+    container?: React.CSSProperties;
+    left?: React.CSSProperties;
+    right?: React.CSSProperties;
+    header?: React.CSSProperties;
+  };
 }
 
 const SelectPanel: React.FC<SelectPanelProps> = ({
@@ -46,7 +52,8 @@ const SelectPanel: React.FC<SelectPanelProps> = ({
   selectedKeys,
   searchPlaceholder,
   notFoundContent,
-  onSelectChange
+  onSelectChange,
+  styles
 }) => {
   const intl = useIntl();
   const [indeterminate, setIndeterminate] = React.useState(false);
@@ -150,9 +157,13 @@ const SelectPanel: React.FC<SelectPanelProps> = ({
   };
 
   return (
-    <PanelWrapper $maxHeight={height} $leftWidth={leftWidth}>
+    <PanelWrapper
+      $maxHeight={height}
+      $leftWidth={leftWidth}
+      style={styles?.container}
+    >
       <Left>
-        <Header>
+        <Header style={styles?.header}>
           <span
             style={{
               display: 'flex',

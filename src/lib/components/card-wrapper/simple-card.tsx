@@ -68,12 +68,14 @@ export const SimpleCardItem: React.FC<{
     <div className={cx({ bordered: bordered }, styles.wrapper)} style={style}>
       <div className="title">{title}</div>
       <div className="content">
-        <span
-          className={cx([iconType], 'icon')}
-          style={{
-            backgroundColor: color || 'transparent'
-          }}
-        ></span>
+        {iconType && (
+          <span
+            className={cx([iconType], 'icon')}
+            style={{
+              backgroundColor: color || 'transparent'
+            }}
+          ></span>
+        )}
         <span>{content}</span>
       </div>
     </div>
@@ -85,7 +87,7 @@ export const SimpleCard: React.FC<{
     label: string;
     value: React.ReactNode;
     color: string;
-    iconType: string;
+    iconType?: string;
   }[];
   height?: string | number;
   bordered?: boolean;
