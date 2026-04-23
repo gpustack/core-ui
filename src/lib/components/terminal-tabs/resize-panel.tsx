@@ -19,7 +19,7 @@ const StyledButton = styled(Button)`
   }
 `;
 
-const ResizeContainer: React.FC<
+const ResizePanel: React.FC<
   React.PropsWithChildren<
     ResizableProps & {
       ref?: any;
@@ -95,4 +95,4 @@ const ResizeContainer: React.FC<
   );
 });
 
-export default ResizeContainer;
+export default ResizePanel;
