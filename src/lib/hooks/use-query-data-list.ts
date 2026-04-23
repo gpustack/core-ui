@@ -1,4 +1,4 @@
-import { useMemoizedFn, useRequest } from 'ahooks';
+import { useRequest } from 'ahooks';
 import { message } from 'antd';
 import { type CancelTokenSource } from 'axios';
 import { useEffect, useRef, useState } from 'react';
@@ -12,8 +12,17 @@ import { createAxiosToken } from '../../lib/hooks/use-chunk-request';
  * @param option.fetchList: (params, extra) => Promise<{ items: ListItem[] }>
  * @returns loading, dataList, fetchData, cancelRequest
  */
-export function useQueryDataList<ListItem, Params = any>(option: {
+type QueryResponse<ListItem, T extends 'array' | 'object'> = T extends 'array'
+  ? ListItem[]
+  : Global.PageResponse<ListItem>;
+
+export function useQueryDataList<
+  ListItem,
+  Params = any,
+  T extends 'array' | 'object' = 'array'
+>(option: {
   key: string;
+  responseType?: T;
   fetchList: (
     params: Params,
     options?: any
@@ -21,26 +30,38 @@ export function useQueryDataList<ListItem, Params = any>(option: {
   getLabel?: (item: ListItem) => string;
   getValue?: (item: ListItem) => any;
   errorMsg?: string;
+  debounceWait?: number;
 }): {
   loading: boolean;
   dataList: Array<ListItem & { label: string; value: any }>;
   cancelRequest: () => void;
-  fetchData: (params: Params, extra?: any) => Promise<ListItem[]>;
+  fetchData: (
+    params: Params,
+    extra?: any
+  ) => Promise<QueryResponse<ListItem, T>>;
 } {
-  const { key, fetchList, getLabel, getValue, errorMsg } = option;
+  const {
+    key,
+    fetchList,
+    getLabel,
+    getValue,
+    responseType = 'array' as T,
+    errorMsg
+  } = option;
+
   const axiosTokenRef = useRef<CancelTokenSource | null>(null);
   const [dataList, setDataList] = useState<
     Array<ListItem & { label: string; value: any }>
   >([]);
 
-  const {
-    runAsync: fetchData,
-    loading,
-    cancel
-  } = useRequest(
-    async (params: Params, extra?: any) => {
+  const { runAsync, loading, cancel } = useRequest(
+    async (
+      params: Params,
+      extra?: any
+    ): Promise<QueryResponse<ListItem, T>> => {
       axiosTokenRef.current?.cancel();
       axiosTokenRef.current = createAxiosToken();
+
       const res = await fetchList(params, {
         token: axiosTokenRef.current?.token,
         ...(extra || {})
@@ -54,11 +75,15 @@ export function useQueryDataList<ListItem, Params = any>(option: {
         })) || []
       );
 
-      return res.items || [];
+      if (responseType === 'array') {
+        return (res.items || []) as QueryResponse<ListItem, T>;
+      }
+
+      return res as QueryResponse<ListItem, T>;
     },
     {
       manual: true,
-      onSuccess: () => {},
+      debounceWait: option.debounceWait || 300,
       onError: (error) => {
         message.error(
           error?.message || errorMsg || `Failed to fetch ${key} list`
@@ -68,16 +93,19 @@ export function useQueryDataList<ListItem, Params = any>(option: {
     }
   );
 
-  const cancelRequest = useMemoizedFn(() => {
+  const fetchData = (params: Params, extra?: any) => runAsync(params, extra);
+
+  const cancelRequest = () => {
     cancel();
     axiosTokenRef.current?.cancel();
-  });
+  };
 
   useEffect(() => {
     return () => {
-      cancelRequest();
+      cancel();
+      axiosTokenRef.current?.cancel();
     };
-  }, []);
+  }, [cancel]);
 
   return {
     loading,
