@@ -1,6 +1,6 @@
 {
   "name": "@gpustack/core-ui",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "private": false,
   "type": "module",
   "exports": {
@@ -132,6 +132,7 @@
     "styled-components": ">=6.0.0"
   },
   "publishConfig": {
+    "access": "public",
     "registry": "https://registry.npmjs.org/"
   }
 }
