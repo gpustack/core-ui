@@ -91,11 +91,17 @@ export const SimpleCard: React.FC<{
   }[];
   height?: string | number;
   bordered?: boolean;
+  styles?: {
+    wrapper?: React.CSSProperties;
+    item?: React.CSSProperties;
+  };
 }> = (props) => {
-  const { dataList, bordered } = props;
+  const { dataList, bordered, styles } = props;
 
   return (
-    <SimpleCardItemWrapper style={{ height: props.height || '100%' }}>
+    <SimpleCardItemWrapper
+      style={{ height: props.height || '100%', ...styles?.wrapper }}
+    >
       {dataList.map((item, index) => (
         <SimpleCardItem
           key={index}
@@ -104,6 +110,9 @@ export const SimpleCard: React.FC<{
           bordered={bordered}
           color={item.color}
           iconType={item.iconType}
+          style={{
+            ...styles?.item
+          }}
         ></SimpleCardItem>
       ))}
     </SimpleCardItemWrapper>
