@@ -1,16 +1,14 @@
-import * as pdfjsLib from 'pdfjs-dist';
-
-pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
-  'pdfjs-dist/build/pdf.worker.mjs',
-
-  import.meta.url
-).href;
-
 const readPDFContent = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = async function (e: any) {
       try {
+        const pdfjsLib = await import('pdfjs-dist');
+        pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+          'pdfjs-dist/build/pdf.worker.mjs',
+          import.meta.url
+        ).href;
+
         const arrayBuffer = e.target.result;
         const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
 

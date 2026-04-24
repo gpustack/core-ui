@@ -76,8 +76,6 @@ export { default as LabelSelectorProvider } from './label-selector/label-selecto
 export { default as ListInput } from './list-input';
 export { default as LogsViewer } from './logs-viewer';
 export { PageSize } from './logs-viewer/config';
-export { default as MarkdownViewer } from './markdown-viewer';
-export { default as FullMarkdown } from './markdown-viewer/full-markdown';
 export { default as MetadataList } from './metadata-list';
 export { default as ModalFooter } from './modal-footer';
 export { default as MoreButton } from './more-button';
@@ -132,4 +130,3 @@ export { default as UploadAudio } from './upload-audio';
 export { default as UploadImage } from './upload-image';
 export { default as ViewerEditor } from './viewer-editor';
 export { default as XTerminal } from './x-terminal';
-export { default as YamlEditor } from './yaml-editor';

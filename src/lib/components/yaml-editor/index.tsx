@@ -161,7 +161,7 @@ const YamlEditor: React.FC<ViewerProps> = forwardRef((props, ref) => {
         header={renderHeader()}
         variant={variant}
         height={height}
-        theme={isDarkTheme ? 'vs-dark' : 'vs-light'}
+        theme={isDarkTheme ? 'vs-dark' : 'light'}
         value={value}
         placeholder={placeholder}
         schema={schema}

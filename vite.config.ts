@@ -4,6 +4,40 @@ import { resolve } from 'path';
 import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
 
+const libraryChunks: Record<string, string> = {
+  mammoth: 'mammoth',
+  jszip: 'jszip',
+  'pdfjs-dist': 'pdfjs-dist',
+  xlsx: 'xlsx',
+  epubjs: 'epubjs'
+};
+
+const exactExternalPackages = new Set([
+  'react',
+  'react-dom',
+  'react/jsx-runtime',
+  'react/jsx-dev-runtime',
+  'file-saver',
+  'axios',
+  '@monaco-editor/react',
+  'monaco-editor',
+  'monaco-yaml',
+  'styled-components',
+  'antd-style',
+  'ahooks',
+  '@ant-design/icons',
+  'overlayscrollbars-react'
+]);
+
+const prefixExternalPackages = ['antd', 'echarts'];
+
+const isExternalPackage = (id: string) => {
+  return (
+    exactExternalPackages.has(id) ||
+    prefixExternalPackages.some((pkg) => id === pkg || id.startsWith(`${pkg}/`))
+  );
+};
+
 //
 export default defineConfig({
   base: './',
@@ -11,7 +45,15 @@ export default defineConfig({
     react(),
     dts({
       tsconfigPath: './tsconfig.app.json',
-      include: ['src/lib', 'src/index.ts'],
+      include: [
+        'src/lib',
+        'src/index.ts',
+        'src/markdown.ts',
+        'src/utils.ts',
+        'src/excel.ts',
+        'src/file-readers.ts',
+        'src/yaml-editor.ts'
+      ],
       entryRoot: 'src',
       compilerOptions: {
         noEmit: false,
@@ -24,45 +66,35 @@ export default defineConfig({
       generateScopedName: '[name]__[local]___[hash:base64:5]'
     }
   },
-  optimizeDeps: {
-    include: ['monaco-editor']
-  },
   build: {
     lib: {
-      entry: resolve(__dirname, 'src/index.ts'),
+      entry: {
+        excel: resolve(__dirname, 'src/excel.ts'),
+        'file-readers': resolve(__dirname, 'src/file-readers.ts'),
+        index: resolve(__dirname, 'src/index.ts'),
+        markdown: resolve(__dirname, 'src/markdown.ts'),
+        utils: resolve(__dirname, 'src/utils.ts'),
+        'yaml-editor': resolve(__dirname, 'src/yaml-editor.ts')
+      },
       name: 'CoreUI',
-      formats: ['es', 'cjs'],
-      fileName: (format) => `index.${format}.js`
+      formats: ['es'],
+      fileName: (format, entryName) => `${entryName}.${format}.js`
     },
     cssCodeSplit: true,
     rollupOptions: {
-      external: [
-        'react',
-        'react-dom',
-        'react/jsx-runtime',
-        'react/jsx-dev-runtime',
-        'antd'
-      ],
+      external: isExternalPackage,
       output: {
-        chunkFileNames: (chunkInfo) => {
-          if (chunkInfo.name === 'monaco-editor') {
-            return 'monaco-editor-[hash].js';
-          }
-
-          return '[name]-[hash].js';
-        },
+        chunkFileNames: '[name]-[hash].js',
         globals: {
           react: 'React',
           'react-dom': 'ReactDOM',
           antd: 'antd'
         },
         manualChunks: (id) => {
-          if (
-            id.includes('/node_modules/monaco-editor/') ||
-            id.includes('/node_modules/@monaco-editor/react/') ||
-            id.includes('/node_modules/monaco-yaml/')
-          ) {
-            return 'monaco-editor';
+          for (const [pkg, chunkName] of Object.entries(libraryChunks)) {
+            if (id.includes(`/node_modules/${pkg}/`)) {
+              return chunkName;
+            }
           }
         }
       }
