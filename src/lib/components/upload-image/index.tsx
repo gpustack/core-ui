@@ -1,9 +1,9 @@
 import { PictureOutlined } from '@ant-design/icons';
-import { Button, Tooltip, Upload } from 'antd';
+import { Button, Tooltip, Upload, message } from 'antd';
 import type { UploadFile } from 'antd/es/upload';
 import { type RcFile } from 'antd/es/upload';
 import { debounce, round } from 'lodash';
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { useIntl } from '../../../lib/hooks/useIntl';
 
 const acceptImageType = ['image/png', 'image/jpg', 'image/jpeg'];
@@ -11,6 +11,8 @@ const acceptImageType = ['image/png', 'image/jpg', 'image/jpeg'];
 interface UploadImgProps {
   size?: 'small' | 'middle' | 'large';
   height?: number;
+  width?: number;
+  verifySize?: boolean;
   multiple?: boolean;
   drag?: boolean;
   disabled?: boolean;
@@ -18,6 +20,8 @@ interface UploadImgProps {
   accept?: string;
   icon?: React.ReactNode;
   title?: React.ReactNode;
+  /** Max file size in KB */
+  maxSize?: number;
   handleUpdateImgList: (
     imgList: {
       dataUrl: string;
@@ -37,10 +41,40 @@ const UploadImg: React.FC<UploadImgProps> = ({
   icon,
   title,
   accept = acceptImageType.join(','),
-  size = 'small'
+  size = 'small',
+  maxSize,
+  width,
+  height,
+  verifySize = false
 }) => {
   const intl = useIntl();
   const uploadRef = useRef<any>(null);
+
+  const validateFile = useCallback(
+    (file: RcFile): boolean => {
+      const allowedTypes = accept.split(',').map((t) => t.trim());
+      if (!allowedTypes.includes(file.type)) {
+        message.error(
+          intl.formatMessage(
+            { id: 'common.file.format.limit' },
+            { formats: allowedTypes.join(', ') }
+          )
+        );
+        return false;
+      }
+      if (maxSize !== undefined && file.size > maxSize * 1024) {
+        message.error(
+          intl.formatMessage(
+            { id: 'common.file.size.limit' },
+            { size: `${maxSize}KB` }
+          )
+        );
+        return false;
+      }
+      return true;
+    },
+    [accept, maxSize]
+  );
 
   const getImgSize = useCallback(
     (url: string): Promise<{ rawWidth: number; rawHeight: number }> => {
@@ -70,22 +104,19 @@ const UploadImg: React.FC<UploadImgProps> = ({
     });
   }, []);
 
-  const debouncedUpdate = useMemo(() => {
-    const fn = debounce(
-      (
-        base64List: {
-          dataUrl: string;
-          uid: number | string;
-          rawWidth: number;
-          rawHeight: number;
-        }[]
-      ) => {
-        handleUpdateImgList(base64List);
-      },
-      300
-    );
-    return fn;
-  }, [handleUpdateImgList, intl]);
+  const debouncedUpdate = debounce(
+    (
+      base64List: {
+        dataUrl: string;
+        uid: number | string;
+        rawWidth: number;
+        rawHeight: number;
+      }[]
+    ) => {
+      handleUpdateImgList(base64List);
+    },
+    300
+  );
 
   const handleChange = useCallback(
     async (info: any) => {
@@ -99,6 +130,24 @@ const UploadImg: React.FC<UploadImgProps> = ({
             if (item.originFileObj && !item.url) {
               const base64 = await getBase64(item.originFileObj as RcFile);
               const { rawWidth, rawHeight } = await getImgSize(base64);
+              if (width !== undefined && rawWidth !== width && verifySize) {
+                message.error(
+                  intl.formatMessage(
+                    { id: 'common.image.limit.width' },
+                    { width: `${width}px` }
+                  )
+                );
+                return null;
+              }
+              if (height !== undefined && rawHeight !== height && verifySize) {
+                message.error(
+                  intl.formatMessage(
+                    { id: 'common.image.limit.height' },
+                    { height: `${height}px` }
+                  )
+                );
+                return null;
+              }
 
               item.url = base64;
               item.rawWidth = rawWidth;
@@ -111,7 +160,7 @@ const UploadImg: React.FC<UploadImgProps> = ({
 
       if (newFileList.length > 0) {
         const base64List = newFileList
-          .filter((sitem) => sitem.url)
+          .filter((sitem) => sitem?.url)
           .map((item: UploadFile & { rawHeight: number; rawWidth: number }) => {
             return {
               dataUrl: item.url as string,
@@ -124,7 +173,7 @@ const UploadImg: React.FC<UploadImgProps> = ({
         debouncedUpdate(base64List);
       }
     },
-    [debouncedUpdate, getBase64]
+    [debouncedUpdate, getBase64, width, height]
   );
 
   return (
@@ -136,7 +185,12 @@ const UploadImg: React.FC<UploadImgProps> = ({
           multiple={multiple}
           action="/"
           fileList={[]}
-          beforeUpload={(file) => false}
+          beforeUpload={(file) => {
+            if (!validateFile(file)) {
+              return Upload.LIST_IGNORE;
+            }
+            return false;
+          }}
           onChange={handleChange}
         >
           {children ?? (
@@ -161,7 +215,12 @@ const UploadImg: React.FC<UploadImgProps> = ({
           multiple={multiple}
           action="/"
           fileList={[]}
-          beforeUpload={(file) => false}
+          beforeUpload={(file) => {
+            if (!validateFile(file)) {
+              return Upload.LIST_IGNORE;
+            }
+            return false;
+          }}
           onChange={handleChange}
         >
           {children ?? (
