@@ -23,6 +23,9 @@ interface SingleImageProps {
   autoBgColor?: boolean;
   editable?: boolean;
   style?: React.CSSProperties;
+  styles?: {
+    image?: React.CSSProperties;
+  };
   loadingSize?: ProgressProps['size'];
   progressType?: 'line' | 'circle' | 'dashboard';
   progressColor?: string;
@@ -45,6 +48,7 @@ const SingleImage: React.FC<SingleImageProps> = (props) => {
     dataUrl = '',
     label,
     style,
+    styles,
     autoBgColor,
     preview = true,
     loadingSize = 'default'
@@ -101,11 +105,13 @@ const SingleImage: React.FC<SingleImageProps> = (props) => {
 
   const renderProgress = () => {
     <Progress
-      percent={round(progress, 0)}
+      percent={round(progress || 0, 0)}
       type="dashboard"
       size={loadingSize}
       steps={{ count: 50, gap: 2 }}
-      format={() => <span className="font-size-20">{round(progress, 0)}%</span>}
+      format={() => (
+        <span className="font-size-20">{round(progress || 0, 0)}%</span>
+      )}
       railColor="var(--ant-color-fill-secondary)"
     />;
   };
@@ -166,7 +172,7 @@ const SingleImage: React.FC<SingleImageProps> = (props) => {
                 }}
               >
                 <AutoImage
-                  style={{ objectFit: 'cover' }}
+                  style={{ objectFit: 'cover', ...styles?.image }}
                   preview={preview}
                   autoSize={autoSize}
                   src={dataUrl}
