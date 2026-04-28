@@ -13,7 +13,8 @@ const BarChart: React.FC<ChartProps> = (props) => {
     width,
     labelFormatter,
     legendData,
-    title
+    title,
+    stack = 'total'
   } = props;
   const {
     barItemConfig,
@@ -51,10 +52,12 @@ const BarChart: React.FC<ChartProps> = (props) => {
       series: []
     };
     const data = _.map(seriesData, (item: any) => {
+      const { stack: itemStack, ...rest } = item;
+      const resolvedStack = itemStack ?? stack;
       return {
-        ...item,
+        ...rest,
         ...barItemConfig,
-        stack: 'total',
+        ...(resolvedStack === false ? {} : { stack: resolvedStack }),
         itemStyle: {
           color: item.color
         }
@@ -86,7 +89,8 @@ const BarChart: React.FC<ChartProps> = (props) => {
     xAxis,
     yAxis,
     legend,
-    barItemConfig
+    barItemConfig,
+    stack
   ]);
 
   return (

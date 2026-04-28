@@ -29,6 +29,7 @@ export interface ChartProps {
   smooth?: boolean;
   color?: string;
   yAxisName?: string;
+  stack?: string | false;
   gaugeConfig?: {
     radius?: string;
     center?: string[];
