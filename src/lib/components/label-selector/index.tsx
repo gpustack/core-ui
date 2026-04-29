@@ -4,7 +4,7 @@ import { useIntl } from '../../../lib/hooks/useIntl';
 import Inner from './inner';
 
 interface LabelSelectorProps {
-  labels: Record<string, any>;
+  value?: Record<string, any>;
   label?: string;
   btnText?: string;
   description?: React.ReactNode;
@@ -17,7 +17,7 @@ interface LabelSelectorProps {
 }
 
 const LabelSelector: React.FC<LabelSelectorProps> = ({
-  labels,
+  value,
   onChange,
   onBlur,
   onDelete,
@@ -35,24 +35,24 @@ const LabelSelector: React.FC<LabelSelectorProps> = ({
   );
 
   useEffect(() => {
-    if (!_.isEqual(labels, labelsData)) {
-      setLabelsData(labels || {});
-      const list = _.map(_.keys(labels), (key: string) => {
+    const externalValue = value ?? {};
+    if (!_.isEqual(externalValue, labelsData)) {
+      setLabelsData(externalValue);
+      const list = _.map(_.keys(externalValue), (key: string) => {
         return {
           key,
-          value: labels[key]
+          value: externalValue[key]
         };
       });
       setLabelList(list);
     }
-  }, [labels]);
+  }, [value]);
 
   const handleLabelListChange = (list: { key: string; value: string }[]) => {
     setLabelList(list);
   };
 
   const handleLabelsChange = (data: Record<string, any>) => {
-    console.log('handleLabelsChange', data);
     setLabelsData(data);
     onChange?.(data);
   };
@@ -85,8 +85,8 @@ const LabelSelector: React.FC<LabelSelectorProps> = ({
       .filter((line: string) => line && line.includes('='));
 
     const parsedData = lines.map((line: string) => {
-      const [key, value] = line.split(/=(.+)/).map((s) => s.trim());
-      return { key, value };
+      const [rawKey = '', rawValue = ''] = line.split(/=(.+)/);
+      return { key: rawKey.trim(), value: rawValue.trim() };
     });
 
     const newPairs = [...labelList];
