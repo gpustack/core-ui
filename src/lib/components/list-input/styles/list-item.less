@@ -1,5 +1,7 @@
 .list-item {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr max-content;
+  gap: 10px;
   align-items: center;
   justify-content: flex-start;
   width: 100%;
@@ -7,9 +9,5 @@
 
   .field-wrapper {
     flex: 1;
-  }
-
-  .btn {
-    margin-left: 10px;
   }
 }
