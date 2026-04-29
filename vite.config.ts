@@ -78,9 +78,10 @@ export default defineConfig({
       },
       name: 'CoreUI',
       formats: ['es'],
+      cssFileName: 'index',
       fileName: (format, entryName) => `${entryName}.${format}.js`
     },
-    cssCodeSplit: true,
+    cssCodeSplit: false,
     rollupOptions: {
       external: isExternalPackage,
       output: {

@@ -19,6 +19,7 @@ type AddModalProps = {
   width?: number | string;
   footer?: React.ReactNode;
   subTitle?: React.ReactNode;
+  loading?: boolean;
 };
 const FormDrawer: React.FC<AddModalProps> = ({
   title,
@@ -28,7 +29,8 @@ const FormDrawer: React.FC<AddModalProps> = ({
   children,
   width = 600,
   subTitle,
-  footer
+  footer,
+  loading
 }) => {
   return (
     <GSDrawer
@@ -74,6 +76,7 @@ const FormDrawer: React.FC<AddModalProps> = ({
             <ModalFooter
               onOk={onSubmit}
               onCancel={onCancel}
+              loading={loading}
               style={ModalFooterStyle}
             ></ModalFooter>
           )
