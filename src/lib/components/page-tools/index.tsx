@@ -6,6 +6,7 @@ import {
   SearchOutlined,
   SyncOutlined
 } from '@ant-design/icons';
+import type { SelectProps } from 'antd';
 import { Button, Input, Space } from 'antd';
 import React, { useMemo } from 'react';
 import DropDownActions from '../../../lib/components/drop-down-actions';
@@ -130,7 +131,7 @@ interface FilterBarProps {
     onClear: () => void;
   };
   select?: {
-    showSearch?: boolean;
+    showSearch?: SelectProps['showSearch'];
   };
   widths?: {
     input?: number;
