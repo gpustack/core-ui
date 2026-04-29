@@ -6,7 +6,7 @@ import ListItem from './list-item';
 
 interface ListInputProps {
   required?: boolean;
-  dataList: string[];
+  value?: string[];
   label?: React.ReactNode;
   description?: React.ReactNode;
   btnText?: string;
@@ -18,7 +18,7 @@ interface ListInputProps {
     wrapper?: React.CSSProperties;
     item?: React.CSSProperties;
   };
-  onChange: (data: string[]) => void;
+  onChange?: (data: string[]) => void;
   onBlur?: (e: any, index: number) => void;
   onDelete?: (index: number) => void;
   renderItem?: (
@@ -32,7 +32,7 @@ interface ListInputProps {
 
 const ListInput: React.FC<ListInputProps> = (props) => {
   const {
-    dataList,
+    value,
     label,
     description,
     onChange,
@@ -58,16 +58,16 @@ const ListInput: React.FC<ListInputProps> = (props) => {
     values.splice(index, 1);
     const valueList = _.map(values, 'value').filter((val: string) => !!val);
     setList(values);
-    onChange(valueList);
+    onChange?.(valueList);
     onDelete?.(index);
   };
 
-  const handleOnChange = (value: string, index: number) => {
+  const handleOnChange = (nextValue: string, index: number) => {
     const values = _.cloneDeep(list);
-    values[index].value = value;
+    values[index]!.value = nextValue;
     const valueList = _.map(values, 'value').filter((val: string) => !!val);
     setList(values);
-    onChange(valueList);
+    onChange?.(valueList);
   };
 
   const handleOnAdd = () => {
@@ -96,35 +96,39 @@ const ListInput: React.FC<ListInputProps> = (props) => {
     const values = _.cloneDeep(list);
 
     // replace the current item with the first line of the pasted text
-    values[index].value = trim ? lines[0].trim() : lines[0];
+    const currVal = trim ? lines[0]?.trim() : lines[0];
+
+    values[index]!.value = currVal || '';
 
     // create new list items for the remaining lines
     for (let i = 1; i < lines.length; i++) {
       updateCountRef();
+      const val = trim ? lines[i]?.trim() : lines[i];
       values.splice(index + i, 0, {
-        value: trim ? lines[i].trim() : lines[i],
+        value: val || '',
         uid: countRef.current
       });
     }
 
     const valueList = _.map(values, 'value').filter((val: string) => !!val);
     setList(values);
-    onChange(valueList);
+    onChange?.(valueList);
   };
 
   React.useEffect(() => {
+    const externalValue = value ?? [];
     const valueList = _.map(list, 'value').filter((val: string) => !!val);
-    if (!_.isEqual(valueList, dataList)) {
-      const values = _.map(dataList, (value: string) => {
+    if (!_.isEqual(valueList, externalValue)) {
+      const values = _.map(externalValue, (val: string) => {
         updateCountRef();
         return {
-          value,
+          value: val,
           uid: countRef.current
         };
       });
       setList(values);
     }
-  }, [dataList]);
+  }, [value]);
 
   useEffect(() => {
     if (required && list.length === 0) {
