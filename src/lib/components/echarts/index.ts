@@ -2,9 +2,16 @@ import type {
   BarSeriesOption,
   GaugeSeriesOption,
   LineSeriesOption,
+  PieSeriesOption,
   ScatterSeriesOption
 } from 'echarts/charts';
-import { BarChart, GaugeChart, LineChart, ScatterChart } from 'echarts/charts';
+import {
+  BarChart,
+  GaugeChart,
+  LineChart,
+  PieChart,
+  ScatterChart
+} from 'echarts/charts';
 import type {
   DatasetComponentOption,
   GridComponentOption,
@@ -35,6 +42,7 @@ type ECOption = ComposeOption<
   | DatasetComponentOption
   | GaugeSeriesOption
   | ScatterSeriesOption
+  | PieSeriesOption
 >;
 
 // register components and charts
@@ -49,6 +57,7 @@ echarts.use([
   BarChart,
   LineChart,
   ScatterChart,
+  PieChart,
   GaugeChart,
   LabelLayout,
   UniversalTransition,
