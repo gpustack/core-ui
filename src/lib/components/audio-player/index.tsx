@@ -210,10 +210,6 @@ const AudioPlayer: React.FC<AudioPlayerProps> = forwardRef((props, ref) => {
           <div className={playerCss['progress-bar']}>
             <span className={playerCss['file-name']}>{props.name}</span>
             <div className={playerCss['slider']}>
-              {/* <span className="time current">
-                {' '}
-                {formatTime(audioState.currentTime)}
-              </span> */}
               <div className={playerCss['slider-inner']}>
                 <Slider
                   tooltip={{ open: false }}
@@ -229,10 +225,9 @@ const AudioPlayer: React.FC<AudioPlayerProps> = forwardRef((props, ref) => {
                   onChange={handleCurrentChange}
                 />
               </div>
-              {/* <span className={playerCss['time']}>{formatTime(audioState.duration)}</span> */}
             </div>
             <div className={playerCss['controls']}>
-              <div className={`${playerCss['audio-control']} 'flex-center'}`}>
+              <div className="flex-center">
                 <span className={playerCss['time']}>
                   {formatTime(audioState.currentTime)}
                 </span>
@@ -258,6 +253,9 @@ const AudioPlayer: React.FC<AudioPlayerProps> = forwardRef((props, ref) => {
                     size="middle"
                     type="text"
                     onClick={handlePlay}
+                    style={{
+                      height: 22
+                    }}
                     disabled={!audioState?.duration}
                     icon={
                       !playOn ? (
