@@ -5,7 +5,9 @@ import useChartConfig from '../../../lib/components/echarts/config';
 import EmptyData from '../../../lib/components/empty-data';
 import { type ChartProps } from './types';
 
-const BarChart: React.FC<ChartProps & { maxItems?: number }> = (props) => {
+const BarChart: React.FC<
+  ChartProps & { maxItems?: number; barWidth?: number }
+> = (props) => {
   const {
     seriesData,
     xAxisData,
@@ -14,6 +16,7 @@ const BarChart: React.FC<ChartProps & { maxItems?: number }> = (props) => {
     labelFormatter,
     legendData,
     maxItems,
+    barWidth = 20,
     title
   } = props;
   const {
@@ -25,6 +28,9 @@ const BarChart: React.FC<ChartProps & { maxItems?: number }> = (props) => {
     xAxis,
     yAxis
   } = useChartConfig();
+
+  const titleText =
+    typeof title === 'string' ? title : ((title?.text as string) ?? '');
 
   const dataOptions = useMemo((): any => {
     const options = {
@@ -80,7 +86,7 @@ const BarChart: React.FC<ChartProps & { maxItems?: number }> = (props) => {
       return {
         ...item,
         type: 'bar',
-        barWidth: 20,
+        barWidth,
         stack: 'Ad',
         barGap: '20%',
         label: {
@@ -112,7 +118,7 @@ const BarChart: React.FC<ChartProps & { maxItems?: number }> = (props) => {
       animation: false,
       title: {
         ...options.title,
-        text: title
+        text: titleText
       },
       yAxis: {
         ...options.yAxis,
@@ -154,7 +160,9 @@ const BarChart: React.FC<ChartProps & { maxItems?: number }> = (props) => {
     grid,
     xAxis,
     yAxis,
-    legend
+    legend,
+    barWidth,
+    maxItems
   ]);
 
   const isEmpty = useMemo(() => {
@@ -166,10 +174,7 @@ const BarChart: React.FC<ChartProps & { maxItems?: number }> = (props) => {
   return (
     <>
       {isEmpty ? (
-        <EmptyData
-          height={height}
-          title={_.get(title, 'text', title || '')}
-        ></EmptyData>
+        <EmptyData height={height} title={titleText}></EmptyData>
       ) : (
         <Chart
           height={height}
