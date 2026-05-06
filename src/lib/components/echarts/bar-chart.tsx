@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import React, { memo, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import Chart from '../../../lib/components/echarts/chart';
 import useChartConfig from '../../../lib/components/echarts/config';
 import EmptyData from '../../../lib/components/empty-data';
@@ -25,6 +25,9 @@ const BarChart: React.FC<ChartProps> = (props) => {
     xAxis,
     yAxis
   } = useChartConfig();
+
+  const titleText =
+    typeof title === 'string' ? title : ((title?.text as string) ?? '');
 
   const dataOptions = useMemo((): any => {
     const options = {
@@ -68,7 +71,7 @@ const BarChart: React.FC<ChartProps> = (props) => {
       animation: false,
       title: {
         ...titleConfig,
-        text: title
+        text: titleText
       },
       yAxis: {
         ...options.yAxis
@@ -96,7 +99,7 @@ const BarChart: React.FC<ChartProps> = (props) => {
   return (
     <>
       {!seriesData.length ? (
-        <EmptyData height={height} title={title}></EmptyData>
+        <EmptyData height={height} title={titleText}></EmptyData>
       ) : (
         <Chart
           height={height}
@@ -108,4 +111,4 @@ const BarChart: React.FC<ChartProps> = (props) => {
   );
 };
 
-export default memo(BarChart);
+export default BarChart;

@@ -23,6 +23,9 @@ const Scatter: React.FC<
     yMax = 1
   } = props;
 
+  const titleText =
+    typeof title === 'string' ? title : ((title?.text as string) ?? '');
+
   const chart = useRef<any>(null);
 
   const options = useMemo(() => {
@@ -200,7 +203,7 @@ const Scatter: React.FC<
       },
       title: {
         ...titleConfig,
-        text: title
+        text: titleText
       },
       series: {
         type: 'scatter',
@@ -215,10 +218,7 @@ const Scatter: React.FC<
   return (
     <>
       {!seriesData.length && showEmpty ? (
-        <EmptyData
-          height={height}
-          title={_.get(title, 'text', title || '')}
-        ></EmptyData>
+        <EmptyData height={height} title={titleText}></EmptyData>
       ) : (
         <Chart
           ref={chart}

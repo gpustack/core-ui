@@ -35,6 +35,9 @@ const LineChart: React.FC<ChartProps> = (props) => {
     yAxis
   } = useChartConfig();
 
+  const titleText =
+    typeof title === 'string' ? title : ((title?.text as string) ?? '');
+
   const axisLabelFormatter = (value: string, index: number) => {
     if (labelFormatter) {
       return labelFormatter(value, index);
@@ -124,7 +127,7 @@ const LineChart: React.FC<ChartProps> = (props) => {
       title: {
         ...titleConfig,
         ...titleOptions,
-        text: title
+        text: titleText
       },
       yAxis: {
         ...options.yAxis,
@@ -154,10 +157,7 @@ const LineChart: React.FC<ChartProps> = (props) => {
   return (
     <>
       {!seriesData.length ? (
-        <EmptyData
-          height={height}
-          title={_.get(title, 'text', title || '')}
-        ></EmptyData>
+        <EmptyData height={height} title={titleText}></EmptyData>
       ) : (
         <Chart
           height={height}

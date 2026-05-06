@@ -41,6 +41,9 @@ const MixLineBarChart: React.FC<
     yAxis
   } = useChartConfig();
 
+  const titleText =
+    typeof title === 'string' ? title : ((title?.text as string) ?? '');
+
   const { line: lineSeriesData, bar: barSeriesData } = chartData;
 
   const options = {
@@ -133,7 +136,7 @@ const MixLineBarChart: React.FC<
       animation: false,
       title: {
         ...titleConfig,
-        text: title
+        text: titleText
       },
       yAxis: [
         {
@@ -158,10 +161,7 @@ const MixLineBarChart: React.FC<
   return (
     <>
       {!lineSeriesData.length && !barSeriesData.length ? (
-        <EmptyData
-          height={height}
-          title={_.get(title, 'text', title || '')}
-        ></EmptyData>
+        <EmptyData height={height} title={titleText}></EmptyData>
       ) : (
         <Chart
           height={height}
