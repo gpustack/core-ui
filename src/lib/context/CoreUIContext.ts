@@ -46,8 +46,26 @@ export interface Services {
   };
 }
 
+export interface CurrentUser {
+  // String IDs are common in modern IdPs (UUIDs etc.); numeric kept
+  // for hosts whose user store still uses integer primary keys.
+  id?: string | number;
+  username?: string;
+  fullName?: string;
+  isAdmin?: boolean;
+  // Hosts often pass through extra fields straight from their user
+  // payload (avatar, email, etc.); keep the type open.
+  [key: string]: any;
+}
+
 export interface CoreHooks {
   useIntl: () => CoreUII18n;
+  // Read the signed-in user's profile. Required so the consumer hook
+  // (`useCurrentUser`) can call it unconditionally — Rules of Hooks
+  // forbid the optional-chained call. The Context default below
+  // returns `undefined`, so a host that hasn't wired this still gets
+  // a graceful no-op.
+  useCurrentUser: () => CurrentUser | undefined;
   usePaginationStatus?: (key: string) => {
     pagination: any;
     getPaginationStatus: () => any;
@@ -60,7 +78,11 @@ export interface CoreHooks {
     getTabActive: (tabKey: string) => any;
     tabsMap: Record<string, string>;
   };
-  useTableFetch?: TableFetchType;
+  // Required so consumers can call `useTableFetch()` unconditionally
+  // (Rules of Hooks). The Context default below throws at call time
+  // if no host wired this — surfaces misconfiguration as a clear error
+  // without breaking hook ordering.
+  useTableFetch: TableFetchType;
   useUserSettings?: () => {
     userSettings: any;
     setUserSettings: any;
@@ -106,7 +128,13 @@ const CoreUIContext = createContext<CoreUIContextProps>({
     useIntl: () => ({
       locale: 'en-US',
       formatMessage: (descriptor: { id: string }, values?: any) => descriptor.id
-    })
+    }),
+    useCurrentUser: () => undefined,
+    useTableFetch: (() => {
+      throw new Error(
+        'useTableFetch was not provided by the host CoreUIProvider'
+      );
+    }) as TableFetchType
   },
   tokens: {},
   services: {
