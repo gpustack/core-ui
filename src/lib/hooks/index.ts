@@ -21,3 +21,5 @@ export { default as useWatchList } from './use-watch-list';
 export { default as useWindowResize } from './use-window-resize';
 export { default as useCoreUIContext } from './useCoreUIContext';
 export { default as useIntl } from './useIntl';
+export { default as useCurrentUser } from './useCurrentUser';
+export { default as useTableFetch } from './useTableFetch';
