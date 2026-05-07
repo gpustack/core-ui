@@ -21,9 +21,14 @@ interface InputTextareaProps extends TextAreaProps {
   alwaysFocus?: boolean; // it's order to display the placeholder
 }
 
-const SealTextArea: React.FC<InputTextareaProps & SealFormItemProps> = (
-  props
-) => {
+const SealTextArea: React.FC<
+  InputTextareaProps &
+    SealFormItemProps & {
+      styles?: {
+        label?: React.CSSProperties;
+      };
+    }
+> = (props) => {
   const {
     label,
     placeholder,
