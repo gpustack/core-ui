@@ -11,7 +11,11 @@ export { default as useDownloadLogs } from './use-download-logs';
 export { default as useDownloadStream } from './use-download-stream';
 export { default as useExpandedRowKeys } from './use-expanded-row-keys';
 export { default as useOverlayScroller } from './use-overlay-scroller';
-export { useQueryData, useQueryDataList } from './use-query-data-list';
+export {
+  useQueryData,
+  useQueryDataList,
+  useQueryData as useRequest
+} from './use-query-data-list';
 export { default as useRequestToken } from './use-request-token';
 export { default as useResponsive } from './use-responsive';
 export { default as useTableRowSelection } from './use-table-row-selection';
