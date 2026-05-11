@@ -25,6 +25,7 @@ const exactExternalPackages = new Set([
   'styled-components',
   'antd-style',
   'ahooks',
+  '@ant-design/pro-components',
   '@ant-design/icons',
   'overlayscrollbars-react'
 ]);
@@ -86,11 +87,6 @@ export default defineConfig({
       external: isExternalPackage,
       output: {
         chunkFileNames: '[name]-[hash].js',
-        globals: {
-          react: 'React',
-          'react-dom': 'ReactDOM',
-          antd: 'antd'
-        },
         manualChunks: (id) => {
           for (const [pkg, chunkName] of Object.entries(libraryChunks)) {
             if (id.includes(`/node_modules/${pkg}/`)) {

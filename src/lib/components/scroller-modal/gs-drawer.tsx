@@ -9,7 +9,7 @@ import { useEscHint } from '../../../lib/hooks/use-esc-hint';
  * @param props
  * @returns
  */
-const ScrollerModal = (props: DrawerProps) => {
+const GSDrawer = (props: DrawerProps) => {
   const { title, closable = true, mask, styles, ...restProps } = props;
   const { EscHint } = useEscHint({
     enabled: !props.keyboard && props.open
@@ -69,4 +69,4 @@ const ScrollerModal = (props: DrawerProps) => {
   );
 };
 
-export default ScrollerModal;
+export default GSDrawer;
