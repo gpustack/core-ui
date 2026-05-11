@@ -36,6 +36,18 @@ const InputWrapper = styled.div`
     box-shadow: none;
   }
 
+  .ant-input-number {
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      height: 100%;
+      right: 0;
+      left: 0;
+    }
+  }
+
   .ant-input-number-outlined.ant-input-number-status-error:not(
       .ant-input-number-disabled
     ):focus,

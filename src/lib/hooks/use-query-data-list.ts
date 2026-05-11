@@ -68,7 +68,7 @@ export function useQueryDataList<
       });
 
       setDataList(
-        res.items?.map((item: ListItem) => ({
+        res?.items?.map((item: ListItem) => ({
           ...item,
           label: getLabel ? getLabel(item) : (item as any).name,
           value: getValue ? getValue(item) : (item as any).id
@@ -76,7 +76,7 @@ export function useQueryDataList<
       );
 
       if (responseType === 'array') {
-        return (res.items || []) as QueryResponse<ListItem, T>;
+        return (res?.items || []) as QueryResponse<ListItem, T>;
       }
 
       return res as QueryResponse<ListItem, T>;

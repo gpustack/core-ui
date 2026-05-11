@@ -1,7 +1,9 @@
+import { InputNumber } from '../lib/components';
+
 function Playground() {
   return (
-    <div>
-      <div> Core UI </div>
+    <div style={{ width: 300 }}>
+      <InputNumber label="Number"></InputNumber>
     </div>
   );
 }
