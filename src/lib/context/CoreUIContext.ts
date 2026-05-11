@@ -96,6 +96,10 @@ export interface CoreHooks {
     getStorageUserSettings: () => any;
   };
 }
+export interface CoreUISlots {
+  ExtraContent?: React.ComponentType<{ isDarkTheme?: boolean }>;
+}
+
 export interface CoreUIContextProps {
   config: CoreUIConfig;
   tokens?: Record<string, string>;
@@ -109,6 +113,7 @@ export interface CoreUIContextProps {
     writeColumnSettings: (key: string, value: any) => void;
     writeState: (key: string, value: any) => void;
   };
+  slots?: CoreUISlots;
 }
 
 const CoreUIContext = createContext<CoreUIContextProps>({
