@@ -24,6 +24,7 @@ export { default as useUpdateChunkedList } from './use-update-chunk-list';
 export { default as useWatchList } from './use-watch-list';
 export { default as useWindowResize } from './use-window-resize';
 export { default as useCoreUIContext } from './useCoreUIContext';
-export { default as useIntl } from './useIntl';
+export { default as useCoreUISlots } from './useCoreUISlots';
 export { default as useCurrentUser } from './useCurrentUser';
+export { default as useIntl } from './useIntl';
 export { default as useTableFetch } from './useTableFetch';
