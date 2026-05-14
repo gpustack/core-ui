@@ -100,6 +100,18 @@ export interface CoreUISlots {
   ExtraContent?: React.ComponentType<{ isDarkTheme?: boolean }>;
 }
 
+// Access control wiring forwarded by the host (e.g. `@umijs/max`'s
+// `plugin-access`). Optional so hosts that don't gate on permissions
+// — or surfaces like the login page that run pre-auth — can omit it.
+export interface CoreUIAccess {
+  Access: React.ComponentType<{
+    accessible: boolean;
+    fallback?: React.ReactNode;
+    children: React.ReactNode;
+  }>;
+  useAccess: () => Record<string, any>;
+}
+
 export interface CoreUIContextProps {
   config: CoreUIConfig;
   tokens?: Record<string, string>;
@@ -114,6 +126,7 @@ export interface CoreUIContextProps {
     writeState: (key: string, value: any) => void;
   };
   slots?: CoreUISlots;
+  access?: CoreUIAccess;
 }
 
 const CoreUIContext = createContext<CoreUIContextProps>({
