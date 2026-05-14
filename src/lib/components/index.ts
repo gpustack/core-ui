@@ -1,4 +1,5 @@
 export { CoreUIProvider } from '../context/CoreUIProvider';
+export { default as Access, type AccessProps } from './access';
 export { default as AlertInfo } from './alert-info';
 export { default as AlertBlockInfo } from './alert-info/block';
 export { default as AudioAnimation } from './audio-animation';
@@ -105,6 +106,7 @@ export { default as InfoColumn } from './simple-table/info-column';
 export { default as SmallCloseButton } from './small-close-button';
 export { default as SpeechContent } from './speech-content';
 export { default as StatusTag } from './status-tag';
+export { default as SubDrawer, type SubDrawerProps } from './sub-drawer';
 export { default as Table } from './table';
 export { default as CellContent } from './table/components/cell-content';
 export { default as RowChildren } from './table/components/row-children';

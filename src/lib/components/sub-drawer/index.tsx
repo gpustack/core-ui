@@ -6,7 +6,7 @@ import ColumnWrapper from '../column-wrapper';
 import IconFont from '../icon-font';
 import overlayStyles from './styles.module.less';
 
-type ModalOverlayViewProps = {
+export type SubDrawerProps = {
   title: React.ReactNode;
   open: boolean;
   onCancel?: () => void;
@@ -29,7 +29,7 @@ type ModalOverlayViewProps = {
   };
 };
 
-const ModalOverlayView: React.FC<ModalOverlayViewProps> = ({
+const SubDrawer: React.FC<SubDrawerProps> = ({
   title,
   open,
   onCancel,
@@ -136,4 +136,4 @@ const ModalOverlayView: React.FC<ModalOverlayViewProps> = ({
   );
 };
 
-export default ModalOverlayView;
+export default SubDrawer;

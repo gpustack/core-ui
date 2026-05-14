@@ -23,6 +23,7 @@ export { useTableMultiSort, default as useTableSort } from './use-table-sort';
 export { default as useUpdateChunkedList } from './use-update-chunk-list';
 export { default as useWatchList } from './use-watch-list';
 export { default as useWindowResize } from './use-window-resize';
+export { default as useAccess } from './useAccess';
 export { default as useCoreUIContext } from './useCoreUIContext';
 export { default as useCoreUISlots } from './useCoreUISlots';
 export { default as useCurrentUser } from './useCurrentUser';
