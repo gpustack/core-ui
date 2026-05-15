@@ -20,6 +20,7 @@ interface LogsViewerProps {
   height?: number;
   content?: string;
   url: string;
+  watchable?: boolean;
   params?: Record<string, any>;
   ref?: any;
   tail?: number;
@@ -35,6 +36,7 @@ const LogsViewer: React.FC<LogsViewerProps> = forwardRef((props, ref) => {
     tail: defaultTail,
     enableScorllLoad = true,
     isDownloading,
+    watchable,
     params
   } = props;
   const { pageSize, page, setPage, setTotalPage, totalPage } =
@@ -178,6 +180,7 @@ const LogsViewer: React.FC<LogsViewerProps> = forwardRef((props, ref) => {
         ...props.params
       },
       watch: params?.watch ?? true,
+      watchable: watchable ?? true,
       contentType: 'text',
       handler: updateContent
     });
