@@ -179,8 +179,7 @@ const LogsViewer: React.FC<LogsViewerProps> = forwardRef((props, ref) => {
         tail: tail.current,
         ...props.params
       },
-      watch: params?.watch ?? true,
-      watchable: watchable ?? true,
+      ...(watchable ? { watch: params?.watch ?? true } : {}),
       contentType: 'text',
       handler: updateContent
     });
