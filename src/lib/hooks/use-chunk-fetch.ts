@@ -19,6 +19,7 @@ interface RequestConfig {
   beforeReconnect?: () => void;
   params?: object;
   watch?: boolean;
+  watchable?: boolean;
   contentType?: 'json' | 'text';
 }
 
@@ -166,6 +167,7 @@ const useSetChunkFetch = () => {
     handler,
     errorHandler,
     watch,
+    watchable = true,
     params = {}
   }: RequestConfig) => {
     axiosToken.current?.abort?.();
@@ -174,7 +176,7 @@ const useSetChunkFetch = () => {
       const response = await fetch(
         `${apiBaseUrl}${url}?${qs.stringify({
           ...params,
-          watch: watch === undefined ? true : watch
+          ...(watchable ? { watch: watch ?? true } : {})
         })}`,
         {
           method: 'GET',
