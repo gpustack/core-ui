@@ -7,9 +7,9 @@ import { OverlayScroller } from '../overlay-scroller';
 interface ListProps {
   maxHeight?: number;
   dataList: Array<{ key: string; title: string }>;
-  selectedKeys: string[];
+  value: string[];
   renderTitle?: (item: { key: string; title: string }) => React.ReactNode;
-  onSelectChange: (selectedKeys: string[]) => void;
+  onChange: (value: string[]) => void;
 }
 
 const UL = styled.ul`
@@ -33,16 +33,16 @@ const LI = styled.li<{ selected: boolean }>`
 const List: React.FC<ListProps> = ({
   maxHeight,
   dataList,
-  selectedKeys,
-  onSelectChange,
+  value,
+  onChange,
   renderTitle
 }) => {
   const handleClickItem = (item: { key: string; title: string }) => {
     const itemKey = item.key;
-    const newSelectedKeys = selectedKeys.includes(itemKey)
-      ? selectedKeys.filter((key) => key !== itemKey)
-      : [...selectedKeys, itemKey];
-    onSelectChange(newSelectedKeys);
+    const newValue = value.includes(itemKey)
+      ? value.filter((key) => key !== itemKey)
+      : [...value, itemKey];
+    onChange(newValue);
   };
 
   return (
@@ -51,10 +51,10 @@ const List: React.FC<ListProps> = ({
         {dataList.map((item) => (
           <LI
             key={item.key}
-            selected={selectedKeys.includes(item.key)}
+            selected={value.includes(item.key)}
             onClick={() => handleClickItem(item)}
           >
-            <Checkbox checked={selectedKeys.includes(item.key)}></Checkbox>
+            <Checkbox checked={value.includes(item.key)}></Checkbox>
             {renderTitle ? (
               renderTitle(item)
             ) : (
