@@ -1,5 +1,4 @@
 import { useRequest } from 'ahooks';
-import { message } from 'antd';
 import { type CancelTokenSource } from 'axios';
 import { useEffect, useRef, useState } from 'react';
 import { createAxiosToken } from '../../lib/hooks/use-chunk-request';
@@ -85,9 +84,9 @@ export function useQueryDataList<
       manual: true,
       debounceWait: option.debounceWait || 300,
       onError: (error) => {
-        message.error(
-          error?.message || errorMsg || `Failed to fetch ${key} list`
-        );
+        // message.error(
+        //   error?.message || errorMsg || `Failed to fetch ${key} list`
+        // );
         setDataList([]);
       }
     }
@@ -158,9 +157,9 @@ export function useQueryData<Detail, Params = any>(option: {
       manual: true,
       onSuccess: () => {},
       onError: (error) => {
-        message.error(
-          error?.message || errorMsg || `Failed to fetch ${key} data`
-        );
+        // message.error(
+        //   error?.message || errorMsg || `Failed to fetch ${key} data`
+        // );
         setDetailData({} as Detail);
       }
     }
