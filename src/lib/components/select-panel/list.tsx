@@ -33,7 +33,7 @@ const LI = styled.li<{ selected: boolean }>`
 const List: React.FC<ListProps> = ({
   maxHeight,
   dataList,
-  value,
+  value = [],
   onChange,
   renderTitle
 }) => {
