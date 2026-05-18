@@ -33,7 +33,8 @@ const useStyles = createStyles(({ css }) => ({
     padding-left: 30px;
     color: var(--ant-color-text-secondary);
     white-space: pre-line;
-    word-break: break-all;
+    word-break: normal;
+    overflow-wrap: break-word;
     span {
       color: var(--ant-color-text);
       display: flex;
