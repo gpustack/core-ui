@@ -1,10 +1,9 @@
 import { SearchOutlined } from '@ant-design/icons';
-import { Button, Checkbox, Empty, Input } from 'antd';
+import { Checkbox, Empty, Input } from 'antd';
 import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useIntl } from '../../../lib/hooks/useIntl';
 import List from './list';
-import SelectedList from './selected-list';
 
 const PanelWrapper = styled.div<{ $maxHeight?: number; $leftWidth?: number }>`
   border: 1px solid var(--ant-color-border);
@@ -17,7 +16,6 @@ const PanelWrapper = styled.div<{ $maxHeight?: number; $leftWidth?: number }>`
 const Left = styled.div`
   padding: 0;
 `;
-const Right = styled.div``;
 
 const Header = styled.div`
   padding: 8px 12px 8px;
@@ -34,9 +32,9 @@ interface SelectPanelProps {
   height?: number;
   leftWidth?: number;
   options: Array<{ key: string; title: string }>;
-  value: string[];
+  value?: string[];
   notFoundContent?: React.ReactNode;
-  onChange: (value: string[]) => void;
+  onChange?: (value: string[]) => void;
   styles?: {
     container?: React.CSSProperties;
     left?: React.CSSProperties;
@@ -49,7 +47,7 @@ const SelectPanel: React.FC<SelectPanelProps> = ({
   height = 300,
   leftWidth = 260,
   options,
-  value,
+  value = [],
   searchPlaceholder,
   notFoundContent,
   onChange,
@@ -70,13 +68,6 @@ const SelectPanel: React.FC<SelectPanelProps> = ({
     setSearchText(e.target.value);
   };
 
-  const handleOnUnselect = (
-    key: string,
-    newSelectedKeys: { key: string; title: string }[]
-  ) => {
-    onChange(newSelectedKeys.map((item) => item.key));
-  };
-
   const handleCheckAllChange = (e: any) => {
     const checked = e.target.checked;
     setCheckAll(checked);
@@ -87,7 +78,7 @@ const SelectPanel: React.FC<SelectPanelProps> = ({
           item.title.toLowerCase().includes(searchText.toLowerCase())
         )
         .map((item) => item.key);
-      onChange(Array.from(new Set([...value, ...allKeys])));
+      onChange?.(Array.from(new Set([...value, ...allKeys])));
     } else {
       const filteredKeys = options
         .filter((item) =>
@@ -97,7 +88,7 @@ const SelectPanel: React.FC<SelectPanelProps> = ({
       const newSelectedKeys = value.filter(
         (key) => !filteredKeys.includes(key)
       );
-      onChange(newSelectedKeys);
+      onChange?.(newSelectedKeys);
     }
   };
 
@@ -122,37 +113,13 @@ const SelectPanel: React.FC<SelectPanelProps> = ({
   };
 
   const handleSelectChange = (newSelectedKeys: string[]) => {
-    onChange(newSelectedKeys);
+    onChange?.(newSelectedKeys);
     updateCheckStatus(newSelectedKeys);
-  };
-
-  const handleClearSelection = () => {
-    onChange([]);
-    setCheckAll(false);
-    setIndeterminate(false);
   };
 
   useEffect(() => {
     updateCheckStatus(value);
   }, [value, options]);
-
-  const renderRight = () => {
-    return (
-      <Right>
-        <Header>
-          <span>({value.length}) selected</span>
-          <Button type="text" size="small" onClick={handleClearSelection}>
-            Clear
-          </Button>
-        </Header>
-        <SelectedList
-          maxHeight={height - 50}
-          selectedList={options.filter((item) => value.includes(item.key))}
-          onUnselect={handleOnUnselect}
-        />
-      </Right>
-    );
-  };
 
   return (
     <PanelWrapper
