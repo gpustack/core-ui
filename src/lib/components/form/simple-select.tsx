@@ -273,7 +273,7 @@ const SimpleSelect: React.FC<
   }));
 
   return (
-    <div ref={selectRef} style={{ ...styles.wrapper }}>
+    <div ref={selectRef} style={{ flex: 1, ...styles.wrapper }}>
       <BaseSelect
         {...restProps}
         style={{

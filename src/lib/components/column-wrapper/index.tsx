@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 import useOverlayScroller from '../../../lib/hooks/use-overlay-scroller';
-import { WrapperContext } from './use-wrapper-context';
+import { WrapperContext } from './use-column-wrapper-context';
 
 const Wrapper = styled.div`
   flex: 1;

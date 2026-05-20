@@ -10,7 +10,14 @@ import Wrapper from './wrapper';
 import SelectWrapper from './wrapper/select';
 
 const SealSelect: React.FC<
-  SelectProps & SealFormItemProps & { showTags?: boolean }
+  SelectProps &
+    SealFormItemProps & {
+      showTags?: boolean;
+      styles?: {
+        wrapper?: React.CSSProperties;
+        select?: React.CSSProperties;
+      };
+    }
 > = (props) => {
   const {
     label,
@@ -109,7 +116,7 @@ const SealSelect: React.FC<
         <SimpleSelect
           {...rest}
           ref={inputRef}
-          options={children ? null : _options}
+          options={children ? undefined : _options}
           onFocus={handleOnFocus}
           onBlur={handleOnBlur}
           onChange={handleChange}
