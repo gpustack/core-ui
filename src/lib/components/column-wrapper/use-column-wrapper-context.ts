@@ -19,10 +19,12 @@ export const WrapperContext = createContext<WrapperContextProps>(
   {} as WrapperContextProps
 );
 
-export const useWrapperContext = () => {
+export const useColumnWrapperContext = () => {
   const context = useContext(WrapperContext);
   if (!context) {
-    throw new Error('useWrapperContext must be used within a WrapperProvider');
+    throw new Error(
+      'useColumnWrapperContext must be used within a WrapperProvider'
+    );
   }
   return context;
 };

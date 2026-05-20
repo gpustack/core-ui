@@ -119,7 +119,7 @@ const SealSelect: React.FC<
           placeholder={placeholder}
           footer={footer}
           ref={inputRef}
-          options={children ? null : _options}
+          options={children ? undefined : _options}
           onFocus={handleOnFocus}
           onBlur={handleOnBlur}
           onChange={handleChange}

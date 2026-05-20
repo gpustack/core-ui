@@ -18,7 +18,10 @@ export { default as HeadlessCollapse } from './collapse-container/headless-colla
 export { default as CollapsePanel } from './collapse-panel';
 export { default as ColumnSettings } from './column-settings';
 export { default as ColumnWrapper } from './column-wrapper';
-export { useWrapperContext } from './column-wrapper/use-wrapper-context';
+export {
+  useColumnWrapperContext,
+  useColumnWrapperContext as useWrapperContext
+} from './column-wrapper/use-column-wrapper-context';
 export { default as CommandViewer } from './command-viewer';
 export { default as ContentWrapper } from './content-wrapper';
 export { default as CopyButton } from './copy-button';
