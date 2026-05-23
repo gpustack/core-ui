@@ -1,6 +1,6 @@
 import { Button, Tag } from 'antd';
 import classNames from 'classnames';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import ColumnWrapper from '../column-wrapper';
 import IconFont from '../icon-font';
@@ -18,7 +18,7 @@ export type SubDrawerProps = {
   className?: string;
   style?: React.CSSProperties;
   maskClosable?: boolean;
-  getContainer?: () => HTMLElement | null | undefined;
+  getContainer: () => HTMLElement | null | undefined;
   styles?: {
     mask?: React.CSSProperties;
     overlay?: React.CSSProperties;
@@ -48,15 +48,23 @@ const SubDrawer: React.FC<SubDrawerProps> = ({
   const [mounted, setMounted] = React.useState(false);
   const [active, setActive] = React.useState(false);
 
+  const getOverlayContainer = useCallback(() => {
+    const containers = document.querySelectorAll<HTMLElement>(
+      '.ant-layout-content'
+    );
+
+    return containers[containers.length - 1] ?? null;
+  }, []);
+
   React.useEffect(() => {
     if (open) {
-      setContainer(getContainer?.() ?? null);
+      setContainer(getContainer?.() ?? getOverlayContainer());
       setMounted(true);
       return;
     }
 
     setActive(false);
-  }, [getContainer, open]);
+  }, [getContainer, getOverlayContainer, open]);
 
   React.useEffect(() => {
     if (!mounted || !container) {
@@ -84,16 +92,17 @@ const SubDrawer: React.FC<SubDrawerProps> = ({
   return createPortal(
     <>
       <div
-        className={classNames(overlayStyles.mask, {
-          [overlayStyles.maskOpen]: active
-        })}
+        className={classNames(
+          overlayStyles.mask,
+          active && overlayStyles.maskOpen
+        )}
         style={styles?.mask}
         onClick={maskClosable ? onCancel : undefined}
       />
       <div
         className={classNames(
           overlayStyles.overlay,
-          { [overlayStyles.overlayOpen]: active },
+          active && overlayStyles.overlayOpen,
           className
         )}
         style={{ width, ...style, ...styles?.overlay }}

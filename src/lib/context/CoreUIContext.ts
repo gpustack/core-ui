@@ -13,6 +13,7 @@ export interface CoreUIConfig {
 
 // i18n
 export interface CoreUII18n {
+  locale?: string;
   formatMessage: (descriptor: { id: string }, values?: any) => string;
 }
 

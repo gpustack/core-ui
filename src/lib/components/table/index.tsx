@@ -17,8 +17,7 @@ const Wrapper = styled.div<{ $token: any }>`
   --ant-table-cell-padding-block: ${(props) => props.$token.cellPaddingBlock}px;
   --ant-table-header-border-radius: ${(props) =>
     props.$token.headerBorderRadius}px;
-  --ant-table-header-split-color: ${(props) =>
-    props.$token.colorBorderSecondary};
+  --ant-table-header-split-color: ${(props) => props.$token.headerSplitColor};
   --ant-table-row-selected-bg: ${(props) => props.$token.rowSelectedBg};
   --ant-table-row-selected-hover-bg: ${(props) =>
     props.$token.rowSelectedHoverBg};
