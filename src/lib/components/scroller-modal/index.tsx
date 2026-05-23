@@ -5,13 +5,6 @@ import useBodyScroll from '../../../lib/hooks/use-body-scroll';
 import useOverlayScroller from '../../../lib/hooks/use-overlay-scroller';
 import { ScrollerContext } from './use-scroller-context';
 
-const Wrapper = styled.div<{ $maxHeight?: number | string }>`
-  max-height: ${({ $maxHeight }) =>
-    typeof $maxHeight === 'number' ? `${$maxHeight}px` : $maxHeight};
-  overflow-y: auto;
-  width: 100%;
-`;
-
 const Title = styled.div`
   display: flex;
   align-items: center;
@@ -56,7 +49,6 @@ const ScrollerModal = (
 
   return (
     <Modal
-      {...props}
       title={<Title>{props.title}</Title>}
       destroyOnHidden={true}
       styles={{
@@ -65,7 +57,8 @@ const ScrollerModal = (
         },
         header: {
           padding: 'var(--ant-modal-content-padding)',
-          paddingBottom: '0'
+          paddingBottom: '0',
+          marginBottom: 16
         },
         body: {
           padding: '0',
@@ -78,18 +71,24 @@ const ScrollerModal = (
             }
           : {}
       }}
+      {...props}
     >
       <ScrollerContext.Provider value={{ scrollToBottom }}>
-        <Wrapper
+        <div
           ref={scroller}
           data-overlayscrollbars-initialize
           className="overlay-scroller-wrapper"
-          $maxHeight={props.maxContentHeight || 500}
           hidden={false}
-          style={{ paddingInline: 24, paddingBlockEnd: 0 }}
+          style={{
+            paddingInline: 24,
+            paddingBlockEnd: 0,
+            maxHeight: props.maxContentHeight || 500,
+            overflowY: 'auto',
+            width: '100%'
+          }}
         >
           {props.children}
-        </Wrapper>
+        </div>
       </ScrollerContext.Provider>
     </Modal>
   );
