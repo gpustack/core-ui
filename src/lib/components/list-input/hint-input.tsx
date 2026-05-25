@@ -10,6 +10,7 @@ interface HintInputProps {
   onPaste?: (e: any) => void;
   placeholder?: string;
   trim?: boolean;
+  disabled?: boolean;
   sourceOptions?: Global.HintOptions[];
 }
 
@@ -22,6 +23,7 @@ const HintInput: React.FC<HintInputProps> = (props) => {
     onChange,
     onBlur,
     onPaste,
+    disabled,
     sourceOptions,
     trim = true
   } = props;
@@ -100,6 +102,7 @@ const HintInput: React.FC<HintInputProps> = (props) => {
       label={label}
       options={options}
       trim={trim}
+      disabled={disabled}
       style={{ flex: 1, minWidth: 0 }}
       onPaste={onPaste}
     />

@@ -23,6 +23,7 @@ interface LabelItemProps {
   options?: Global.HintOptions[];
   trim?: boolean;
   data?: any;
+  disabled?: boolean;
   required?: boolean;
 }
 
@@ -38,6 +39,7 @@ const ListItem: React.FC<LabelItemProps> = (props) => {
     trim = true,
     data,
     required,
+    disabled,
     renderItem
   } = props;
 
@@ -63,9 +65,10 @@ const ListItem: React.FC<LabelItemProps> = (props) => {
           sourceOptions={options}
           trim={trim}
           placeholder={props.placeholder}
+          disabled={disabled}
         />
       )}
-      {!required && (
+      {!required && !disabled && (
         <Button
           size="small"
           className="btn"
