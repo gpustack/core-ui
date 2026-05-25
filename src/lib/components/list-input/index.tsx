@@ -7,6 +7,7 @@ import ListItem from './list-item';
 interface ListInputProps {
   required?: boolean;
   value?: string[];
+  disabled?: boolean;
   label?: React.ReactNode;
   description?: React.ReactNode;
   btnText?: string;
@@ -44,6 +45,7 @@ const ListInput: React.FC<ListInputProps> = (props) => {
     trim = true,
     styles,
     required,
+    disabled,
     renderItem
   } = props;
   const [list, setList] = React.useState<{ value: string; uid: number }[]>([]);
@@ -145,6 +147,7 @@ const ListInput: React.FC<ListInputProps> = (props) => {
       labelExtra={labelExtra}
       onAdd={handleOnAdd}
       btnText={btnText}
+      disabled={disabled}
     >
       <>
         {_.map(list, (item: any, index: number) => {
@@ -161,6 +164,7 @@ const ListInput: React.FC<ListInputProps> = (props) => {
               onChange={(val) => handleOnChange(val, index)}
               onPaste={(e) => handleOnPaste(e, index)}
               trim={trim}
+              disabled={disabled}
               renderItem={renderItem}
             />
           );
