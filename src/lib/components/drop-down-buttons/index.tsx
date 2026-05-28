@@ -3,6 +3,7 @@ import { Button, Dropdown, Space, Tooltip, type MenuProps } from 'antd';
 import _ from 'lodash';
 import React from 'react';
 import { useIntl } from '../../../lib/hooks/useIntl';
+import useAccess from '../../hooks/useAccess';
 import dropdownButtonCss from './index.module.less';
 
 type Trigger = 'click' | 'hover';
@@ -21,7 +22,7 @@ interface DropdownButtonsProps {
 const DropdownButtons: React.FC<
   DropdownButtonsProps & { items: MenuProps['items'] }
 > = ({
-  items,
+  items: actions,
   size = 'middle',
   trigger = ['hover'],
   showText,
@@ -31,13 +32,22 @@ const DropdownButtons: React.FC<
   extra,
   onSelect
 }) => {
-  const headItem = _.head(items) as any;
   const intl = useIntl();
+  const access = useAccess();
+
+  const items = _.filter(actions, (item: any) => {
+    if (item?.access) {
+      return access?.[item.access];
+    }
+    return true;
+  });
 
   const handleMenuClick = (item: any) => {
     const selectItem = _.find(items, { key: item.key });
     onSelect(item.key, selectItem);
   };
+
+  const headItem = _.head(items) as any;
 
   const handleButtonClick = (e: any) => {
     const headItem = _.head(items) as any;
