@@ -1,6 +1,7 @@
+import { useMemoizedFn } from 'ahooks';
 import { Button, Tag } from 'antd';
 import classNames from 'classnames';
-import React, { useCallback } from 'react';
+import React from 'react';
 import { createPortal } from 'react-dom';
 import ColumnWrapper from '../column-wrapper';
 import IconFont from '../icon-font';
@@ -48,13 +49,13 @@ const SubDrawer: React.FC<SubDrawerProps> = ({
   const [mounted, setMounted] = React.useState(false);
   const [active, setActive] = React.useState(false);
 
-  const getOverlayContainer = useCallback(() => {
+  const getOverlayContainer = useMemoizedFn(() => {
     const containers = document.querySelectorAll<HTMLElement>(
       '.ant-layout-content'
     );
 
     return containers[containers.length - 1] ?? null;
-  }, []);
+  });
 
   React.useEffect(() => {
     if (open) {
