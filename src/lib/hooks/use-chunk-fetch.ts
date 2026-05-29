@@ -1,4 +1,5 @@
 import { useMemoizedFn } from 'ahooks';
+import { throttle } from 'lodash';
 import qs from 'query-string';
 import { useEffect, useRef } from 'react';
 import { convertFileSize } from '../../lib/utils';
@@ -49,7 +50,6 @@ class BufferManager {
   private totalBytes: number = 0;
   private avgSpeed: number = 0;
   private callback: HandlerFunction;
-  private encoder = new TextEncoder();
 
   constructor(options: {
     contentLength?: string | null;
@@ -63,7 +63,7 @@ class BufferManager {
 
   private updateProgress(data: any) {
     if (this.contentLength) {
-      this.progress += this.encoder.encode(data).length;
+      this.progress += new TextEncoder().encode(data).length;
       this.percent = Math.floor((this.progress / this.contentLength) * 100);
     }
   }
@@ -78,22 +78,36 @@ class BufferManager {
     console.log(`瞬时均值: ${convertFileSize(this.avgSpeed)}/s`);
   }
 
+  public updateSpeed(bytes: number) {
+    const now = performance.now();
+    const elapsed = (now - this.lastTime) / 1000;
+    if (elapsed > 0.3) {
+      const speed = (this.totalBytes + bytes - this.lastBytes) / elapsed;
+      this.logSpeed(speed);
+      this.lastTime = now;
+      this.lastBytes = this.totalBytes + bytes;
+    }
+  }
+
   public add(data: any) {
     this.buffer.push(data);
     this.updateProgress(data);
   }
 
-  public flush(done?: boolean) {
+  public async flush(done?: boolean) {
     if (this.buffer.length > 0) {
       while (this.buffer.length > 0) {
         const item = this.buffer.shift()!;
         const isComplete = this.buffer.length === 0 && done;
 
-        this.callback(item, {
-          isComplete: isComplete || this.percent === 100,
-          percent: this.percent,
-          progress: this.progress,
-          contentLength: this.contentLength
+        await new Promise<void>((resolve) => {
+          this.callback(item, {
+            isComplete: isComplete || this.percent === 100,
+            percent: this.percent,
+            progress: this.progress,
+            contentLength: this.contentLength
+          });
+          resolve();
         });
       }
     }
@@ -109,6 +123,7 @@ const useSetChunkFetch = () => {
   const { apiBaseUrl } = config;
   const axiosToken = useRef<any>(null);
   const requestConfig = useRef<any>({});
+  const throttledRef = useRef<any>(null);
 
   const readTextEventStreamData = async (
     response: Response,
@@ -121,43 +136,43 @@ const useSetChunkFetch = () => {
     const contentLength = response.headers.get('content-length');
 
     const bufferManager = new BufferManager({
-      contentLength: contentLength,
-      callback: callback
+      contentLength,
+      callback
     });
 
-    let flushing = false;
+    const throttledCallback = throttle(async () => {
+      await bufferManager.flush();
+    }, delay);
+    throttledRef.current = throttledCallback;
 
-    const flushSafe = async () => {
-      if (flushing) return;
-      flushing = true;
-      try {
-        await Promise.resolve(bufferManager.flush());
-      } finally {
-        flushing = false;
-      }
-    };
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
 
-    let isReading = true;
-
-    while (isReading) {
-      const { done, value } = await reader.read();
-
-      try {
-        if (value) {
+        try {
           const chunk = decoder.decode(value, { stream: true });
           bufferManager.add(chunk);
+          throttledCallback();
+        } catch {
+          // tolerate single-chunk decode errors, keep reading
         }
-        await flushSafe();
-      } catch (error) {
-        console.error('Error processing chunk:', error);
-      }
 
-      if (done) {
-        isReading = false;
-        await flushSafe();
-        bufferManager.flush(done);
+        if (done) {
+          await bufferManager.flush(true);
+          throttledCallback.cancel();
+          reader.releaseLock();
+          break;
+        }
+      }
+    } finally {
+      throttledCallback.cancel();
+      if (throttledRef.current === throttledCallback) {
+        throttledRef.current = null;
+      }
+      try {
         reader.releaseLock();
-        break;
+      } catch {
+        // already released or stream errored
       }
     }
   };
@@ -171,6 +186,8 @@ const useSetChunkFetch = () => {
     params = {}
   }: RequestConfig) => {
     axiosToken.current?.abort?.();
+    throttledRef.current?.cancel?.();
+    throttledRef.current = null;
     axiosToken.current = new AbortController();
     try {
       const response = await fetch(
@@ -199,7 +216,10 @@ const useSetChunkFetch = () => {
       }
 
       await readTextEventStreamData(response, handler);
-    } catch (error) {
+    } catch (error: any) {
+      if (error?.name !== 'AbortError') {
+        console.error('Chunk request error:', error);
+      }
       // handle error: catched in request interceptor
     }
 
@@ -215,12 +235,14 @@ const useSetChunkFetch = () => {
   useEffect(() => {
     const handleUnload = () => {
       axiosToken.current?.abort?.();
+      throttledRef.current?.cancel?.();
     };
 
     window.addEventListener('beforeunload', handleUnload);
 
     return () => {
       axiosToken.current?.abort?.();
+      throttledRef.current?.cancel?.();
       window.removeEventListener('beforeunload', handleUnload);
     };
   }, []);
