@@ -1,7 +1,6 @@
 import { createFromIconfontCN } from '@ant-design/icons';
 import React, { useRef } from 'react';
 import useCoreUIContext from '../../../lib/hooks/useCoreUIContext';
-import './iconfont/iconfont.js';
 
 type IconFontProps = {
   type: string;
