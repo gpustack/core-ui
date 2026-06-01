@@ -24,12 +24,13 @@ const SealPassword: React.FC<InputProps & SealFormItemProps & PasswordProps> = (
   try {
     if (isInFormItems) {
       const statusData = Form?.Item?.useStatus?.();
-      status = statusData?.status || '';
+      status = props.status || statusData?.status || '';
+    } else {
+      status = props.status || '';
     }
   } catch (error) {
-    status = '';
+    status = props.status || '';
   }
-
   useEffect(() => {
     if (props.value) {
       setIsFocus(true);
