@@ -37,17 +37,8 @@ const SealSelect: React.FC<
   let status = '';
 
   // the status can be controlled by Form.Item
-
-  try {
-    if (isInFormItems) {
-      const statusData = Form?.Item?.useStatus?.();
-      status = statusData?.status || '';
-    } else {
-      status = props.status || '';
-    }
-  } catch (error) {
-    status = props.status || '';
-  }
+  const statusData = Form?.Item?.useStatus?.();
+  status = props.status || (isInFormItems ? statusData?.status : '') || '';
 
   const _options = useMemo(() => {
     if (!options?.length) {

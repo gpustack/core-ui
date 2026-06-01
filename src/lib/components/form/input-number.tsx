@@ -21,16 +21,8 @@ const SealInputNumber: React.FC<InputNumberProps & SealFormItemProps> = (
   const inputRef = useRef<any>(null);
   let status = '';
 
-  try {
-    if (isInFormItems) {
-      const statusData = Form?.Item?.useStatus?.();
-      status = props.status || statusData?.status || '';
-    } else {
-      status = props.status || '';
-    }
-  } catch (error) {
-    status = props.status || '';
-  }
+  const statusData = Form?.Item?.useStatus?.();
+  status = props.status || (isInFormItems ? statusData?.status : '') || '';
 
   useEffect(() => {
     if (isNotEmptyValue(props.value)) {
