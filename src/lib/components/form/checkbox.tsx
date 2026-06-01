@@ -32,14 +32,10 @@ const SealCheckbox: React.FC<SealCheckboxProps> = (props) => {
   } = props;
 
   let status = '';
-  try {
-    if (isInFormItems) {
-      const statusData = Form?.Item?.useStatus?.();
-      status = statusData?.status || '';
-    }
-  } catch (error) {
-    status = '';
-  }
+
+  const statusData = Form?.Item?.useStatus?.();
+  status = props.checkStatus || (isInFormItems ? statusData?.status : '') || '';
+
   const handleChange = (e: any) => {
     props.onChange?.(e);
   };
@@ -55,11 +51,7 @@ const SealCheckbox: React.FC<SealCheckboxProps> = (props) => {
   };
 
   return (
-    <Wrapper
-      required={required}
-      status={checkStatus || status}
-      className="no-focus"
-    >
+    <Wrapper required={required} status={status} className="no-focus">
       <Inner onClick={handleContainerClick}>
         <LabelInfo label={label} description={description}></LabelInfo>
         <Checkbox

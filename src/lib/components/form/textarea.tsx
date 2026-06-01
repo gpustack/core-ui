@@ -51,15 +51,8 @@ const SealTextArea: React.FC<
   const [isFocus, setIsFocus] = useState(false);
   const inputRef = useRef<any>(null);
   let status = '';
-
-  try {
-    if (isInFormItems) {
-      const statusData = Form?.Item?.useStatus?.();
-      status = statusData?.status || '';
-    }
-  } catch (error) {
-    status = '';
-  }
+  const statusData = Form?.Item?.useStatus?.();
+  status = props.status || (isInFormItems ? statusData?.status : '') || '';
 
   useEffect(() => {
     if (props.value) {
