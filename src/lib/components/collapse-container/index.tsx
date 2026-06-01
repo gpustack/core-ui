@@ -111,7 +111,7 @@ export default function CollapsibleContainer({
   iconPlacement = 'left',
   styles: cardStyles,
   children
-}: CollapsibleContainerProps) {
+}: CollapseContainerProps) {
   const { styles } = useStyles();
   const isControlled = typeof open === 'boolean';
   const [internalOpen, setInternalOpen] = useState(defaultOpen);
