@@ -110,6 +110,7 @@ export { default as SmallCloseButton } from './small-close-button';
 export { default as SpeechContent } from './speech-content';
 export { default as StatusTag } from './status-tag';
 export { default as SubDrawer, type SubDrawerProps } from './sub-drawer';
+export { default as SwitchCard } from './switch-card';
 export { default as Table } from './table';
 export { default as CellContent } from './table/components/cell-content';
 export { default as RowChildren } from './table/components/row-children';
