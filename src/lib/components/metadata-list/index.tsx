@@ -34,6 +34,8 @@ interface MetadataListProps {
   btnText?: string;
   styles?: {
     wrapper?: React.CSSProperties;
+    item?: React.CSSProperties;
+    delBtn?: React.CSSProperties;
   };
   onAdd?: () => void;
   onDelete?: (index: number, item: any) => void;
@@ -53,7 +55,9 @@ const MetadataList: React.FC<MetadataListProps> = ({
 }) => {
   return (
     <Wrapper
-      styles={styles}
+      styles={{
+        wrapper: styles?.wrapper
+      }}
       label={label}
       description={description}
       onAdd={onAdd}
@@ -61,7 +65,11 @@ const MetadataList: React.FC<MetadataListProps> = ({
       btnText={btnText}
     >
       {dataList.map((item, index) => (
-        <ItemContainer key={index}>
+        <ItemContainer
+          key={index}
+          className="item-container"
+          style={styles?.item}
+        >
           {children?.(item, index)}
           {!disabled && (
             <Button
@@ -69,6 +77,7 @@ const MetadataList: React.FC<MetadataListProps> = ({
               className="btn"
               type="default"
               shape="circle"
+              style={styles?.delBtn}
               onClick={() => onDelete?.(index, item)}
             >
               <MinusOutlined />
