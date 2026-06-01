@@ -49,62 +49,83 @@ const CopyButton: React.FC<CopyButtonProps> = ({
   };
 
   /**
-   * Modern clipboard API (works in secure contexts: HTTPS or localhost)
+   * Modern clipboard API. Requires a secure context (HTTPS / localhost)
+   * AND the document to be focused — otherwise it rejects with
+   * "Document is not focused", which is the common cause of intermittent failures.
    */
   const asyncCopy = async (value: string): Promise<boolean> => {
+    if (!navigator.clipboard?.writeText) return false;
+    if (
+      typeof window.isSecureContext === 'boolean' &&
+      !window.isSecureContext
+    ) {
+      return false;
+    }
     try {
+      if (!document.hasFocus()) {
+        window.focus();
+      }
       await navigator.clipboard.writeText(value);
       return true;
-    } catch (error) {
+    } catch {
       return false;
     }
   };
 
   /**
-   * Fallback: execCommand with copy event listener
-   * More reliable than textarea selection method
+   * Fallback using a hidden textarea + selection + execCommand('copy').
+   * execCommand('copy') only fires when there is an active selection, so we
+   * must create one ourselves rather than relying on the page's current state.
    */
   const execCopy = (value: string): boolean => {
-    let copySuccess = false;
+    const textarea = document.createElement('textarea');
+    textarea.value = value;
+    textarea.setAttribute('readonly', '');
+    textarea.style.cssText =
+      'position:fixed;top:0;left:0;width:1px;height:1px;padding:0;border:none;outline:none;box-shadow:none;background:transparent;opacity:0;pointer-events:none;';
+    // Avoid iOS zoom on focus
+    textarea.style.fontSize = '12pt';
 
-    const onCopy = (event: ClipboardEvent) => {
-      event.stopPropagation();
-      event.preventDefault();
-      event.clipboardData?.clearData();
-      event.clipboardData?.setData('text/plain', value);
-      copySuccess = true;
-    };
+    const selection = document.getSelection();
+    const previousRange =
+      selection && selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
+    const activeElement = document.activeElement as HTMLElement | null;
 
+    document.body.appendChild(textarea);
+
+    let success = false;
     try {
-      document.addEventListener('copy', onCopy, { capture: true });
-      document.execCommand('copy');
-      return copySuccess;
-    } catch (error) {
-      return false;
+      // iOS Safari requires a Range-based selection rather than .select()
+      const range = document.createRange();
+      range.selectNodeContents(textarea);
+      selection?.removeAllRanges();
+      selection?.addRange(range);
+      textarea.setSelectionRange(0, value.length);
+      textarea.focus();
+      success = document.execCommand('copy');
+    } catch {
+      success = false;
     } finally {
-      document.removeEventListener('copy', onCopy, { capture: true });
+      document.body.removeChild(textarea);
+      if (selection) {
+        selection.removeAllRanges();
+        if (previousRange) selection.addRange(previousRange);
+      }
+      activeElement?.focus?.();
     }
+    return success;
   };
 
   const handleCopy = async () => {
-    try {
-      // Try modern clipboard API first
-      if (await asyncCopy(text)) {
-        setCopied(true);
-        return;
-      }
-
-      // Fallback to execCommand method
-      if (execCopy(text)) {
-        setCopied(true);
-        return;
-      }
-
-      // Both methods failed
-      throw new Error('Copy failed');
-    } catch (error) {
-      message.error(intl.formatMessage({ id: 'common.copy.fail' }) as string);
+    if (await asyncCopy(text)) {
+      setCopied(true);
+      return;
     }
+    if (execCopy(text)) {
+      setCopied(true);
+      return;
+    }
+    message.error(intl.formatMessage({ id: 'common.copy.fail' }) as string);
   };
 
   const tipTitle = useMemo(() => {
@@ -116,6 +137,9 @@ const CopyButton: React.FC<CopyButtonProps> = ({
 
   useEffect(() => {
     resetCopied();
+    return () => {
+      window.clearTimeout(timerRef.current);
+    };
   }, [copied]);
 
   return (
