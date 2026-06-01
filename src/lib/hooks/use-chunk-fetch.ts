@@ -38,6 +38,28 @@ async function parseErrorResponse(response: Response) {
   }
 }
 
+function extractErrorMessage(error: any, fallback: string): string {
+  console.log('error==========', error);
+  if (!error) return fallback;
+  if (typeof error === 'string') return error;
+  const msg =
+    error.message ||
+    error.error ||
+    error.detail ||
+    error.reason ||
+    error.statusText;
+  if (msg) return String(msg);
+  try {
+    return JSON.stringify(error);
+  } catch {
+    return fallback;
+  }
+}
+
+function appendNewline(msg: string) {
+  return msg.endsWith('\n') ? msg : `${msg}\n`;
+}
+
 class BufferManager {
   private buffer: any[] = [];
   private contentLength: number | null = null;
@@ -207,20 +229,32 @@ const useSetChunkFetch = () => {
 
       if (!response.ok) {
         const error = await parseErrorResponse(response);
+        console.log('error================> 2', error, response);
         if (errorHandler) {
           errorHandler(error);
         } else {
-          handler(error?.message);
+          const msg = extractErrorMessage(
+            error,
+            `Request failed: ${response.status} ${response.statusText}`
+          );
+          handler(appendNewline(msg));
         }
         return;
       }
 
       await readTextEventStreamData(response, handler);
     } catch (error: any) {
-      if (error?.name !== 'AbortError') {
-        console.error('Chunk request error:', error);
+      console.log('errror==============>', error);
+      if (error?.name === 'AbortError') {
+        return axiosToken.current;
       }
-      // handle error: catched in request interceptor
+      console.error('Chunk request error:', error);
+      if (errorHandler) {
+        errorHandler(error);
+      } else {
+        const msg = extractErrorMessage(error, 'Network request failed');
+        handler(appendNewline(msg));
+      }
     }
 
     return axiosToken.current;
