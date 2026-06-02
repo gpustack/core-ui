@@ -52,10 +52,13 @@ const EditorWrap: React.FC<EditorwrapProps> = ({
   return (
     <Wrapper
       style={{ ...styles.wrapper }}
-      className={classNames({
-        bordered: variant === 'bordered',
-        borderless: variant === 'borderless'
-      })}
+      className={classNames(
+        {
+          bordered: variant === 'bordered',
+          borderless: variant === 'borderless'
+        },
+        'editor-wrap'
+      )}
     >
       {header && <HeaderWrapper $height={headerHeight}>{header}</HeaderWrapper>}
       <div>{children}</div>

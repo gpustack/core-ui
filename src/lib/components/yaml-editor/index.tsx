@@ -20,9 +20,13 @@ loader.config({ monaco });
 const Container = styled.div`
   position: relative;
   border: 1px solid var(--ant-color-border);
-  border-radius: var(--ant-border-radius);
+  border-radius: var(--ant-border-radius-lg);
   .monaco-editor .scroll-decoration {
     box-shadow: none;
+  }
+  .monaco-editor {
+    border-radius: 0 0 var(--ant-border-radius-lg) var(--ant-border-radius-lg);
+    overflow: hidden;
   }
 `;
 
@@ -33,7 +37,7 @@ const ErrorText = styled(Text)`
   bottom: 0;
   padding: 4px 6px;
   background-color: var(--ant-color-bg-elevated);
-  border-radius: 0 0 var(--ant-border-radius) var(--ant-border-radius);
+  border-radius: 0 0 var(--ant-border-radius-lg) var(--ant-border-radius-lg);
 `;
 
 const Header = styled.div`
@@ -46,6 +50,7 @@ const Header = styled.div`
   font-size: 14px;
   border-bottom: 1px solid var(--ant-color-border);
   background-color: var(--ant-color-fill-quaternary);
+  border-radius: var(--ant-border-radius-lg) var(--ant-border-radius-lg) 0 0;
 `;
 
 interface ViewerProps {
@@ -152,6 +157,7 @@ const YamlEditor: React.FC<ViewerProps> = forwardRef((props, ref) => {
 
   return (
     <Container
+      className="yaml-editor-container"
       style={{
         minHeight: height
       }}
