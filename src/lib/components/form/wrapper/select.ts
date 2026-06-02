@@ -124,6 +124,9 @@ const SelectWrapper = styled.div`
       .ant-select-selection-wrap {
         height: 100%;
       }
+      .ant-select-content-item-suffix {
+        margin-inline-start: 0px;
+      }
 
       &.ant-select-auto-complete {
         .ant-select-selection-search {
