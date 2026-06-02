@@ -39,10 +39,6 @@ const SelectAllWrapper = styled.div`
   }
 `;
 
-const TagWrapper = styled(Tag)`
-  border-radius: 12px;
-`;
-
 const SimpleSelect: React.FC<
   SelectProps & {
     ref?: any;
@@ -60,7 +56,7 @@ const SimpleSelect: React.FC<
     showTags: tagsVisible,
     styles = {},
     optionLabelRender,
-    maxTagCount: tagCount,
+    maxTagCount,
     ...restProps
   } = props;
 
@@ -76,8 +72,8 @@ const SimpleSelect: React.FC<
   const selectorRef = React.useRef<any>(null);
 
   const showTags = Array.isArray(props.value) && props.value.length === 1;
-  const maxTagCount =
-    Array.isArray(props.value) && props.value.length === 1 ? 1 : 0;
+  // const maxTagCount =
+  //   Array.isArray(props.value) && props.value.length === 1 ? 1 : 0;
 
   useEffect(() => {
     setOptionsList(options || []);
@@ -193,24 +189,24 @@ const SimpleSelect: React.FC<
 
   const TagRender = (props: any) => {
     const { label } = props;
-    const count = props.isMaxTag ? label.slice(0, -3).slice(1) : label;
+    const newLabel = props.isMaxTag ? `+${label.slice(0, -3).slice(1)}` : label;
 
     return (
-      <TagWrapper
+      <Tag
         variant="filled"
         closable={props.closable}
         onClose={props.onClose}
         style={{
           height: 22,
+          marginRight: 4,
+          borderRadius: 12,
           backgroundColor: 'var(--ant-color-fill-secondary)',
           fontSize: 'var(--ant-font-size)'
         }}
         className="flex-center"
       >
-        {showTags
-          ? label
-          : intl.formatMessage({ id: 'common.select.count' }, { count: count })}
-      </TagWrapper>
+        {newLabel}
+      </Tag>
     );
   };
 
@@ -288,9 +284,9 @@ const SimpleSelect: React.FC<
         defaultActiveFirstOption={false}
         popupRender={dropdownRender}
         optionRender={optionRender}
+        tagRender={TagRender}
         menuItemSelectedIcon={false}
         onChange={handleOnChange}
-        tagRender={TagRender}
         onBlur={handleOnBlur}
         onFocus={handleOnFocus}
         showSearch={{
