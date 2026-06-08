@@ -43,7 +43,9 @@ const LogsViewer: React.FC<LogsViewerProps> = forwardRef((props, ref) => {
     useLogsPagination();
   const { setChunkFetch } = useSetChunkFetch();
   const chunkRequedtRef = useRef<any>(null);
-  const [logs, setLogs] = useState<any[]>([]);
+  // full accumulated log lines; kept in a ref (not state) so streaming append
+  // is O(new lines) instead of copying the whole array into state each chunk.
+  const logsRef = useRef<string[]>([]);
   const logParseWorker = useRef<any>(null);
   const tail = useRef<any>(defaultTail);
   const [loading, setLoading] = useState(false);
@@ -98,10 +100,10 @@ const LogsViewer: React.FC<LogsViewerProps> = forwardRef((props, ref) => {
     }
     const start = (pageRef.current - 1) * pageSize;
     const end = pageRef.current * pageSize;
-    const currentLogs = logs.slice(start, end);
+    const currentLogs = logsRef.current.slice(start, end);
     setPage(pageRef.current);
     setCurrentData(currentLogs);
-  }, [logs, pageSize]);
+  }, [pageSize]);
 
   const getPrePage = useCallback(() => {
     pageRef.current = pageRef.current - 1;
@@ -207,7 +209,7 @@ const LogsViewer: React.FC<LogsViewerProps> = forwardRef((props, ref) => {
       }
       if (
         loading ||
-        (logs.length > 0 &&
+        (logsRef.current.length > 0 &&
           lineCountRef.current < pageSize - 1 &&
           !loadMoreDone.current) ||
         !enableScorllLoad
@@ -263,8 +265,25 @@ const LogsViewer: React.FC<LogsViewerProps> = forwardRef((props, ref) => {
     );
 
     logParseWorker.current.onmessage = (event: any) => {
-      const { result, lines } = event.data;
+      const { result, lines, append, reset } = event.data;
       lineCountRef.current = lines;
+
+      // apply this batch to the accumulated buffer in place:
+      // - reset: worker was reset / screen cleared -> drop everything first
+      // - append (line mode): push only the new lines (O(new lines))
+      // - otherwise (screen mode): full replace, since rows can be rewritten
+      if (reset) {
+        logsRef.current = [];
+      }
+      if (append) {
+        const buffer = logsRef.current;
+        for (let i = 0; i < result.length; i++) {
+          buffer.push(result[i]);
+        }
+      } else {
+        logsRef.current = result || [];
+      }
+      const allLogs = logsRef.current;
 
       if (pageRef.current < 1) {
         pageRef.current = 1;
@@ -272,7 +291,7 @@ const LogsViewer: React.FC<LogsViewerProps> = forwardRef((props, ref) => {
 
       const oldTotalPage = totalPageRef.current;
 
-      totalPageRef.current = Math.ceil(result.length / pageSize);
+      totalPageRef.current = Math.ceil(allLogs.length / pageSize);
 
       if (isLoadingMoreRef.current) {
         pageRef.current = totalPageRef.current;
@@ -290,9 +309,8 @@ const LogsViewer: React.FC<LogsViewerProps> = forwardRef((props, ref) => {
 
       const start = (pageRef.current - 1) * pageSize;
       const end = pageRef.current * pageSize;
-      const currentLogs = result.slice(start, end);
+      const currentLogs = allLogs.slice(start, end);
 
-      setLogs(result);
       setTotalPage(totalPageRef.current);
       setPage(pageRef.current);
       setCurrentData(currentLogs);

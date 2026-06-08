@@ -35,6 +35,9 @@ class AnsiParser {
   private lines: string[] = [];
   isDownloading: boolean = false;
   private pageSize: number = 500;
+  // signals the consumer to clear its accumulated lines before applying the
+  // next emitted batch (set on reset / screen clear, cleared after one emit)
+  private resetFlag: boolean = false;
   private colorMap = {
     '30': 'black',
     '31': 'red',
@@ -59,6 +62,7 @@ class AnsiParser {
     this.lines = [];
     this.reminder = '';
     this.page = 1;
+    this.resetFlag = true;
   }
 
   public setPage(page: number | undefined) {
@@ -205,14 +209,18 @@ class AnsiParser {
     const lines = input?.split(/\r?\n/) || [];
     const remainder = lines.pop() || '';
 
-    // const data = lines.join('\n');
     this.rawDataRows += lines.length;
-    lines.forEach((line) => {
-      this.lines.push(line);
-    });
+    // only the non-chunked completion path needs the full accumulated buffer
+    // (getAllLines); the chunked path emits incrementally, so skip retaining
+    // every line in the worker to keep memory linear instead of 2x.
+    if (!this.chunked) {
+      lines.forEach((line) => {
+        this.lines.push(line);
+      });
+    }
 
     return {
-      data: this.lines,
+      data: lines,
       lines: this.rawDataRows,
       remainder
     };
@@ -248,7 +256,16 @@ class AnsiParser {
           }
 
           if (this.chunked) {
-            self.postMessage({ result: result.data, lines: result.lines });
+            // line mode (processInputByLine) is append-only, so emit just this
+            // batch's new lines; screen mode (processInput) can rewrite earlier
+            // rows, so it still emits the full screen for a full replace.
+            self.postMessage({
+              result: result.data,
+              lines: result.lines,
+              append: !this.isDownloading,
+              reset: this.resetFlag
+            });
+            this.resetFlag = false;
           } else if (!this.isComplete) {
             self.postMessage({
               result: '',
