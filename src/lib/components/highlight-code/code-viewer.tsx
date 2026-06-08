@@ -74,7 +74,10 @@ const CodeHeader: React.FC<CodeHeaderProps> = ({
       <CopyButton
         text={copyValue || ''}
         size="small"
-        style={{ color: '#abb2bf' }}
+        style={{
+          color: '#abb2bf',
+          backgroundColor: theme === 'dark' ? 'transparent' : '#fff'
+        }}
       ></CopyButton>
     </CodeHeaderWrapper>
   );
