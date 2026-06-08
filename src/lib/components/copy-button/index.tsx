@@ -107,11 +107,19 @@ const CopyButton: React.FC<CopyButtonProps> = ({
       success = false;
     } finally {
       document.body.removeChild(textarea);
-      if (selection) {
-        selection.removeAllRanges();
-        if (previousRange) selection.addRange(previousRange);
+      // Restoring the previous selection/focus is best-effort: addRange can
+      // throw ("parameter 1 is not of type 'Range'") when the saved range is
+      // no longer valid. Never let that escape — the copy already happened and
+      // a thrown error here would swallow the success result (no UI feedback).
+      try {
+        if (selection) {
+          selection.removeAllRanges();
+          if (previousRange) selection.addRange(previousRange);
+        }
+        activeElement?.focus?.();
+      } catch {
+        // ignore selection/focus restore failures
       }
-      activeElement?.focus?.();
     }
     return success;
   };
