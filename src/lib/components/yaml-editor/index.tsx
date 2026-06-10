@@ -66,6 +66,9 @@ interface ViewerProps {
   schema?: any;
   isDarkTheme?: boolean;
   onUpload?: (content: string) => void;
+  onChange?: (value: string | undefined, event: any) => void;
+  onBlur?: () => void;
+  onFocus?: () => void;
 }
 
 const YamlEditor: React.FC<ViewerProps> = forwardRef((props, ref) => {
@@ -78,7 +81,10 @@ const YamlEditor: React.FC<ViewerProps> = forwardRef((props, ref) => {
     placeholder,
     validateMessage,
     title,
-    onUpload
+    onUpload,
+    onChange,
+    onBlur,
+    onFocus
   } = props;
 
   const intl = useIntl();
@@ -171,6 +177,9 @@ const YamlEditor: React.FC<ViewerProps> = forwardRef((props, ref) => {
         value={value}
         placeholder={placeholder}
         schema={schema}
+        onChange={onChange}
+        onBlur={onBlur}
+        onFocus={onFocus}
       />
       {validateMessage && (
         <ErrorText type="danger">{validateMessage}</ErrorText>
