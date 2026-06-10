@@ -25,6 +25,9 @@ interface ViewerProps {
   placeholder?: string;
   variant?: 'bordered' | 'borderless';
   schema?: any;
+  onChange?: (value: string | undefined, event: any) => void;
+  onBlur?: () => void;
+  onFocus?: () => void;
 }
 
 const path = 'inmemory://model/config.yaml';
@@ -37,7 +40,10 @@ const EditorInner: React.FC<ViewerProps> = forwardRef((props, ref) => {
     header,
     variant = 'borderless',
     schema,
-    placeholder
+    placeholder,
+    onChange,
+    onBlur,
+    onFocus
   } = props;
 
   const editorRef = useRef<any>(null);
@@ -64,6 +70,12 @@ const EditorInner: React.FC<ViewerProps> = forwardRef((props, ref) => {
   const handleEditorDidMount = (editor: any, monaco: any) => {
     editorRef.current = editor;
     monacoRef.current = monaco;
+    editor.onDidBlurEditorText?.(() => {
+      onBlur?.();
+    });
+    editor.onDidFocusEditorText?.(() => {
+      onFocus?.();
+    });
   };
 
   const formatCode = () => {
@@ -136,6 +148,7 @@ const EditorInner: React.FC<ViewerProps> = forwardRef((props, ref) => {
         loading={<LoadingOutlined style={{ fontSize: 24 }}></LoadingOutlined>}
         beforeMount={handleBeforeMount}
         onMount={handleEditorDidMount}
+        onChange={onChange}
       />
     </EditorWrap>
   );

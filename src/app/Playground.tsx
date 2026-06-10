@@ -1,19 +1,29 @@
 import React from 'react';
-import { HighlightCode } from '../lib/components';
+import YamlEditor from '../lib/components/yaml-editor';
 
 function Playground() {
-  const [value, setValue] = React.useState<string[]>([]);
-  const handleChange = (newValue: string[]) => {
-    setValue(newValue);
+  const [value, setValue] = React.useState<string>('');
+  const handleChange = (newValue: string | undefined) => {
+    console.log('change value===', newValue);
+    setValue(newValue || '');
   };
+
+  const handleOnBlur = () => {
+    console.log('onBlur value===');
+  };
+
+  const handleOnFocus = () => {
+    console.log('onFocus value===');
+  };
+
   return (
     <div style={{ width: 300, backgroundColor: '#383838', padding: 16 }}>
-      <HighlightCode
-        code={'sdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfsadfasdf'}
-        lang="text"
-        theme="dark"
-        copyable
-      />
+      <YamlEditor
+        value={value}
+        onChange={handleChange}
+        onBlur={handleOnBlur}
+        onFocus={handleOnFocus}
+      ></YamlEditor>
     </div>
   );
 }
