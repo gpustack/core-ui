@@ -92,6 +92,14 @@ export default function useOverlayScroller(data?: {
     defer: defer
   });
 
+  // re-resolve the instance + scroll element on every render: OverlayScrollbars
+  // initializes lazily (defer: true), so the instance isn't ready when
+  // createInstance runs at mount. Without this, scrollEventElement.current stays
+  // undefined and scrollauto()/throttledScroll() become permanent no-ops.
+  instanceRef.current = instance?.();
+  scrollEventElement.current =
+    instanceRef.current?.elements()?.scrollEventElement;
+
   const handleOnScroll = () => {
     const scrollTop = scrollEventElement.current?.scrollTop;
     const scrollHeight = scrollEventElement.current?.scrollHeight;
@@ -106,17 +114,15 @@ export default function useOverlayScroller(data?: {
     }
   };
 
-  const throttledScroll = throttle(() => {
-    const el = scrollEventElement.current;
-    const instance = instanceRef.current;
-
-    el?.scrollTo?.({
-      top: el.scrollHeight,
-      behavior: 'smooth'
-    });
-
-    instance?.update?.();
-  }, 100);
+  const throttledScroll = useMemoizedFn(
+    throttle(() => {
+      scrollEventElement.current?.scrollTo?.({
+        top: scrollEventElement.current?.scrollHeight,
+        behavior: 'smooth'
+      });
+      instanceRef.current?.update?.();
+    }, 100)
+  );
 
   const scrollauto = useMemoizedFn(() => {
     scrollEventElement.current?.scrollTo?.({
@@ -263,7 +269,7 @@ export default function useOverlayScroller(data?: {
     initialize: createInstance,
     instance: instanceRef,
     scrollEventElement: scrollEventElement,
-    initialized: initialized,
+    initialized: initialized.current,
     getScrollElementScrollableHeight,
     getScrollElement,
     generateInstance,
