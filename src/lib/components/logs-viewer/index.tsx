@@ -7,6 +7,7 @@ import React, {
   useCallback,
   useEffect,
   useImperativeHandle,
+  useMemo,
   useRef,
   useState
 } from 'react';
@@ -231,17 +232,19 @@ const LogsViewer: React.FC<LogsViewerProps> = forwardRef((props, ref) => {
     }
   );
 
-  const debouncedScroll = useCallback(() => {
-    const fn = _.throttle(() => {
-      if (scrollPos[0] === 'top' && scrollPosRef.current.pos === 'top') {
-        logListRef.current?.scrollToTop();
-      }
-      if (scrollPosRef.current.pos === 'bottom') {
-        logListRef.current?.scrollToBottom();
-      }
-    }, 150);
-    return fn;
-  }, [scrollPos]);
+  const debouncedScroll = useMemo(
+    () =>
+      _.throttle(() => {
+        console.log('scrollPos===', scrollPos);
+        if (scrollPos[0] === 'top' && scrollPosRef.current.pos === 'top') {
+          logListRef.current?.scrollToTop();
+        }
+        if (scrollPosRef.current.pos === 'bottom') {
+          logListRef.current?.scrollToBottom();
+        }
+      }, 150),
+    [scrollPos]
+  );
 
   useEffect(() => {
     createChunkConnection();
@@ -252,7 +255,7 @@ const LogsViewer: React.FC<LogsViewerProps> = forwardRef((props, ref) => {
 
   useEffect(() => {
     debouncedScroll();
-  }, [scrollPos]);
+  }, [scrollPos, debouncedScroll]);
 
   useEffect(() => {
     logParseWorker.current?.terminate?.();
@@ -292,7 +295,11 @@ const LogsViewer: React.FC<LogsViewerProps> = forwardRef((props, ref) => {
       const oldTotalPage = totalPageRef.current;
 
       totalPageRef.current = Math.ceil(allLogs.length / pageSize);
-
+      console.log(
+        'onmessage===',
+        isLoadingMoreRef.current,
+        totalPageRef.current
+      );
       if (isLoadingMoreRef.current) {
         pageRef.current = totalPageRef.current;
       } else if (
