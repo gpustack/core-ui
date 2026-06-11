@@ -61,13 +61,52 @@
   padding: 0;
   overflow: hidden;
   cursor: pointer;
-  transition: background-color 0.3s ease;
   border-radius: var(--border-radius-base);
   border: 1px solid var(--ant-color-border);
 
   .textarea-wrapper {
     flex: 1;
     width: 100%;
+  }
+
+  // Text mode (no image thumbnails): stack the preview and the editable
+  // textarea on top of each other and crossfade + animate height between the
+  // collapsed and expanded states so the transition is smooth.
+  &.text-mode {
+    display: block;
+    height: var(--row-collapsed-h, 46px);
+    transition: height 0.3s ease;
+
+    .textarea-wrapper,
+    .content-wrap {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      transition: opacity 0.2s ease;
+    }
+
+    .textarea-wrapper {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .content-wrap {
+      opacity: 1;
+    }
+
+    &.expanded {
+      height: var(--row-expanded-h, 168px);
+
+      .textarea-wrapper {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .content-wrap {
+        opacity: 0;
+        pointer-events: none;
+      }
+    }
   }
 
   &:hover {
@@ -131,7 +170,7 @@
     color: var(--ant-color-text-secondary);
 
     .title {
-      font-weight: var(--font-weight-normal);
+      font-weight: 400;
       padding-right: 10px;
       color: var(--ant-color-text);
     }

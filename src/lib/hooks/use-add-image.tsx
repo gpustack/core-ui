@@ -1,58 +1,32 @@
-import {
-  DeleteOutlined,
-  LinkOutlined,
-  PictureOutlined,
-  UploadOutlined
-} from '@ant-design/icons';
-import { Button, Input, Tooltip } from 'antd';
 import { useRef, useState } from 'react';
-import styled from 'styled-components';
-import DropDownActions from '../components/drop-down-actions';
-import UploadImg from '../components/upload-image';
-import { useIntl } from './useIntl';
 
-const ImgInputWrapper = styled.div`
-  position: relative;
-  .del-btn {
-    display: none;
-    position: absolute;
-    right: 8px;
-    top: 50%;
-    transform: translateY(-50%);
-    border-radius: var(--ant-border-radius);
-    background: var(--ant-color-bg-container);
-  }
-  &:hover {
-    .del-btn {
-      display: flex;
-    }
-  }
-`;
+interface ImageItem {
+  uid: number | string;
+  dataUrl: string;
+}
 
-const useAddImage = (options: {
-  size?: 'small' | 'middle' | 'large';
-  inputProps?: Record<string, any>;
-  handleUpdateImgList: (
-    list: { uid: number | string; dataUrl: string }[]
-  ) => void;
+interface UseAddImageOptions {
+  handleUpdateImgList: (list: ImageItem[]) => void;
   updateUidCount: () => number | string;
-}) => {
-  const {
-    handleUpdateImgList,
-    updateUidCount,
-    size = 'middle',
-    inputProps
-  } = options;
-  const intl = useIntl();
+}
+
+/**
+ * Owns the interaction state for the "add image" flow (file picker dropdown +
+ * add-by-url input). It returns only state and handlers — render the UI with
+ * the `UploadImageButton` and `ImageURLInput` components, wiring these handlers
+ * to them. This keeps the logic reusable and lets the UI be memoized/composed
+ * by the consumer.
+ */
+const useAddImage = (options: UseAddImageOptions) => {
+  const { handleUpdateImgList, updateUidCount } = options;
   const [isFromUrl, setIsFromUrl] = useState(false);
   const [openImgTips, setOpenImgTips] = useState(false);
   const [dropDownOpen, setDropDownOpen] = useState(false);
+  const inputImgRef = useRef<any>(null);
 
   const handleOnOpenChange = (open: boolean) => {
     setDropDownOpen(open);
-    console.log('handleOnOpenChange', open);
   };
-  const inputImgRef = useRef<any>(null);
 
   const handleAddImgFromUrl = () => {
     setIsFromUrl(true);
@@ -98,83 +72,16 @@ const useAddImage = (options: {
     }
   };
 
-  const ImageURLInput = isFromUrl ? (
-    <Tooltip
-      open={openImgTips}
-      title={intl.formatMessage({
-        id: 'playground.uploadImage.url.invalid'
-      })}
-    >
-      <ImgInputWrapper>
-        <Input
-          {...inputProps}
-          ref={inputImgRef}
-          status={openImgTips ? 'error' : ''}
-          placeholder={intl.formatMessage({
-            id: 'playground.uploadImage.url.holder'
-          })}
-          style={{ width: 360, height: 32 }}
-          onBlur={handleInputImageUrl}
-          onPressEnter={handleInputImageUrl}
-          onKeyDown={handleOnEscape}
-        ></Input>
-        <div className="del-btn">
-          <Button
-            onClick={handleClose}
-            icon={<DeleteOutlined />}
-            size="small"
-            type="text"
-          ></Button>
-        </div>
-      </ImgInputWrapper>
-    </Tooltip>
-  ) : null;
-
-  const UploadImageButton = (
-    <DropDownActions
-      onOpenChange={handleOnOpenChange}
-      placement={'topLeft'}
-      menu={{
-        items: [
-          {
-            label: (
-              <UploadImg
-                handleUpdateImgList={handleUpdateImgList}
-                size="middle"
-              >
-                <UploadOutlined className="m-r-8" />
-                {intl.formatMessage({ id: 'playground.img.upload' })}
-              </UploadImg>
-            ),
-            key: 'upload_image'
-          },
-          {
-            label: intl.formatMessage({
-              id: 'playground.uploadImage.url.button'
-            }),
-            key: 'add_image_url',
-            icon: <LinkOutlined />,
-            onClick: handleAddImgFromUrl
-          }
-        ]
-      }}
-    >
-      <Button
-        type="text"
-        size={size}
-        icon={<PictureOutlined />}
-        onClick={(e) => {
-          e.stopPropagation();
-        }}
-      ></Button>
-    </DropDownActions>
-  );
-
   return {
     isFromUrl,
-    ImageURLInput,
     dropDownOpen,
-    UploadImageButton
+    openImgTips,
+    inputImgRef,
+    handleAddImgFromUrl,
+    handleInputImageUrl,
+    handleClose,
+    handleOnEscape,
+    handleOnOpenChange
   };
 };
 

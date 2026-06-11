@@ -71,6 +71,10 @@ export { default as IconFont } from './icon-font';
 export { default as icons } from './icon-font/icons';
 export { default as ImageEditor } from './image-editor';
 export { processImage } from './image-editor/extract-image-colors';
+export {
+  default as ImageURLInput,
+  type ImageURLInputProps
+} from './image-url-input';
 export { default as InfiniteScroller } from './infinite-scroller';
 export { default as InfiniteScrollerProvider } from './infinite-scroller/infinite-scroller-provider';
 export { useScrollerContext } from './infinite-scroller/use-scroller-context';
@@ -135,5 +139,9 @@ export { default as Transfer } from './transfer';
 export { default as TransitionWrapper } from './transition';
 export { default as UploadAudio } from './upload-audio';
 export { default as UploadImage } from './upload-image';
+export {
+  default as UploadImageButton,
+  type UploadImageButtonProps
+} from './upload-image-button';
 export { default as ViewerEditor } from './viewer-editor';
 export { default as XTerminal } from './x-terminal';
