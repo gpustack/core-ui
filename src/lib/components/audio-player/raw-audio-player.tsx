@@ -35,81 +35,77 @@ const RawAudioPlayer: React.FC<AudioPlayerProps> = forwardRef((props, ref) => {
     analyser.current.connect(audioContext.current.destination);
   }, []);
 
-  const initEnvents = () => {
-    if (!audioRef.current) {
-      return;
-    }
+  // Keep the latest props accessible from the stable handlers below without
+  // having to re-register listeners on every prop change.
+  const propsRef = useRef(props);
+  propsRef.current = props;
 
-    audioRef.current.addEventListener('complete', () => {});
-
-    audioRef.current.addEventListener('play', () => {
-      props.onAnalyse?.(dataArray.current, analyser);
-      props.onPlay?.();
-    });
-
-    audioRef.current.addEventListener('pause', () => {
-      props.onAnalyse?.(dataArray.current, analyser);
-      props.onPause?.();
-    });
-
-    audioRef.current.addEventListener('timeupdate', () => {
-      const current = audioRef.current?.currentTime || 0;
-      props.onTimeUpdate?.();
-      props.onAudioProcess?.(current);
-    });
-
-    audioRef.current.addEventListener('ended', () => {
-      props.onEnded?.();
-    });
-    // add all other events
-
-    audioRef.current.addEventListener('canplay', () => {
-      props.onCanPlay?.();
-    });
-
-    audioRef.current.addEventListener('loadeddata', () => {
-      initEnvents();
-      if (!audioContext.current) {
-        initAudioContext();
-        generateVisualData();
+  // Handlers are created once so the exact same references are used for both
+  // addEventListener and removeEventListener (an inline arrow function can
+  // never be removed, which previously leaked listeners on every reload).
+  const handlersRef = useRef<Record<string, EventListener>>();
+  if (!handlersRef.current) {
+    handlersRef.current = {
+      play: () => {
+        propsRef.current.onAnalyse?.(dataArray.current, analyser);
+        propsRef.current.onPlay?.();
+      },
+      pause: () => {
+        propsRef.current.onAnalyse?.(dataArray.current, analyser);
+        propsRef.current.onPause?.();
+      },
+      timeupdate: () => {
+        const current = audioRef.current?.currentTime || 0;
+        propsRef.current.onTimeUpdate?.();
+        propsRef.current.onAudioProcess?.(current);
+      },
+      ended: () => {
+        propsRef.current.onEnded?.();
+      },
+      canplay: () => {
+        propsRef.current.onCanPlay?.();
+      },
+      loadeddata: () => {
+        if (!audioContext.current) {
+          initAudioContext();
+          generateVisualData();
+        }
+        propsRef.current.onLoadedData?.();
+      },
+      seeked: () => {
+        propsRef.current.onSeeked?.();
+      },
+      seeking: () => {
+        propsRef.current.onSeeking?.();
+      },
+      volumechange: () => {
+        propsRef.current.onVolumeChange?.();
+      },
+      playing: () => {
+        propsRef.current.onPlaying?.();
+      },
+      loadedmetadata: () => {
+        const duration = audioRef.current?.duration || 0;
+        propsRef.current.onLoadedMetadata?.(duration);
+        propsRef.current.onReady?.(duration);
       }
-      props.onLoadedData?.();
-    });
+    };
+  }
 
-    audioRef.current.addEventListener('seeked', () => {
-      props.onSeeked?.();
-    });
-
-    audioRef.current.addEventListener('seeking', () => {
-      props.onSeeking?.();
-    });
-
-    audioRef.current.addEventListener('volumechange', () => {
-      props.onVolumeChange?.();
-    });
-
-    audioRef.current.addEventListener('playing', () => {
-      props.onPlaying?.();
-    });
-
-    audioRef.current.addEventListener('loadedmetadata', () => {
-      const duration = audioRef.current?.duration || 0;
-      props.onLoadedMetadata?.(duration);
-      props.onReady?.(duration);
-    });
-
-    audioRef.current.addEventListener('ended', () => {
-      props.onEnded?.();
-    });
-
-    audioRef.current.addEventListener('loadeddata', () => {
-      props.onLoadedData?.();
-    });
+  // AudioContext is created in a suspended state (browser autoplay policy).
+  // It can only be resumed from within a user gesture, so resume it before
+  // every explicit play() call — otherwise the media element is routed through
+  // a suspended context and never produces sound or advances.
+  const resumeAudioContext = () => {
+    if (audioContext.current?.state === 'suspended') {
+      audioContext.current.resume();
+    }
   };
 
   useImperativeHandle(ref, () => ({
     play: () => {
       if (audioRef.current) {
+        resumeAudioContext();
         // If playback has ended, reset to beginning
         if (audioRef.current.currentTime >= audioRef.current.duration) {
           audioRef.current.currentTime = 0;
@@ -130,6 +126,7 @@ const RawAudioPlayer: React.FC<AudioPlayerProps> = forwardRef((props, ref) => {
       current: {
         play: () => {
           if (audioRef.current) {
+            resumeAudioContext();
             // If playback has ended, reset to beginning
             if (audioRef.current.currentTime >= audioRef.current.duration) {
               audioRef.current.currentTime = 0;
@@ -146,30 +143,26 @@ const RawAudioPlayer: React.FC<AudioPlayerProps> = forwardRef((props, ref) => {
   }));
 
   useEffect(() => {
-    if (audioRef.current) {
-      initEnvents();
+    const audio = audioRef.current;
+    const handlers = handlersRef.current;
+    if (!audio || !handlers) {
+      return;
     }
+
+    Object.entries(handlers).forEach(([event, handler]) => {
+      audio.addEventListener(event, handler);
+    });
+
     return () => {
+      Object.entries(handlers).forEach(([event, handler]) => {
+        audio.removeEventListener(event, handler);
+      });
       if (audioContext.current) {
         audioContext.current.close();
+        audioContext.current = null;
       }
-      // remove all events
-
-      audioRef.current?.removeEventListener('play', () => {});
-      audioRef.current?.removeEventListener('pause', () => {});
-      audioRef.current?.removeEventListener('timeupdate', () => {});
-      audioRef.current?.removeEventListener('ended', () => {});
-      audioRef.current?.removeEventListener('canplay', () => {});
-      audioRef.current?.removeEventListener('loadeddata', () => {});
-      audioRef.current?.removeEventListener('seeked', () => {});
-      audioRef.current?.removeEventListener('seeking', () => {});
-      audioRef.current?.removeEventListener('volumechange', () => {});
-      audioRef.current?.removeEventListener('playing', () => {});
-      audioRef.current?.removeEventListener('loadedmetadata', () => {});
-      audioRef.current?.removeEventListener('ended', () => {});
-      audioRef.current?.removeEventListener('loadeddata', () => {});
     };
-  }, [audioRef.current]);
+  }, []);
 
   // Reload audio when URL changes
   useEffect(() => {
