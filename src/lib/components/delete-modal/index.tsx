@@ -35,6 +35,7 @@ const useStyles = createStyles(({ css }) => ({
     white-space: pre-line;
     word-break: normal;
     overflow-wrap: break-word;
+    hyphens: auto;
     span {
       color: var(--ant-color-text);
       display: flex;
