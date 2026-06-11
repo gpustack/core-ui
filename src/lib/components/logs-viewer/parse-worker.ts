@@ -18,7 +18,11 @@ interface MessageProps {
   percent?: number;
   isDownloading?: boolean;
 }
-class AnsiParser {
+export class AnsiParser {
+  // Emit seam: in the worker this posts to the main thread; tests can override
+  // it to capture the messages without a real Worker/`self`.
+  public onMessage?: (message: any) => void;
+
   private cursorRow: number = 0;
   private cursorCol: number = 0;
   private screen: string[][] = [['']];
@@ -164,6 +168,22 @@ class AnsiParser {
   }
 
   private processInput(input: string) {
+    // Hold back a trailing, not-yet-terminated control sequence so it is not
+    // mis-parsed as literal text when a chunk boundary splits it (e.g. chunk
+    // ends with "\x1b[1;2" and the terminating "H" arrives in the next chunk).
+    // The held part is returned as `remainder` and re-joined with the next
+    // chunk by processQueue.
+    const partialMatch = /\x1b(\[[\d;]*)?$/.exec(input);
+    let remainder = '';
+    if (partialMatch) {
+      remainder = input.slice(partialMatch.index);
+      input = input.slice(0, partialMatch.index);
+    }
+
+    // controlSeqRegex is a shared /g instance; make sure we start from the
+    // beginning in case a prior run left lastIndex advanced.
+    controlSeqRegex.lastIndex = 0;
+
     let match: RegExpExecArray | null;
     let lastIndex = 0;
 
@@ -190,7 +210,7 @@ class AnsiParser {
     return {
       data: result,
       lines: this.rawDataRows,
-      remainder: ''
+      remainder
     };
   }
 
@@ -230,6 +250,13 @@ class AnsiParser {
     return this.lines.join('\n');
   }
 
+  private emit(message: any) {
+    if (typeof self !== 'undefined' && typeof self.postMessage === 'function') {
+      self.postMessage(message);
+    }
+    this.onMessage?.(message);
+  }
+
   private async processQueue(): Promise<void> {
     if (this.isProcessing) {
       return;
@@ -238,28 +265,23 @@ class AnsiParser {
     this.isProcessing = true;
 
     while (this.taskQueue.length > 0) {
-      let input = '';
-
-      if (this.isDownloading) {
-        input = this.taskQueue.shift() || '';
-      } else {
-        input = this.reminder + this.taskQueue.shift();
-      }
+      // Prepend the carried-over remainder for both paths: in line mode it is
+      // the trailing partial line, in download mode it is a partial ANSI
+      // control sequence that was split across the chunk boundary.
+      const input = this.reminder + (this.taskQueue.shift() || '');
 
       if (input) {
         try {
           const result = this.isDownloading
             ? this.processInput(input)
             : this.processInputByLine(input);
-          if (!this.isDownloading) {
-            this.reminder = result.remainder;
-          }
+          this.reminder = result.remainder;
 
           if (this.chunked) {
             // line mode (processInputByLine) is append-only, so emit just this
             // batch's new lines; screen mode (processInput) can rewrite earlier
             // rows, so it still emits the full screen for a full replace.
-            self.postMessage({
+            this.emit({
               result: result.data,
               lines: result.lines,
               append: !this.isDownloading,
@@ -267,7 +289,7 @@ class AnsiParser {
             });
             this.resetFlag = false;
           } else if (!this.isComplete) {
-            self.postMessage({
+            this.emit({
               result: '',
               percent: this.percent,
               isComplete: false
@@ -287,7 +309,7 @@ class AnsiParser {
     if (this.taskQueue.length > 0) {
       this.processQueue();
     } else if (this.isComplete && !this.chunked) {
-      self.postMessage({
+      this.emit({
         result: this.getAllLines(),
         percent: this.percent,
         isComplete: true
@@ -303,31 +325,39 @@ class AnsiParser {
     }
   }
 }
-const parser = new AnsiParser();
+// Only wire up the worker message handlers when running inside an actual
+// Worker context (`self` exists). When imported from tests in Node this block
+// is skipped and the exported `AnsiParser` is used directly.
+if (
+  typeof self !== 'undefined' &&
+  typeof self.addEventListener === 'function'
+) {
+  const parser = new AnsiParser();
 
-self.onmessage = function (event: MessageEvent<MessageProps>) {
-  const {
-    inputStr,
-    reset,
-    page,
-    isComplete = false,
-    chunked = true,
-    percent = 0,
-    isDownloading = false
-  } = event.data;
+  self.onmessage = function (event: MessageEvent<MessageProps>) {
+    const {
+      inputStr,
+      reset,
+      page,
+      isComplete = false,
+      chunked = true,
+      percent = 0,
+      isDownloading = false
+    } = event.data;
 
-  parser.setIsDownloading(isDownloading);
-  parser.setPage(page);
-  parser.setIsCompelete(isComplete);
-  parser.setChunked(chunked);
-  parser.setPercent(percent);
+    parser.setIsDownloading(isDownloading);
+    parser.setPage(page);
+    parser.setIsCompelete(isComplete);
+    parser.setChunked(chunked);
+    parser.setPercent(percent);
 
-  if (reset) {
-    parser.reset();
-  }
-  parser.enqueueData(inputStr);
-};
+    if (reset) {
+      parser.reset();
+    }
+    parser.enqueueData(inputStr);
+  };
 
-self.onerror = function (event) {
-  console.error('parse logs error===', event);
-};
+  self.onerror = function (event) {
+    console.error('parse logs error===', event);
+  };
+}
