@@ -1,5 +1,4 @@
 import React from 'react';
-import YamlEditor from '../lib/components/yaml-editor';
 
 function Playground() {
   const [value, setValue] = React.useState<string>('');
@@ -17,14 +16,7 @@ function Playground() {
   };
 
   return (
-    <div style={{ width: 300, backgroundColor: '#383838', padding: 16 }}>
-      <YamlEditor
-        value={value}
-        onChange={handleChange}
-        onBlur={handleOnBlur}
-        onFocus={handleOnFocus}
-      ></YamlEditor>
-    </div>
+    <div style={{ width: 300, backgroundColor: '#383838', padding: 16 }}></div>
   );
 }
 

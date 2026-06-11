@@ -4,8 +4,10 @@ import classNames from 'classnames';
 import React, { useState } from 'react';
 import useAddImage from '../../../lib/hooks/use-add-image';
 import { useIntl } from '../../../lib/hooks/useIntl';
+import ImageURLInput from '../image-url-input';
 import SmallCloseButton from '../small-close-button';
 import ThumbImg from '../thumb-image';
+import UploadImageButton from '../upload-image-button';
 import './styles/row-textarea.less';
 
 interface SystemMessageProps {
@@ -27,6 +29,8 @@ interface SystemMessageProps {
   onChange: (e: any) => void;
   onPaste?: (e: any) => void;
   onDelete?: () => void;
+  actions?: React.ReactNode;
+  showUpload?: boolean;
   onSelect?: (data: {
     start: number;
     end: number;
@@ -43,6 +47,8 @@ const RowTextarea: React.FC<SystemMessageProps> = (props) => {
     onChange,
     onSelect,
     onDelete,
+    actions,
+    showUpload = true,
     style,
     label,
     placeholder,
@@ -106,15 +112,20 @@ const RowTextarea: React.FC<SystemMessageProps> = (props) => {
     onUploadImage?.(list);
   };
 
-  const { ImageURLInput, UploadImageButton, isFromUrl, dropDownOpen } =
-    useAddImage({
-      size: 'small',
-      inputProps: {
-        variant: 'filled'
-      },
-      handleUpdateImgList: handleUploadImage,
-      updateUidCount: () => `img-${Date.now()}`
-    });
+  const {
+    isFromUrl,
+    dropDownOpen,
+    openImgTips,
+    inputImgRef,
+    handleAddImgFromUrl,
+    handleInputImageUrl,
+    handleClose,
+    handleOnEscape,
+    handleOnOpenChange
+  } = useAddImage({
+    handleUpdateImgList: handleUploadImage,
+    updateUidCount: () => `img-${Date.now()}`
+  });
 
   const handleClear = () => {
     onChange?.({ target: { value: '' } });
@@ -155,17 +166,18 @@ const RowTextarea: React.FC<SystemMessageProps> = (props) => {
     >
       <div
         className={classNames('row-textarea', {
-          expanded: expanded
+          expanded: expanded,
+          'text-mode': !data.imgs?.length
         })}
-        style={{ ...style }}
+        style={
+          {
+            ...style,
+            '--row-collapsed-h': `${height}px`
+          } as React.CSSProperties
+        }
       >
         {!data.imgs?.length && (
-          <div
-            style={{
-              display: expanded ? 'block' : 'none'
-            }}
-            className="textarea-wrapper"
-          >
+          <div className="textarea-wrapper">
             {label && <span className="textarea-label">{label}</span>}
             {
               <Input.TextArea
@@ -199,39 +211,54 @@ const RowTextarea: React.FC<SystemMessageProps> = (props) => {
           </div>
         )}
 
-        {!expanded && (
-          <div
-            className={classNames('content-wrap', {
-              dropDownOpen: dropDownOpen
-            })}
-            onClick={handleFocus}
-          >
-            <div className="content" style={{ height: height }}>
-              {renderTextContent()}
-              {!!data.imgs?.length && (
-                <div className="flex-center">
-                  {label && <span className="title">{label}</span>}
-                  <ThumbImg
-                    editable
-                    dataList={data.imgs}
-                    onDelete={handleDeleteImage}
-                  />
-                </div>
-              )}
-            </div>
+        <div
+          className={classNames('content-wrap', {
+            dropDownOpen: dropDownOpen
+          })}
+          onClick={handleFocus}
+        >
+          <div className="content" style={{ height: height }}>
+            {renderTextContent()}
+            {!!data.imgs?.length && (
+              <div className="flex-center">
+                {label && <span className="title">{label}</span>}
+                <ThumbImg
+                  editable
+                  dataList={data.imgs}
+                  onDelete={handleDeleteImage}
+                />
+              </div>
+            )}
           </div>
-        )}
+        </div>
         <div
           className={classNames('actions-wrapper', {
             show: expanded
           })}
         >
-          {ImageURLInput}
+          {isFromUrl && (
+            <ImageURLInput
+              ref={inputImgRef}
+              open={openImgTips}
+              inputProps={{ variant: 'filled' }}
+              onSubmit={handleInputImageUrl}
+              onClose={handleClose}
+              onEscape={handleOnEscape}
+            />
+          )}
           <div className={'actions'}>
             {!expanded && (data.content || !!data.imgs?.length) && (
               <SmallCloseButton onClick={handleClear}></SmallCloseButton>
             )}
-            {UploadImageButton}
+            {showUpload && (
+              <UploadImageButton
+                size="small"
+                onOpenChange={handleOnOpenChange}
+                onUpdateImgList={handleUploadImage}
+                onAddFromUrl={handleAddImgFromUrl}
+              />
+            )}
+            {actions}
             <Tooltip title={intl.formatMessage({ id: 'common.button.delete' })}>
               <Button
                 danger
