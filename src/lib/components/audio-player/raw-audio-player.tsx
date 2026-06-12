@@ -93,10 +93,18 @@ const RawAudioPlayer: React.FC<AudioPlayerProps> = forwardRef((props, ref) => {
   }
 
   // AudioContext is created in a suspended state (browser autoplay policy).
-  // It can only be resumed from within a user gesture, so resume it before
-  // every explicit play() call — otherwise the media element is routed through
-  // a suspended context and never produces sound or advances.
+  // It can only be resumed from within a user gesture, so create (if needed)
+  // and resume it before every explicit play() call — otherwise the media
+  // element is routed through a suspended context and never produces sound or
+  // advances. Lazily initializing here (rather than relying on `loadeddata`,
+  // which may fire after the first play()) guarantees the context exists and
+  // is resumed within the gesture; the `loadeddata` handler's null-check then
+  // skips re-creating it.
   const resumeAudioContext = () => {
+    if (!audioContext.current) {
+      initAudioContext();
+      generateVisualData();
+    }
     if (audioContext.current?.state === 'suspended') {
       audioContext.current.resume();
     }
