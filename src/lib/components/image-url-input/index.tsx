@@ -59,6 +59,7 @@ const ImageURLInput = forwardRef<any, ImageURLInputProps>(
           ></Input>
           <div className="del-btn">
             <Button
+              onMouseDown={(e) => e.preventDefault()}
               onClick={onClose}
               icon={<DeleteOutlined />}
               size="small"

@@ -269,6 +269,9 @@ export class AnsiParser {
       // the trailing partial line, in download mode it is a partial ANSI
       // control sequence that was split across the chunk boundary.
       const input = this.reminder + (this.taskQueue.shift() || '');
+      // Clear immediately on consumption: if processing throws below, the stale
+      // remainder must not be prepended again to the next chunk.
+      this.reminder = '';
 
       if (input) {
         try {
