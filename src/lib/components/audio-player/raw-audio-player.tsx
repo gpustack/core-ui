@@ -35,6 +35,35 @@ const RawAudioPlayer: React.FC<AudioPlayerProps> = forwardRef((props, ref) => {
     analyser.current.connect(audioContext.current.destination);
   }, []);
 
+  // Best-effort visualizer setup, shared by the play() gesture and the
+  // loadeddata listener. AudioContext may be unavailable (SSR/JSDOM) or
+  // createMediaElementSource may throw (e.g. the element is already connected
+  // to another source). On failure, close any half-created context and reset
+  // to null so (a) no dangling context leaks — browsers cap active contexts —
+  // and (b) a later call can retry instead of being blocked by the guard.
+  const ensureAudioContext = useCallback(() => {
+    if (audioContext.current) {
+      return;
+    }
+    try {
+      initAudioContext();
+      generateVisualData();
+    } catch (error) {
+      console.error('Failed to init audio context:', error);
+      if (audioContext.current) {
+        try {
+          audioContext.current.close();
+        } catch (closeError) {
+          console.error(
+            'Failed to close audio context after initialization failure:',
+            closeError
+          );
+        }
+        audioContext.current = null;
+      }
+    }
+  }, [initAudioContext, generateVisualData]);
+
   // Keep the latest props accessible from the stable handlers below without
   // having to re-register listeners on every prop change.
   const propsRef = useRef(props);
@@ -66,10 +95,7 @@ const RawAudioPlayer: React.FC<AudioPlayerProps> = forwardRef((props, ref) => {
         propsRef.current.onCanPlay?.();
       },
       loadeddata: () => {
-        if (!audioContext.current) {
-          initAudioContext();
-          generateVisualData();
-        }
+        ensureAudioContext();
         propsRef.current.onLoadedData?.();
       },
       seeked: () => {
@@ -98,13 +124,9 @@ const RawAudioPlayer: React.FC<AudioPlayerProps> = forwardRef((props, ref) => {
   // element is routed through a suspended context and never produces sound or
   // advances. Lazily initializing here (rather than relying on `loadeddata`,
   // which may fire after the first play()) guarantees the context exists and
-  // is resumed within the gesture; the `loadeddata` handler's null-check then
-  // skips re-creating it.
+  // is resumed within the gesture; ensureAudioContext is a no-op once created.
   const resumeAudioContext = () => {
-    if (!audioContext.current) {
-      initAudioContext();
-      generateVisualData();
-    }
+    ensureAudioContext();
     if (audioContext.current?.state === 'suspended') {
       audioContext.current.resume();
     }
