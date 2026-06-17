@@ -21,6 +21,7 @@ export function useQueryDataList<
   T extends 'array' | 'object' = 'array'
 >(option: {
   key: string;
+  manual?: boolean;
   responseType?: T;
   fetchList: (
     params: Params,
@@ -32,6 +33,7 @@ export function useQueryDataList<
   debounceWait?: number;
 }): {
   loading: boolean;
+  manual?: boolean;
   dataList: Array<ListItem & { label: string; value: any }>;
   cancelRequest: () => void;
   fetchData: (
@@ -44,6 +46,7 @@ export function useQueryDataList<
     fetchList,
     getLabel,
     getValue,
+    manual = true,
     responseType = 'array' as T,
     errorMsg
   } = option;
@@ -81,7 +84,7 @@ export function useQueryDataList<
       return res as QueryResponse<ListItem, T>;
     },
     {
-      manual: true,
+      manual: manual,
       debounceWait: option.debounceWait || 300,
       onError: (error) => {
         // message.error(
@@ -120,13 +123,15 @@ export function useQueryData<Detail, Params = any>(option: {
   fetchDetail: (params: Params, options?: any) => Promise<Detail>;
   getData?: (response: Detail, params?: any) => any;
   errorMsg?: string;
+  manual?: boolean;
 }): {
   loading: boolean;
   detailData: Detail;
+  manual?: boolean;
   cancelRequest: () => void;
   fetchData: (params: Params, extra?: any) => Promise<Detail>;
 } {
-  const { key, fetchDetail, getData, errorMsg, delay } = option;
+  const { key, fetchDetail, getData, errorMsg, delay, manual = true } = option;
   const axiosTokenRef = useRef<CancelTokenSource | null>(null);
   const [detailData, setDetailData] = useState<Detail>({} as Detail);
 
@@ -154,7 +159,7 @@ export function useQueryData<Detail, Params = any>(option: {
       return res;
     },
     {
-      manual: true,
+      manual: manual,
       onSuccess: () => {},
       onError: (error) => {
         // message.error(
