@@ -143,6 +143,7 @@ const SelectWrapper = styled.div`
       .ant-select-content {
         padding-block: 20px 0;
         box-shadow: none !important;
+        height: 100%;
       }
       &.ant-cascader {
         .ant-select-content-item-prefix + .ant-select-content-item-suffix {

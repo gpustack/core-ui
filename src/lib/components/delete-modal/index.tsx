@@ -41,6 +41,17 @@ const useStyles = createStyles(({ css }) => ({
       display: flex;
       margin-top: 8px;
     }
+  `,
+  checkboxWrapper: css`
+    margin-top: 20px;
+    margin-left: 30px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    .check-text {
+      font-weight: 700;
+      color: var(--ant-color-warning);
+    }
   `
 }));
 
@@ -64,6 +75,7 @@ interface DataOptions {
   cancelText?: string;
   title?: string;
   operation: string;
+  tips?: React.ReactNode;
   checkConfig?: {
     checkText: string;
     defautlChecked: boolean;
@@ -204,7 +216,7 @@ const DeleteModal = forwardRef((props, ref) => {
         }}
       ></div>
       {config.checkConfig && (
-        <CheckboxWrapper>
+        <div className={styles.checkboxWrapper}>
           <Checkbox
             checked={configuration.checked}
             onChange={(e) =>
@@ -217,7 +229,12 @@ const DeleteModal = forwardRef((props, ref) => {
               {intl.formatMessage({ id: config.checkConfig?.checkText })}
             </span>
           </Checkbox>
-        </CheckboxWrapper>
+        </div>
+      )}
+      {config.tips && (
+        <div className={styles.checkboxWrapper}>
+          <span className="check-text">{config.tips}</span>
+        </div>
       )}
     </Modal>
   );
