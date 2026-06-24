@@ -10,6 +10,7 @@ const components: {
   Select: typeof SealSelect;
   Slider: React.ComponentType<typeof Slider>;
   TextArea: typeof CInput.TextArea;
+  Textarea: typeof CInput.TextArea;
   Input: typeof CInput.Input;
   Checkbox: typeof Checkbox;
   Switch: typeof Switch;
@@ -19,6 +20,7 @@ const components: {
   Select: SealSelect,
   Slider: Slider as React.ComponentType<typeof Slider>,
   TextArea: CInput.TextArea,
+  Textarea: CInput.TextArea,
   Input: CInput.Input,
   Checkbox: Checkbox,
   Switch: Switch,

@@ -90,14 +90,18 @@ const ViewerEditor: React.FC<ViewerProps> = forwardRef((props, ref) => {
         defaultLanguage={defaultLang}
         language={lang}
         value={value}
-        options={{
-          minimap: { enabled: false },
-          scrollbar: {
-            verticalScrollbarSize: 6,
-            horizontalScrollbarSize: 6
-          },
-          placeholder: placeholder
-        }}
+        options={
+          {
+            minimap: { enabled: false },
+            scrollbar: {
+              verticalScrollbarSize: 6,
+              horizontalScrollbarSize: 6
+            },
+            // `placeholder` is not in monaco 0.30's editor options type yet
+            // (added in 0.42+); kept so it takes effect after a monaco bump.
+            placeholder: placeholder
+          } as any
+        }
         loading={<LoadingOutlined style={{ fontSize: 24 }}></LoadingOutlined>}
         beforeMount={handleBeforeMount}
         onMount={handleEditorDidMount}

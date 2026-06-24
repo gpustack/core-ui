@@ -21,6 +21,11 @@ interface ToolsBarProps {
   uploadButton?: React.ReactNode;
   invertMask?: boolean;
   accept?: string;
+  tooltipStyles?: {
+    root?: React.CSSProperties;
+    container?: React.CSSProperties;
+    arrow?: React.CSSProperties;
+  };
   handleBrushSizeChange: (value: number) => void;
   undo: () => void;
   onClear: () => void;
@@ -36,6 +41,7 @@ const ToolsBar: React.FC<ToolsBarProps> = (props) => {
     lineWidth,
     invertMask,
     accept,
+    tooltipStyles,
     handleBrushSizeChange,
     undo,
     onClear,
@@ -50,13 +56,7 @@ const ToolsBar: React.FC<ToolsBarProps> = (props) => {
         placement="bottomLeft"
         arrow={false}
         styles={{
-          body: {
-            background: 'var(--color-white-1)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'flex-start',
-            width: 160
-          }
+          ...tooltipStyles
         }}
         title={
           <div className="flex-column" style={{ width: '100%' }}>

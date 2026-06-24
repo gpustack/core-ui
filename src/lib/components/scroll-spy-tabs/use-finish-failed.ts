@@ -31,7 +31,7 @@ const useFinishFailed = (options: FinishFailedOptions) => {
           .map((item) => item.key);
 
         updateActiveKey(keys);
-        onTargetChange(collapseKeys[0].key);
+        onTargetChange(collapseKeys[0]!.key);
       }
     }
   };

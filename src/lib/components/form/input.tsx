@@ -102,13 +102,18 @@ const CInput: React.FC<InputProps & SealFormItemProps> = (props) => {
   );
 };
 
-export default {
+const CInputComponents: {
+  TextArea: React.FC<any>;
+  Input: React.FC<any>;
+  Password: React.FC<any>;
+  Number: React.FC<any>;
+  Search: React.FC<any>;
+} = {
   TextArea: SealTextArea,
   Input: CInput,
   Password: SealPassword,
   Number: SealInputNumber,
   Search: SealInputSearch
-} as Record<
-  string,
-  React.FC<InputProps & SealFormItemProps & { scaleSize?: boolean }>
->;
+};
+
+export default CInputComponents;

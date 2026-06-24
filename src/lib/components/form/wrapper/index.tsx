@@ -1,6 +1,6 @@
 import { theme } from 'antd';
 import classNames from 'classnames';
-import React, { FC } from 'react';
+import React, { type FC } from 'react';
 import styled from 'styled-components';
 import LabelInfo from '../components/label-info';
 import { INPUT_INNER_PADDING } from '../config';

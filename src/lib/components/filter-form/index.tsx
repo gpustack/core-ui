@@ -87,7 +87,7 @@ const FilterForm: React.FC<
     return (
       <div
         className={classNames(filterFormCss.wrapper, {
-          [filterFormCss.show]: open
+          [filterFormCss.show!]: open
         })}
         style={{
           width: open ? width : 0,

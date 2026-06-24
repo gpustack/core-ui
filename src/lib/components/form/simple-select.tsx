@@ -211,8 +211,12 @@ const SimpleSelect: React.FC<
   };
 
   const handleOnSearch = (value: string) => {
-    if (restProps.showSearch?.onSearch) {
-      restProps.showSearch?.onSearch?.(value);
+    const searchConfig =
+      typeof restProps.showSearch === 'object'
+        ? restProps.showSearch
+        : undefined;
+    if (searchConfig?.onSearch) {
+      searchConfig.onSearch(value);
     } else {
       const filteredOptions = options?.filter((option: any) =>
         option.label.toLowerCase().includes(value.toLowerCase())
@@ -291,7 +295,10 @@ const SimpleSelect: React.FC<
         onFocus={handleOnFocus}
         showSearch={{
           onSearch: handleOnSearch,
-          filterOption: restProps.showSearch?.filterOption || filterOption
+          filterOption:
+            (typeof restProps.showSearch === 'object'
+              ? restProps.showSearch.filterOption
+              : undefined) || filterOption
         }}
         onOpenChange={handleOnOpenChange}
       >

@@ -42,7 +42,7 @@ type KeybindingValue = {
 
 const KeybiningList: KeybindingValue[] = Object.entries(KeybindingsMap).map(
   ([key, value]) => {
-    const keybinding = platform.isMac ? value[1] || value[0] : value[0];
+    const keybinding = (platform.isMac ? value[1] || value[0] : value[0])!;
     return {
       keybinding: keybinding,
       command: key,

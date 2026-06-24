@@ -1,4 +1,4 @@
-import { Dropdown, type DropdownProps } from 'antd';
+import { Dropdown, type DropdownProps, type MenuProps } from 'antd';
 import _ from 'lodash';
 import React, { useMemo } from 'react';
 import { useIntl } from '../../../lib/hooks/useIntl';
@@ -35,7 +35,7 @@ const DropDownActions: React.FC<DropdownProps> = (props) => {
   return (
     <Dropdown
       menu={{
-        items: items,
+        items: items as MenuProps['items'],
         onClick: menu?.onClick
       }}
       trigger={trigger}

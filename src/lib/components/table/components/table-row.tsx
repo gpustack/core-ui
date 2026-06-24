@@ -109,7 +109,7 @@ const TableRow: React.FC<
 
   const filterUpdateChildrenHandler = () => {
     const dataList = _.filter(tableContext.allChildren, (data: any) => {
-      return _.get(data, [childParentKey]) === _.get(record, [rowKey]);
+      return _.get(data, [childParentKey!]) === _.get(record, [rowKey!]);
     });
     setChildrenData(dataList);
   };
