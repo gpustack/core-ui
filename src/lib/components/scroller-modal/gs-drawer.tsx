@@ -11,6 +11,7 @@ import { useEscHint } from '../../../lib/hooks/use-esc-hint';
  */
 const GSDrawer = (props: DrawerProps) => {
   const { title, closable = true, mask, styles, ...restProps } = props;
+  const resolvedStyles = typeof styles === 'function' ? undefined : styles;
   const { EscHint } = useEscHint({
     enabled: !props.keyboard && props.open
   });
@@ -24,21 +25,21 @@ const GSDrawer = (props: DrawerProps) => {
         {...restProps}
         styles={{
           wrapper: {
-            ...styles?.wrapper
+            ...resolvedStyles?.wrapper
           },
           root: {
-            ...styles?.root
+            ...resolvedStyles?.root
           },
           body: {
             height: 'calc(100vh - 57px)',
             paddingBlock: 16,
             paddingInline: 0,
             overflowX: 'hidden',
-            ...styles?.body
+            ...resolvedStyles?.body
           },
           section: {
             borderRadius: '6px 0 0 6px',
-            ...styles?.section
+            ...resolvedStyles?.section
           }
         }}
         closable={false}

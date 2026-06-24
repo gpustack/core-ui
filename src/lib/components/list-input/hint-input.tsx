@@ -56,9 +56,9 @@ const HintInput: React.FC<HintInputProps> = (props) => {
       return;
     }
     const list = _.filter(data.opts, (item: Global.BaseOption<string>) =>
-      item.label.includes(value)
+      item.label.includes(String(value))
     );
-    setOptions(list);
+    setOptions(list as Array<Global.BaseOption<string>>);
   };
 
   const replaceLastEqual = (value: string) => {

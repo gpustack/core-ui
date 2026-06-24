@@ -14,3 +14,4 @@ declare module '*.jpeg';
 declare module '*.gif';
 declare module '*.md';
 declare module 'tinycolor2';
+declare module '@orcid/bibtex-parse-js';

@@ -201,7 +201,7 @@ const SealCascader: React.FC<
           tagRender={tagRender || renderTag}
           displayRender={displayRender}
           ref={inputRef}
-          options={children ? null : _options}
+          options={children ? undefined : _options}
           onFocus={handleOnFocus}
           onBlur={handleOnBlur}
           onChange={handleChange}

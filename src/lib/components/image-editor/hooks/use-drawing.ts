@@ -58,7 +58,7 @@ export default function useDrawing(props: {
   const inpaintArea = useCallback(
     (data: Uint8ClampedArray<ArrayBufferLike>) => {
       for (let i = 0; i < data.length; i += 4) {
-        const alpha = data[i + 3];
+        const alpha: number = data[i + 3] as number;
         if (alpha > 0) {
           data[i] = 255; // Red
           data[i + 1] = 255; // Green

@@ -29,12 +29,14 @@ const TagsWrapper: React.FC<TagsWrapperProps> = (props) => {
     let sizeList = nodeSizeList.current;
 
     if (!sizeList.length && childNodes?.length) {
-      sizeList = _.map(childNodes, (node: HTMLDivElement, index: number) => {
-        if (index === childNodes.length - 1) {
-          return node?.offsetWidth;
+      sizeList = Array.from(childNodes as NodeListOf<HTMLDivElement>).map(
+        (node, index) => {
+          if (index === childNodes.length - 1) {
+            return node.offsetWidth;
+          }
+          return node.offsetWidth + gap;
         }
-        return node?.offsetWidth + gap;
-      });
+      );
       nodeSizeList.current = sizeList;
     }
 
@@ -50,7 +52,7 @@ const TagsWrapper: React.FC<TagsWrapperProps> = (props) => {
     let end = dataList.length;
 
     for (let i = 0; i < sizeList.length; i++) {
-      const nodeWidth = sizeList[i];
+      const nodeWidth = sizeList[i]!;
 
       if (totalWidth + moreButtonWidth.current >= wrapperWidth) {
         end = i - 1 < 0 ? 0 : i - 1;

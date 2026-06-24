@@ -74,13 +74,13 @@ function floodFill(
       cy < 0 ||
       cx >= width ||
       cy >= height ||
-      visited[cy][cx] ||
+      visited[cy]![cx] ||
       !isWhite(pixels, cx, cy, width)
     ) {
       continue;
     }
 
-    visited[cy][cx] = true;
+    visited[cy]![cx] = true;
     block.push({ x: cx, y: cy });
 
     directions.forEach(([dx, dy]) => stack.push([cx + dx, cy + dy]));
@@ -103,7 +103,7 @@ function getWhiteBlocks(
 
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
-      if (isWhite(data, x, y, width) && !visited[y][x]) {
+      if (isWhite(data, x, y, width) && !visited[y]![x]) {
         const block: Array<{ x: number; y: number }> = [];
         floodFill(data, width, height, x, y, visited, block);
         whiteBlocks.push(block);

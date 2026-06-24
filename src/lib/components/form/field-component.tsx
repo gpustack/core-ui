@@ -31,7 +31,7 @@ const FieldComponent: React.FC<ParamsSchema> = (props) => {
     return type === 'Checkbox' ? { checked: value } : { value: value };
   }, [type, value]);
   return React.createElement(
-    componentsMap[type],
+    componentsMap[type] as React.FC<any>,
     {
       ...rest,
       ...attrs,

@@ -582,7 +582,7 @@ const CanvasImageEditor: React.FC<CanvasImageEditorProps> = forwardRef(
           <canvas
             ref={overlayCanvasRef}
             className={classNames(imageCss['overlay-canvas'], {
-              [imageCss['overlay-canvas--disabled']]: disabled
+              [imageCss['overlay-canvas--disabled']!]: disabled
             })}
             style={{ position: 'absolute', zIndex: 10, cursor: 'none' }}
             onMouseDown={(event) => {

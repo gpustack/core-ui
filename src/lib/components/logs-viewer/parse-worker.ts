@@ -162,8 +162,8 @@ export class AnsiParser {
     while (this.screen.length <= this.cursorRow && !isEnd) {
       this.screen.push(['']);
     }
-    while (this.screen[this.cursorRow].length <= this.cursorCol && !isEnd) {
-      this.screen[this.cursorRow].push('');
+    while (this.screen[this.cursorRow]!.length <= this.cursorCol && !isEnd) {
+      this.screen[this.cursorRow]!.push('');
     }
   }
 

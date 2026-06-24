@@ -37,7 +37,7 @@ const AudioPlayer: React.FC<
 
   const initAudioContext = useCallback(() => {
     audioContext.current = new (
-      window.AudioContext || window.webkitAudioContext
+      window.AudioContext || (window as any).webkitAudioContext
     )();
 
     analyser.current = audioContext.current.createAnalyser();

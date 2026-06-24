@@ -15,6 +15,7 @@ export const OverlayScroller: React.FC<
     style?: React.CSSProperties;
     styles?: {
       wrapper?: React.CSSProperties;
+      container?: React.CSSProperties;
     };
     children: React.ReactNode;
     onScroll?: (e: React.UIEvent<HTMLDivElement, UIEvent>) => void;
@@ -82,13 +83,14 @@ export const TooltipOverlayScroller: React.FC<
   oppositeTheme
 }) => {
   const { styles, ...rest } = toolTipProps || {};
+  const styleObj = typeof styles === 'function' ? undefined : styles;
   return (
     <Tooltip
       styles={{
-        ...styles,
+        ...styleObj,
         container: {
           paddingInline: 0,
-          ...styles?.container
+          ...styleObj?.container
         }
       }}
       title={

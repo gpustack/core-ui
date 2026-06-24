@@ -16,8 +16,11 @@ export class StreamProcessor {
 
   private totalBytes = 0;
   private flushing = false;
+  private handler: Handler;
 
-  constructor(private handler: Handler) {}
+  constructor(handler: Handler) {
+    this.handler = handler;
+  }
 
   push(chunk: string) {
     this.buffer.push(chunk);
@@ -36,7 +39,7 @@ export class StreamProcessor {
       const batch = this.buffer.drain();
 
       for (let i = 0; i < batch.length; i++) {
-        const item = batch[i];
+        const item = batch[i]!;
 
         this.handler(item, {
           isComplete: done && this.buffer.size() === 0,

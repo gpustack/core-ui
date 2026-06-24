@@ -10,8 +10,20 @@ const RenderProgress = memo(
     label?: React.ReactNode;
     successPercent?: number;
     successColor?: string;
+    tooltipStyles?: {
+      root?: React.CSSProperties;
+      container?: React.CSSProperties;
+      arrow?: React.CSSProperties;
+    };
   }) => {
-    const { defaultOpen, percent, download, label, successPercent } = props;
+    const {
+      defaultOpen,
+      percent,
+      download,
+      label,
+      successPercent,
+      tooltipStyles
+    } = props;
     const [open, setOpen] = React.useState(false);
 
     const strokeColor = useMemo(() => {
@@ -67,9 +79,7 @@ const RenderProgress = memo(
             open={open}
             onOpenChange={setOpen}
             styles={{
-              body: {
-                paddingInline: 12
-              }
+              ...tooltipStyles
             }}
           >
             {renderProgress}

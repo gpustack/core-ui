@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import React, { MutableRefObject, useState } from 'react';
+import React, { type MutableRefObject, useState } from 'react';
 
 export default function useZoom(props: {
   overlayCanvasRef: any;
