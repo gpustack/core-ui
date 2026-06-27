@@ -120,7 +120,10 @@ const DropdownButtons: React.FC<
             menu={{
               onClick: handleMenuClick,
               items: _.tail(items).map((item: any) => ({
-                ..._.omit(item, ['label', 'locale']),
+                // omit `onClick`: 点击只经 menu 级 onClick → handleMenuClick → onSelect
+                // 分发；若把 action 自带的 onClick 透传给 antd menu item，antd 会把它当成
+                // 单项点击回调额外触发一次（且入参是 menu info 而非 row），导致重复执行。
+                ..._.omit(item, ['label', 'locale', 'onClick']),
                 ...item.props,
                 label:
                   item.locale || item.locale === undefined

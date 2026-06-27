@@ -13,33 +13,33 @@
   "type": "module",
   "exports": {
     ".": {
-      "types": "./dist/src/index.d.ts",
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.es.js"
     },
     "./markdown": {
-      "types": "./dist/src/markdown.d.ts",
+      "types": "./dist/markdown.d.ts",
       "import": "./dist/markdown.es.js"
     },
     "./yaml-editor": {
-      "types": "./dist/src/yaml-editor.d.ts",
+      "types": "./dist/yaml-editor.d.ts",
       "import": "./dist/yaml-editor.es.js"
     },
     "./excel": {
-      "types": "./dist/src/excel.d.ts",
+      "types": "./dist/excel.d.ts",
       "import": "./dist/excel.es.js"
     },
     "./file-readers": {
-      "types": "./dist/src/file-readers.d.ts",
+      "types": "./dist/file-readers.d.ts",
       "import": "./dist/file-readers.es.js"
     },
     "./utils": {
-      "types": "./dist/src/lib/utils/index.d.ts",
+      "types": "./dist/lib/utils/index.d.ts",
       "import": "./dist/utils.es.js"
     },
     "./style.css": "./dist/index.css"
   },
   "module": "./dist/index.es.js",
-  "types": "./dist/src/index.d.ts",
+  "types": "./dist/index.d.ts",
   "files": [
     "dist"
   ],
