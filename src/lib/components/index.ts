@@ -34,13 +34,8 @@ export { default as DynamicForm } from './dynamic-form';
 export { default as ListMap } from './dynamic-form/components/list-map';
 export { type FieldSchema, type statusType } from './dynamic-form/config/types';
 export { default as useValidateFields } from './dynamic-form/hooks/use-validate-fields';
-export { default as BarChart } from './echarts/bar-chart';
-export { default as Chart } from './echarts/chart';
-export { default as GaugeChart } from './echarts/gauge';
-export { default as HBarChart } from './echarts/h-bar';
-export { default as LineChart } from './echarts/line-chart';
-export { default as MixLineBarChart } from './echarts/mix-line-bar';
-export { default as ScatterChart } from './echarts/scatter';
+// Chart components live in the dedicated '@gpustack/core-ui/charts' entry
+// (see src/charts.ts) so echarts stays out of the main synchronous bundle.
 export { default as EditorWrap } from './editor-wrap';
 export { default as ErrorMessage } from './error-message-content';
 export { default as FilterForm } from './filter-form';
