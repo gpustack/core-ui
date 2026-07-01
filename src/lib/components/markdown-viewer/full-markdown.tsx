@@ -1,5 +1,10 @@
 import { sanitizeUrl } from '@braintree/sanitize-url';
-import 'katex/dist/katex.min.css';
+// NOTE: KaTeX stylesheet is intentionally NOT imported here.
+// Vite library mode base64-inlines all CSS url() assets, so importing
+// 'katex/dist/katex.min.css' would bake ~1.4MB of fonts into the shared
+// index.css and block first paint on every page. Consumers that render
+// math must import 'katex/dist/katex.min.css' themselves, lazily, in the
+// route/component where FullMarkdown is used.
 import React, { useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import rehypeKatex from 'rehype-katex';
