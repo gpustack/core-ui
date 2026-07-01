@@ -93,7 +93,13 @@ export {
   TooltipOverlayScroller as TooltipOverlayScroller
 } from './overlay-scroller';
 export { default as PageBreadcrumb } from './page-breadcrumb';
-export { PageBox, default as PageContainerInner } from './page-container';
+export {
+  HeaderLeft,
+  HeaderRight,
+  HeaderSlotContext,
+  usePageContentStyle,
+  type HeaderSlotContextValue
+} from './page-container';
 export { FilterBar, FiltersButton, default as PageTools } from './page-tools';
 export { default as Popover } from './popover';
 export { default as ProgressBar } from './progress-bar';
