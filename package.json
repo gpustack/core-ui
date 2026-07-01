@@ -16,6 +16,10 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.es.js"
     },
+    "./charts": {
+      "types": "./dist/charts.d.ts",
+      "import": "./dist/charts.es.js"
+    },
     "./markdown": {
       "types": "./dist/markdown.d.ts",
       "import": "./dist/markdown.es.js"

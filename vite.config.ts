@@ -49,6 +49,7 @@ export default defineConfig({
       include: [
         'src/lib',
         'src/index.ts',
+        'src/charts.ts',
         'src/markdown.ts',
         'src/utils.ts',
         'src/excel.ts',
@@ -70,6 +71,7 @@ export default defineConfig({
   build: {
     lib: {
       entry: {
+        charts: resolve(__dirname, 'src/charts.ts'),
         excel: resolve(__dirname, 'src/excel.ts'),
         'file-readers': resolve(__dirname, 'src/file-readers.ts'),
         index: resolve(__dirname, 'src/index.ts'),
