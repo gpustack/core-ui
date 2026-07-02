@@ -51,6 +51,7 @@ export default defineConfig({
         'src/index.ts',
         'src/charts.ts',
         'src/markdown.ts',
+        'src/terminal.ts',
         'src/utils.ts',
         'src/excel.ts',
         'src/file-readers.ts',
@@ -76,6 +77,7 @@ export default defineConfig({
         'file-readers': resolve(__dirname, 'src/file-readers.ts'),
         index: resolve(__dirname, 'src/index.ts'),
         markdown: resolve(__dirname, 'src/markdown.ts'),
+        terminal: resolve(__dirname, 'src/terminal.ts'),
         utils: resolve(__dirname, 'src/utils.ts'),
         'yaml-editor': resolve(__dirname, 'src/yaml-editor.ts')
       },

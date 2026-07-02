@@ -132,7 +132,6 @@ export { default as ThemeTag } from './tags-wrapper/theme-tag';
 export { default as TemplateCard } from './templates/card';
 export { default as TemplateCardList } from './templates/card-list';
 export { default as TemplateCardSkeleton } from './templates/card-skeleton';
-export { default as TerminalTabs } from './terminal-tabs';
 export { default as ResizePanel } from './terminal-tabs/resize-panel';
 export { default as ThumbImage } from './thumb-image';
 export { default as TooltipList } from './tooltip-list';
@@ -145,4 +144,3 @@ export {
   type UploadImageButtonProps
 } from './upload-image-button';
 export { default as ViewerEditor } from './viewer-editor';
-export { default as XTerminal } from './x-terminal';
