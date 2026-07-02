@@ -24,6 +24,10 @@
       "types": "./dist/markdown.d.ts",
       "import": "./dist/markdown.es.js"
     },
+    "./terminal": {
+      "types": "./dist/terminal.d.ts",
+      "import": "./dist/terminal.es.js"
+    },
     "./yaml-editor": {
       "types": "./dist/yaml-editor.d.ts",
       "import": "./dist/yaml-editor.es.js"
