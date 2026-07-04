@@ -66,6 +66,8 @@ export { default as GrafanaIcon } from './grafana-icon';
 export { default as HighlightCode } from './highlight-code';
 export { default as IconFont } from './icon-font';
 export { default as icons } from './icon-font/icons';
+export { default as IconTextButton } from './icon-text-button';
+export type { IconTextButtonProps } from './icon-text-button';
 export { default as ImageEditor } from './image-editor';
 export { processImage } from './image-editor/extract-image-colors';
 export {
@@ -97,6 +99,8 @@ export {
   usePageContentStyle,
   type HeaderSlotContextValue
 } from './page-container';
+export { default as PageHeaderTitle } from './page-header-title';
+export type { PageHeaderTitleProps } from './page-header-title';
 export { FilterBar, FiltersButton, default as PageTools } from './page-tools';
 export { default as Popover } from './popover';
 export { default as ProgressBar } from './progress-bar';
