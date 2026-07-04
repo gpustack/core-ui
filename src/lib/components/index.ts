@@ -2,6 +2,8 @@ export { CoreUIProvider } from '../context/CoreUIProvider';
 export { default as Access, type AccessProps } from './access';
 export { default as AlertInfo } from './alert-info';
 export { default as AlertBlockInfo } from './alert-info/block';
+export { default as AntdResponsiveTable } from './antd-responsive-table';
+export type { AntdResponsiveTableProps } from './antd-responsive-table';
 export { default as AudioAnimation } from './audio-animation';
 export { default as AudioPlayer } from './audio-player';
 export { default as SimpleAudio } from './audio-player/simple-audio';
