@@ -1,17 +1,23 @@
 import { Pagination, Spin, theme, type PaginationProps } from 'antd';
+import classNames from 'classnames';
 import _ from 'lodash';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
+import useWindowResize from '../../hooks/use-window-resize';
+import { filterResponsiveColumns } from '../../utils/filter-responsive-columns';
 import Header from './components/header';
 import HeaderPrefix from './components/header-prefix';
 import RowChildren from './components/row-children';
 import TableBody from './components/table-body';
+import { getMobileCardColumns } from './mobile-card/mobile-card-utils';
 import './styles/index.less';
 import { type ColumnProps, type TableProps } from './types';
 import useSorter from './use-sorter';
 
 const Wrapper = styled.div<{ $token: any }>`
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   --ant-table-cell-padding-inline: ${(props) =>
     props.$token.cellPaddingInline}px;
   --ant-table-cell-padding-block: ${(props) => props.$token.cellPaddingBlock}px;
@@ -60,24 +66,41 @@ const Table: React.FC<TableProps & { pagination?: PaginationProps }> = (
     columns
   });
   const { token } = theme.useToken();
+  const { size, isMobile } = useWindowResize();
   const parsedColumns = useMemo(() => {
-    if (columns) return columns;
+    let cols: ColumnProps[];
+    if (columns) {
+      cols = columns;
+    } else {
+      cols = React.Children.toArray(children)
+        .filter(React.isValidElement)
+        .map((child) => {
+          const column = child as React.ReactElement<ColumnProps>;
+          const { title, dataIndex, key, render, ...restProps } = column.props;
 
-    return React.Children.toArray(children)
-      .filter(React.isValidElement)
-      .map((child) => {
-        const column = child as React.ReactElement<ColumnProps>;
-        const { title, dataIndex, key, render, ...restProps } = column.props;
-
-        return {
-          title,
-          dataIndex,
-          key: key || dataIndex,
-          render,
-          ...restProps
-        };
-      });
+          return {
+            title,
+            dataIndex,
+            key: key || dataIndex,
+            render,
+            ...restProps
+          };
+        });
+    }
+    return cols;
   }, [columns, children]);
+
+  const visibleColumns = useMemo(
+    () => filterResponsiveColumns(parsedColumns, size.width),
+    [parsedColumns, size.width]
+  );
+
+  const tableColumns = useMemo(() => {
+    if (isMobile) {
+      return getMobileCardColumns(parsedColumns, size.width);
+    }
+    return visibleColumns;
+  }, [isMobile, parsedColumns, size.width, visibleColumns]);
 
   const expandAll = (() => {
     const data = props.dataSource;
@@ -155,7 +178,7 @@ const Table: React.FC<TableProps & { pagination?: PaginationProps }> = (
     pagination?.onShowSizeChange?.(current, size);
   };
 
-  console.log('token.table', token);
+  const paginationSize = isMobile ? 'small' : pagination?.size;
 
   return (
     <Wrapper
@@ -166,7 +189,12 @@ const Table: React.FC<TableProps & { pagination?: PaginationProps }> = (
         colorBorderSecondary: token.colorBorderSecondary
       }}
     >
-      <div className="seal-table-container">
+      <div
+        className={classNames('seal-table-container', {
+          'seal-table-scroll': !isMobile,
+          'seal-table-mobile': isMobile
+        })}
+      >
         <div className="header-row-wrapper">
           <HeaderPrefix
             selectAll={selectState.selectAll}
@@ -177,21 +205,23 @@ const Table: React.FC<TableProps & { pagination?: PaginationProps }> = (
             expandable={expandable}
             enableSelection={rowSelection?.enableSelection}
             disabled={!props.dataSource?.length}
-            hasColumns={parsedColumns.length > 0}
+            hasColumns={visibleColumns.length > 0}
           ></HeaderPrefix>
-          <Header
-            onSort={handleOnTableSort}
-            columns={parsedColumns}
-            sortDirections={sortDirections}
-            sorterList={sorterList}
-            showSorterTooltip={showSorterTooltip}
-          ></Header>
+          {!isMobile && (
+            <Header
+              onSort={handleOnTableSort}
+              columns={visibleColumns}
+              sortDirections={sortDirections}
+              sorterList={sorterList}
+              showSorterTooltip={showSorterTooltip}
+            ></Header>
+          )}
         </div>
         <Spin spinning={loading} size="middle">
           <TableBody
             empty={empty}
             dataSource={props.dataSource}
-            columns={parsedColumns}
+            columns={tableColumns}
             rowSelection={rowSelection}
             expandable={expandable}
             rowKey={rowKey}
@@ -204,6 +234,7 @@ const Table: React.FC<TableProps & { pagination?: PaginationProps }> = (
             onCell={onCell}
             onExpand={onExpand}
             expandedRowKeys={expandedRowKeys}
+            mobile={isMobile}
           />
         </Spin>
       </div>
@@ -211,6 +242,7 @@ const Table: React.FC<TableProps & { pagination?: PaginationProps }> = (
         <div className="pagination-wrapper">
           <Pagination
             {...pagination}
+            size={paginationSize}
             onChange={handlePageChange}
             onShowSizeChange={handlePageSizeChange}
           ></Pagination>

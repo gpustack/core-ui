@@ -6,8 +6,13 @@ import styled from 'styled-components';
 import IconFont from '../../../../lib/components/icon-font';
 
 const ButtonWrapper = styled.div`
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
   width: 30px;
   margin-right: 5px;
+
   &.disable-expand {
     .ant-btn {
       display: none;

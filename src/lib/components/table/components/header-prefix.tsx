@@ -1,8 +1,18 @@
 import { Button, Checkbox } from 'antd';
 import _ from 'lodash';
 import React from 'react';
+import styled from 'styled-components';
 import IconFont from '../../../../lib/components/icon-font';
 import { useIntl } from '../../../../lib/hooks/useIntl';
+
+const ExpandSlot = styled.span`
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  margin-right: 5px;
+`;
 
 interface HeaderPrefixProps {
   expandable?: boolean | React.ReactNode;
@@ -48,18 +58,10 @@ const HeaderPrefix: React.FC<HeaderPrefixProps> = (props) => {
   }
   if (expandable && enableSelection) {
     return (
-      <div
-        className="header-row-prefix-wrapper flex-center"
-        style={{ paddingLeft: 16 }}
-      >
-        <span style={{ marginRight: 5 }}>
+      <div className="header-row-prefix-wrapper flex-center">
+        <ExpandSlot>
           {_.isBoolean(expandable) ? (
-            <Button
-              type="text"
-              size="small"
-              onClick={handleToggleExpand}
-              style={{ paddingInline: 6 }}
-            >
+            <Button type="text" size="small" onClick={handleToggleExpand}>
               {expandAll ? (
                 <IconFont
                   type="icon-collapse_all"
@@ -75,7 +77,7 @@ const HeaderPrefix: React.FC<HeaderPrefixProps> = (props) => {
           ) : (
             expandable
           )}
-        </span>
+        </ExpandSlot>
         <Checkbox
           onChange={onSelectAll}
           indeterminate={indeterminate}
@@ -87,18 +89,10 @@ const HeaderPrefix: React.FC<HeaderPrefixProps> = (props) => {
   }
   if (expandable) {
     return (
-      <div
-        className="header-row-prefix-wrapper flex-center"
-        style={{ paddingLeft: 16 }}
-      >
-        <span style={{ marginRight: 5 }}>
+      <div className="header-row-prefix-wrapper flex-center">
+        <ExpandSlot>
           {_.isBoolean(expandable) ? (
-            <Button
-              type="text"
-              size="small"
-              onClick={handleToggleExpand}
-              style={{ paddingInline: 6 }}
-            >
+            <Button type="text" size="small" onClick={handleToggleExpand}>
               {expandAll ? (
                 <IconFont
                   type="icon-collapse_all"
@@ -114,7 +108,7 @@ const HeaderPrefix: React.FC<HeaderPrefixProps> = (props) => {
           ) : (
             expandable
           )}
-        </span>
+        </ExpandSlot>
       </div>
     );
   }

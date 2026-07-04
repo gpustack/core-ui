@@ -4,6 +4,7 @@ import classNames from 'classnames';
 import _ from 'lodash';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createAxiosToken } from '../../../../lib/hooks/use-chunk-request';
+import MobileCardRow from '../mobile-card/mobile-card-row';
 import RowContext from '../row-context';
 import TableContext from '../table-context';
 import { type RowContextProps, type TableProps } from '../types';
@@ -12,7 +13,9 @@ import TableCell from './table-cell';
 
 const TableRow: React.FC<
   RowContextProps &
-    Omit<TableProps, 'dataSource' | 'loading' | 'children' | 'empty'>
+    Omit<TableProps, 'dataSource' | 'loading' | 'children' | 'empty'> & {
+      mobile?: boolean;
+    }
 > = (props) => {
   const {
     record,
@@ -29,7 +32,8 @@ const TableRow: React.FC<
     onExpand,
     renderChildren,
     loadChildren,
-    loadChildrenAPI
+    loadChildrenAPI,
+    mobile
   } = props;
   const tableContext: any = React.useContext<{
     allChildren?: any[];
@@ -185,8 +189,48 @@ const TableRow: React.FC<
     };
   }, [updateChild, tableContext.allChildren]);
 
+  const mobileCardColumns = useMemo(
+    () => (mobile && columns?.length ? columns : null),
+    [mobile, columns]
+  );
+
+  const expandedContent =
+    expanded && !disableExpand ? (
+      <div className="expanded-row">
+        <Spin spinning={loading} size="middle">
+          {renderChildrenData()}
+        </Spin>
+      </div>
+    ) : null;
+
+  if (mobile && mobileCardColumns) {
+    return (
+      <MobileCardRow
+        record={record}
+        rowIndex={rowIndex}
+        columns={mobileCardColumns}
+        checked={checked}
+        onCell={onCell}
+        expandedContent={expandedContent}
+        prefix={
+          <RowPrefix
+            expandable={expandable}
+            enableSelection={rowSelection?.enableSelection}
+            expanded={expanded}
+            checked={checked}
+            handleRowExpand={handleRowExpand}
+            handleSelectChange={handleSelectChange}
+            disableExpand={disableExpand}
+          ></RowPrefix>
+        }
+      />
+    );
+  }
+
   return (
-    <RowContext.Provider value={{ row: { ...record, rowIndex }, onCell }}>
+    <RowContext.Provider
+      value={{ row: { ...record, rowIndex }, onCell, mobile: false }}
+    >
       <div className="row-box">
         <div
           className={classNames('row-wrapper', {
@@ -215,13 +259,7 @@ const TableRow: React.FC<
             })}
           </Row>
         </div>
-        {expanded && !disableExpand && (
-          <div className="expanded-row">
-            <Spin spinning={loading} size="middle">
-              {renderChildrenData()}
-            </Spin>
-          </div>
-        )}
+        {expandedContent}
       </div>
     </RowContext.Provider>
   );

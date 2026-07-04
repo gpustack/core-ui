@@ -125,6 +125,12 @@ export { default as SwitchCard } from './switch-card';
 export { default as Table } from './table';
 export { default as CellContent } from './table/components/cell-content';
 export { default as RowChildren } from './table/components/row-children';
+export {
+  MobileCardList,
+  MobileCardRow,
+  type MobileCardListProps,
+  type MobileCardRowProps
+} from './table/mobile-card';
 export { default as TableProvider } from './table/table-provider';
 export { default as TableRowProvider } from './table/table-row-provider';
 export type {
