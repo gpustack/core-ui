@@ -39,6 +39,8 @@ export { default as useValidateFields } from './dynamic-form/hooks/use-validate-
 export { default as EditorWrap } from './editor-wrap';
 export { default as ErrorMessage } from './error-message-content';
 export { default as FilterForm } from './filter-form';
+export { default as FilterFormField } from './filter-form/filter-form-field';
+export type { FilterFormFieldProps } from './filter-form/filter-form-field';
 export { default as FormButtons } from './form-buttons';
 export { default as FormDrawer } from './form-drawer';
 export { default as AutoComplete } from './form/auto-complete';

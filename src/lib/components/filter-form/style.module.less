@@ -1,3 +1,5 @@
+@md: 768;
+
 .wrapper {
   flex-shrink: 0;
   overflow: hidden;
@@ -8,6 +10,22 @@
   &.show {
     width: 232px;
     border-right: 1px solid var(--ant-color-split);
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .wrapper.show {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    width: 100% !important;
+    background: var(--ant-color-bg-elevated);
+    border-right: none;
+  }
+
+  .container {
+    width: 100% !important;
+    max-width: 100%;
   }
 }
 
