@@ -15,6 +15,11 @@ export {
   countActiveFilters,
   default as useFilterDrawer
 } from './use-filter-drawer';
+export {
+  getInitialCollapsed,
+  isBelowBreakpoint,
+  default as useInitialCollapsed
+} from './use-initial-collapsed';
 export { default as useOverlayScroller } from './use-overlay-scroller';
 export {
   useQueryData,
