@@ -377,6 +377,12 @@ export {
   readStreamData
 } from './fetch-chunk-data';
 
+export { DRAWER_WIDTH_NARROW, getDrawerWidth } from './drawer-width';
+export {
+  filterResponsiveColumns,
+  useResponsiveColumns,
+  type ResponsiveColumnProps
+} from './filter-responsive-columns';
 export {
   convertFileToBase64,
   loadAudioData,
