@@ -386,4 +386,14 @@ export { pcmToWav } from './pcm-to-wav';
 export { default as readPDFContent } from './pdf-reader';
 export { default as readPptxContent } from './pptx-reader';
 export { default as readHtmlContent } from './read-html';
+export {
+  getCurrentBreakpoint,
+  getResponsiveLayout,
+  getResponsiveScreens,
+  isColumnVisibleAtWidth,
+  type ColumnHideBelow,
+  type ResponsiveBreakpointKey,
+  type ResponsiveLayout,
+  type ResponsiveScreens
+} from './responsive-layout';
 export { default as readWordContent } from './word-reader';

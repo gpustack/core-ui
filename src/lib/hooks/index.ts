@@ -18,6 +18,7 @@ export {
 } from './use-query-data-list';
 export { default as useRequestToken } from './use-request-token';
 export { default as useResponsive } from './use-responsive';
+export { default as useResponsiveLayout } from './use-responsive-layout';
 export { default as useTableRowSelection } from './use-table-row-selection';
 export { useTableMultiSort, default as useTableSort } from './use-table-sort';
 export { default as useUpdateChunkedList } from './use-update-chunk-list';
