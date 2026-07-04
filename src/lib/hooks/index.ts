@@ -10,6 +10,11 @@ export { default as useDeferredRequest } from './use-deferred-request';
 export { default as useDownloadLogs } from './use-download-logs';
 export { default as useDownloadStream } from './use-download-stream';
 export { default as useExpandedRowKeys } from './use-expanded-row-keys';
+export {
+  buildClearedFilters,
+  countActiveFilters,
+  default as useFilterDrawer
+} from './use-filter-drawer';
 export { default as useOverlayScroller } from './use-overlay-scroller';
 export {
   useQueryData,

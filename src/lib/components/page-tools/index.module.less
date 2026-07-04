@@ -1,18 +1,237 @@
 .page-tools {
   display: flex;
+  flex-wrap: nowrap;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
   margin-top: 70px;
 
   .left {
     display: flex;
     align-items: center;
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 100%;
     font-size: var(--font-size-middle);
+
+    :global(.ant-space) {
+      flex-wrap: nowrap;
+      max-width: 100%;
+    }
   }
 
   .right {
     display: flex;
     align-items: center;
+    flex: 0 0 auto;
+    flex-shrink: 0;
+    min-width: 0;
+    max-width: 100%;
     font-size: var(--font-size-middle);
+
+    :global(.ant-space) {
+      flex-wrap: nowrap;
+      max-width: 100%;
+    }
+
+    :global(.compactActions) {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 16px;
+    }
+  }
+
+  &.mobile {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 8px;
+
+    .left {
+      flex: 1;
+      min-width: 0;
+      width: auto;
+      max-width: 100%;
+      justify-content: flex-start;
+
+      :global(.ant-space) {
+        flex: 1;
+        min-width: 0;
+        max-width: 100%;
+        flex-wrap: nowrap !important;
+
+        :global(.ant-space-item:has(.ant-input-affix-wrapper)) {
+          flex: 1 1 0;
+          min-width: 0;
+          overflow: hidden;
+        }
+
+        :global(
+          .ant-space-item:not(:has(.ant-input-affix-wrapper)):not(
+              :has(.ant-select)
+            )
+        ) {
+          flex: 0 0 auto;
+        }
+
+        :global(.ant-input-affix-wrapper) {
+          width: 100% !important;
+          max-width: 100%;
+          min-width: 0;
+        }
+      }
+
+      :global(.filter-stack:not(.filter-row)) {
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        align-items: center;
+
+        :global(.ant-space-item:has(.ant-input-affix-wrapper)) {
+          flex: 1 1 0;
+          min-width: 0;
+          max-width: 100%;
+        }
+
+        :global(.ant-space-item:not(:has(.ant-input-affix-wrapper))) {
+          width: auto;
+          max-width: none;
+          flex: 0 0 auto;
+        }
+      }
+
+      :global(.filter-row) {
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        align-items: center;
+
+        :global(.ant-space-item:has(.ant-input-affix-wrapper)) {
+          flex: 1 1 0;
+          min-width: 0;
+          max-width: 100%;
+        }
+
+        :global(.ant-space-item:not(:has(.ant-input-affix-wrapper))) {
+          width: auto;
+          max-width: none;
+          flex: 0 0 auto;
+        }
+      }
+
+      :global(.searchRow) {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+
+        :global(.ant-input-affix-wrapper) {
+          flex: 1;
+          min-width: 0;
+          width: auto !important;
+        }
+      }
+    }
+
+    .right {
+      flex-shrink: 0;
+      width: auto;
+      max-width: none;
+      justify-content: flex-end;
+
+      :global(.compactActions) {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        align-items: center;
+        gap: 12px;
+        width: auto;
+      }
+
+      :global(.ant-space:not(.action-stack)) {
+        width: auto;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        align-items: center;
+      }
+
+      :global(.action-stack) {
+        width: auto;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        align-items: center;
+
+        :global(.ant-space-item) {
+          width: auto;
+          max-width: none;
+        }
+
+        :global(.ant-space-item) > :global(.ant-btn:not(.ant-btn-icon-only)) {
+          width: auto;
+        }
+
+        :global(.ant-space-item) > :global(.ant-dropdown-trigger) {
+          display: inline-flex;
+          width: auto;
+        }
+
+        :global(.ant-space-item)
+          > :global(.ant-dropdown-trigger)
+          :global(.ant-btn:not(.ant-btn-icon-only)) {
+          width: auto;
+        }
+      }
+
+      :global(.ant-space-compact) {
+        display: inline-flex;
+        width: fit-content;
+        max-width: 100%;
+      }
+
+      :global(.ant-space-compact .ant-btn) {
+        width: auto;
+      }
+
+      :global(.ant-space-compact .ant-btn-icon-only) {
+        min-width: 40px;
+        width: 40px !important;
+        min-height: 40px;
+        padding-inline: 0;
+      }
+    }
+  }
+}
+
+.filter-stack {
+  width: 100%;
+
+  :global(.ant-space-item) {
+    width: 100%;
+  }
+
+  :global(.ant-input-affix-wrapper),
+  :global(.ant-select) {
+    width: 100% !important;
+  }
+}
+
+.filter-row {
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center;
+
+  :global(.ant-space-item) {
+    width: auto;
+  }
+}
+
+.filter-wrap {
+  width: 100%;
+  max-width: 100%;
+
+  :global(.ant-space-item) {
+    max-width: 100%;
   }
 }

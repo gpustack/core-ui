@@ -7,12 +7,15 @@ import {
   SyncOutlined
 } from '@ant-design/icons';
 import type { SelectProps } from 'antd';
-import { Button, Input, Space } from 'antd';
+import { Button, Input, Space, Tooltip } from 'antd';
+import classNames from 'classnames';
 import React, { useMemo } from 'react';
 import DropDownActions from '../../../lib/components/drop-down-actions';
+import useWindowResize from '../../../lib/hooks/use-window-resize';
 import { useIntl } from '../../../lib/hooks/useIntl';
 import BaseSelect from '../form/base/select';
 import IconFont from '../icon-font';
+import { getFilterBarLayoutState } from './filter-bar-layout';
 import filtersButtonCss from './filters-button.module.less';
 import pageToolsCss from './index.module.less';
 
@@ -27,22 +30,28 @@ type PageToolsProps = {
 export const FiltersButton = ({
   onClick,
   onClear,
-  count
+  count,
+  iconOnly
 }: {
   onClick: () => void;
   onClear: () => void;
   count?: number;
+  iconOnly?: boolean;
 }) => {
   const handleClear = (e: React.MouseEvent) => {
     e.stopPropagation();
     onClear();
   };
   const intl = useIntl();
+  const { isIconOnlyToolbar } = useWindowResize();
+  const compactIcon = iconOnly ?? isIconOnlyToolbar;
+  const filterLabel = intl.formatMessage({ id: 'common.filter.label' });
 
-  return (
+  const button = (
     <div className={filtersButtonCss.buttonWrapper}>
       <Button
         onClick={onClick}
+        className={classNames(compactIcon && filtersButtonCss.iconOnly)}
         style={{
           color: 'var(--ant-color-text-tertiary)'
         }}
@@ -50,23 +59,44 @@ export const FiltersButton = ({
           <IconFont type="icon-filter-list" style={{ fontSize: 14 }}></IconFont>
         }
       >
-        <span className={filtersButtonCss.wrapper}>
-          <span>{intl.formatMessage({ id: 'common.filter.label' })}</span>
-          {!!count && <span className={filtersButtonCss.count}>{count}</span>}
-          {!!count && (
-            <span
-              className={filtersButtonCss['close-btn']}
-              onClick={handleClear}
-            >
-              <CloseCircleFilled />
-            </span>
-          )}
-        </span>
+        {!compactIcon && (
+          <span className={filtersButtonCss.wrapper}>
+            <span>{filterLabel}</span>
+            {!!count && <span className={filtersButtonCss.count}>{count}</span>}
+            {!!count && (
+              <span
+                className={filtersButtonCss['close-btn']}
+                onClick={handleClear}
+              >
+                <CloseCircleFilled />
+              </span>
+            )}
+          </span>
+        )}
       </Button>
+      {compactIcon && !!count && (
+        <span className={filtersButtonCss.iconBadge}>{count}</span>
+      )}
+      {compactIcon && !!count && (
+        <span className={filtersButtonCss.iconClear} onClick={handleClear}>
+          <CloseCircleFilled />
+        </span>
+      )}
     </div>
   );
+
+  if (compactIcon) {
+    return <Tooltip title={filterLabel}>{button}</Tooltip>;
+  }
+
+  return button;
 };
 
+/**
+ * Page toolbar layout. In compact mode (< xl) keeps filters and actions on one row.
+ * Pair with FiltersButton + FilterForm drawer for multi-select filters;
+ * use isIconOnlyToolbar (< lg) for icon-only action buttons.
+ */
 const PageTools: React.FC<PageToolsProps> = (props) => {
   const {
     left,
@@ -75,6 +105,8 @@ const PageTools: React.FC<PageToolsProps> = (props) => {
     marginTop = 30,
     style: pageStyle
   } = props;
+  const { isCompactToolbar } = useWindowResize();
+  const compactToolbar = isCompactToolbar;
 
   const newStyle: React.CSSProperties = useMemo(() => {
     const style: React.CSSProperties = {};
@@ -87,7 +119,13 @@ const PageTools: React.FC<PageToolsProps> = (props) => {
   }, [marginBottom, marginTop, pageStyle]);
 
   return (
-    <div className={pageToolsCss['page-tools']} style={newStyle}>
+    <div
+      className={classNames(
+        pageToolsCss['page-tools'],
+        compactToolbar && pageToolsCss.mobile
+      )}
+      style={newStyle}
+    >
       <div className={pageToolsCss.left}>{left}</div>
       <div className={pageToolsCss.right}>{right}</div>
     </div>
@@ -137,6 +175,15 @@ interface FilterBarProps {
     input?: number;
     select?: number;
   };
+  /** Extra inline selects/chips between search and refresh (domain-specific). */
+  inlineFilters?: React.ReactNode;
+  /**
+   * When true (default if filtersButtonProps.show), hide inlineFilters on
+   * isCompactToolbar (< xl) — filters move to FilterForm drawer.
+   */
+  collapseInlineFilters?: boolean;
+  /** Stack search + inline filters vertically on compact toolbar. */
+  stackInlineFilters?: boolean;
 }
 
 export const FilterBar: React.FC<FilterBarProps> = (props) => {
@@ -161,14 +208,54 @@ export const FilterBar: React.FC<FilterBarProps> = (props) => {
     right,
     left,
     widths,
-    filtersButtonProps
+    filtersButtonProps,
+    inlineFilters,
+    collapseInlineFilters,
+    stackInlineFilters = true
   } = props;
   const intl = useIntl();
+  const { isCompactToolbar, isIconOnlyToolbar } = useWindowResize();
+  const compactToolbar = isCompactToolbar;
+  const iconOnly = isIconOnlyToolbar;
+  const fieldWidth = widths?.input ?? 230;
+  const selectWidth = compactToolbar ? '100%' : widths?.select || 230;
+  const inputStyle: React.CSSProperties = compactToolbar
+    ? { width: '100%', minWidth: 0, maxWidth: fieldWidth }
+    : { width: fieldWidth };
+  const { showInlineFilters, useDrawerRow, stackVertical, showFiltersButton } =
+    getFilterBarLayoutState({
+      hasInlineFilters: !!inlineFilters,
+      collapseInlineFilters,
+      hasFiltersButton: !!filtersButtonProps?.show,
+      isCompactToolbar: compactToolbar,
+      stackInlineFilters
+    });
 
   const renderLeft = () => {
+    const refreshButton = (
+      <Button
+        type="text"
+        style={{ color: 'var(--ant-color-text-tertiary)', flexShrink: 0 }}
+        onClick={handleSearch}
+        icon={<SyncOutlined></SyncOutlined>}
+      ></Button>
+    );
+
     return (
-      <Space>
-        {filtersButtonProps?.show && (
+      <Space
+        wrap={false}
+        direction={stackVertical ? 'vertical' : 'horizontal'}
+        size="small"
+        className={classNames(
+          stackVertical && pageToolsCss['filter-stack'],
+          useDrawerRow && pageToolsCss['filter-row'],
+          !compactToolbar && pageToolsCss['filter-wrap']
+        )}
+        style={
+          compactToolbar ? { flex: 1, minWidth: 0, width: '100%' } : undefined
+        }
+      >
+        {showFiltersButton && filtersButtonProps && (
           <FiltersButton
             onClear={filtersButtonProps.onClear}
             onClick={filtersButtonProps.onClick}
@@ -187,7 +274,8 @@ export const FilterBar: React.FC<FilterBarProps> = (props) => {
               id: 'common.filter.name'
             })
           }
-          style={{ width: widths?.input || 230 }}
+          style={inputStyle}
+          size="large"
           allowClear
           onChange={handleInputChange}
         ></Input>
@@ -196,18 +284,14 @@ export const FilterBar: React.FC<FilterBarProps> = (props) => {
             allowClear
             showSearch={select?.showSearch}
             placeholder={selectHolder}
-            style={{ width: widths?.select || 230 }}
+            style={{ width: selectWidth }}
             size="large"
             onChange={handleSelectChange}
             options={selectOptions}
           ></BaseSelect>
         )}
-        <Button
-          type="text"
-          style={{ color: 'var(--ant-color-text-tertiary)' }}
-          onClick={handleSearch}
-          icon={<SyncOutlined></SyncOutlined>}
-        ></Button>
+        {showInlineFilters ? inlineFilters : null}
+        {refreshButton}
       </Space>
     );
   };
@@ -216,53 +300,81 @@ export const FilterBar: React.FC<FilterBarProps> = (props) => {
     if (!handleClickPrimary && !handleDeleteByBatch) {
       return null;
     }
-    return (
-      <Space size={16}>
-        {handleClickPrimary ? (
-          actionType === 'dropdown' ? (
-            <DropDownActions
-              styles={{
-                root: { minWidth: '140px' }
-              }}
-              menu={{
-                items: actionItems,
-                onClick: handleClickPrimary
-              }}
-            >
-              <Button
-                icon={<DownOutlined></DownOutlined>}
-                type="primary"
-                iconPlacement="end"
-              >
-                {buttonText}
-              </Button>
-            </DropDownActions>
-          ) : (
-            <Button
-              icon={buttonIcon ?? <PlusOutlined></PlusOutlined>}
-              type="primary"
-              onClick={handleClickPrimary}
-            >
-              {buttonText}
-            </Button>
-          )
-        ) : null}
-        {handleDeleteByBatch && (
+    const deleteLabel = intl.formatMessage({ id: 'common.button.delete' });
+    const deleteCount =
+      rowSelection?.selectedRowKeys?.length > 0
+        ? ` (${rowSelection.selectedRowKeys.length})`
+        : '';
+    const deleteDisabled = !rowSelection?.selectedRowKeys?.length;
+
+    const primaryButton =
+      actionType === 'dropdown' ? (
+        <DropDownActions
+          styles={{
+            root: { minWidth: iconOnly ? undefined : '140px' }
+          }}
+          menu={{
+            items: actionItems,
+            onClick: handleClickPrimary
+          }}
+        >
           <Button
-            icon={<DeleteOutlined />}
-            danger
-            onClick={handleDeleteByBatch}
-            disabled={!rowSelection?.selectedRowKeys?.length}
+            icon={
+              iconOnly ? (buttonIcon ?? <PlusOutlined />) : <DownOutlined />
+            }
+            type="primary"
+            iconPlacement={iconOnly ? undefined : 'end'}
           >
-            <span>
-              {intl?.formatMessage?.({ id: 'common.button.delete' })}
-              {rowSelection?.selectedRowKeys?.length > 0 && (
-                <span>({rowSelection?.selectedRowKeys?.length})</span>
-              )}
-            </span>
+            {!iconOnly && buttonText}
           </Button>
+        </DropDownActions>
+      ) : (
+        <Button
+          icon={buttonIcon ?? <PlusOutlined></PlusOutlined>}
+          type="primary"
+          onClick={handleClickPrimary}
+        >
+          {!iconOnly && buttonText}
+        </Button>
+      );
+
+    const deleteButton = (
+      <Button
+        icon={<DeleteOutlined />}
+        danger
+        onClick={handleDeleteByBatch}
+        disabled={deleteDisabled}
+      >
+        {!iconOnly && (
+          <span>
+            {deleteLabel}
+            {deleteCount}
+          </span>
         )}
-      </Space>
+      </Button>
+    );
+
+    return (
+      <div className={compactToolbar ? 'compactActions' : undefined}>
+        <Space size={16} wrap={false}>
+          {handleClickPrimary ? (
+            iconOnly && buttonText ? (
+              <Tooltip title={buttonText}>{primaryButton}</Tooltip>
+            ) : (
+              primaryButton
+            )
+          ) : null}
+          {handleDeleteByBatch ? (
+            iconOnly ? (
+              <Tooltip title={`${deleteLabel}${deleteCount}`}>
+                {deleteButton}
+              </Tooltip>
+            ) : (
+              deleteButton
+            )
+          ) : null}
+        </Space>
+      </div>
     );
   };
 
