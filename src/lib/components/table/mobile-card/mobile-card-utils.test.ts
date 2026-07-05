@@ -5,7 +5,8 @@ import {
   getMobileCardColumns,
   getMobileColumnGroups,
   getMobileColumnLabel,
-  isOperationColumn
+  isOperationColumn,
+  renderMobileCardValue
 } from './mobile-card-utils';
 
 describe('mobile-card-utils', () => {
@@ -82,6 +83,20 @@ describe('mobile-card-utils', () => {
         title: 'Ignored'
       })
     ).toBe('Model Name');
+  });
+
+  it('reads nested dataIndex array path', () => {
+    const record = { profile: { age: 42 } };
+    expect(
+      renderMobileCardValue({ dataIndex: ['profile', 'age'] }, record, 0)
+    ).toBe(42);
+  });
+
+  it('reads numeric segment in nested path', () => {
+    const record = { items: [{ qty: 3 }] };
+    expect(
+      renderMobileCardValue({ dataIndex: ['items', 0, 'qty'] }, record, 0)
+    ).toBe(3);
   });
 
   it('flattens table header wrappers for card labels', () => {

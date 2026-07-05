@@ -57,8 +57,7 @@ export const getCellValue = <T>(
   index: number
 ): ReactNode => {
   const dataIndex = column.dataIndex;
-  const value =
-    dataIndex != null ? _.get(record, dataIndex as string | number) : undefined;
+  const value = dataIndex != null ? _.get(record, dataIndex as any) : undefined;
 
   if (column.render) {
     const rendered = column.render(value, record, index);

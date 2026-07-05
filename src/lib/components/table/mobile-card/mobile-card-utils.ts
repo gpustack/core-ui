@@ -150,8 +150,7 @@ export function renderMobileCardValue(
   rowIndex: number
 ): React.ReactNode {
   const dataIndex = column.dataIndex;
-  const value =
-    dataIndex != null ? _.get(record, dataIndex as string) : undefined;
+  const value = dataIndex != null ? _.get(record, dataIndex as any) : undefined;
 
   if (typeof column.render === 'function') {
     return column.render(value, record, rowIndex);
