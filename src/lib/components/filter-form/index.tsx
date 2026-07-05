@@ -91,7 +91,7 @@ const FilterForm: React.FC<
         })}
         style={{
           width: open ? width : 0,
-          height: contentHeight,
+          height: open ? contentHeight : 0,
           ...styles?.wrapper
         }}
       >

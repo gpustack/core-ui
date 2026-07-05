@@ -1,3 +1,6 @@
+declare module 'tinycolor2';
+declare module '@orcid/bibtex-parse-js';
+
 type PageActionType = 'create' | 'update' | 'view' | 'edit' | 'copy';
 declare namespace Global {
   type WithFalse<T> = T | false;

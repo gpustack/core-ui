@@ -2,6 +2,8 @@ export { CoreUIProvider } from '../context/CoreUIProvider';
 export { default as Access, type AccessProps } from './access';
 export { default as AlertInfo } from './alert-info';
 export { default as AlertBlockInfo } from './alert-info/block';
+export { default as AntdResponsiveTable } from './antd-responsive-table';
+export type { AntdResponsiveTableProps } from './antd-responsive-table';
 export { default as AudioAnimation } from './audio-animation';
 export { default as AudioPlayer } from './audio-player';
 export { default as SimpleAudio } from './audio-player/simple-audio';
@@ -39,6 +41,8 @@ export { default as useValidateFields } from './dynamic-form/hooks/use-validate-
 export { default as EditorWrap } from './editor-wrap';
 export { default as ErrorMessage } from './error-message-content';
 export { default as FilterForm } from './filter-form';
+export { default as FilterFormField } from './filter-form/filter-form-field';
+export type { FilterFormFieldProps } from './filter-form/filter-form-field';
 export { default as FormButtons } from './form-buttons';
 export { default as FormDrawer } from './form-drawer';
 export { default as AutoComplete } from './form/auto-complete';
@@ -64,6 +68,8 @@ export { default as GrafanaIcon } from './grafana-icon';
 export { default as HighlightCode } from './highlight-code';
 export { default as IconFont } from './icon-font';
 export { default as icons } from './icon-font/icons';
+export { default as IconTextButton } from './icon-text-button';
+export type { IconTextButtonProps } from './icon-text-button';
 export { default as ImageEditor } from './image-editor';
 export { processImage } from './image-editor/extract-image-colors';
 export {
@@ -95,11 +101,22 @@ export {
   usePageContentStyle,
   type HeaderSlotContextValue
 } from './page-container';
+export { default as PageHeaderTitle } from './page-header-title';
+export type { PageHeaderTitleProps } from './page-header-title';
 export { FilterBar, FiltersButton, default as PageTools } from './page-tools';
 export { default as Popover } from './popover';
 export { default as ProgressBar } from './progress-bar';
 export { default as RadioButtons } from './radio-buttons';
 export { default as ResizeContainer } from './resize-container';
+export { default as ResponsiveColGrid } from './responsive-col-grid';
+export type { ResponsiveColGridProps } from './responsive-col-grid';
+export { default as ResponsiveSegmented } from './responsive-segmented';
+export type {
+  ResponsiveSegmentedOption,
+  ResponsiveSegmentedProps
+} from './responsive-segmented';
+export { default as ResponsiveTabsExtra } from './responsive-tabs-extra';
+export type { ResponsiveTabsExtraProps } from './responsive-tabs-extra';
 export { default as ScrollSpyTabs } from './scroll-spy-tabs';
 export { default as useFinishFailed } from './scroll-spy-tabs/use-finish-failed';
 export { default as useScrollActiveChange } from './scroll-spy-tabs/use-scroll-active-change';
@@ -119,6 +136,12 @@ export { default as SwitchCard } from './switch-card';
 export { default as Table } from './table';
 export { default as CellContent } from './table/components/cell-content';
 export { default as RowChildren } from './table/components/row-children';
+export {
+  MobileCardList,
+  MobileCardRow,
+  type MobileCardListProps,
+  type MobileCardRowProps
+} from './table/mobile-card';
 export { default as TableProvider } from './table/table-provider';
 export { default as TableRowProvider } from './table/table-row-provider';
 export type {

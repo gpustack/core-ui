@@ -43,5 +43,53 @@
     .close-btn {
       display: block;
     }
+
+    .iconBadge {
+      display: none;
+    }
+
+    .iconClear {
+      display: flex;
+    }
+  }
+}
+
+.iconOnly {
+  flex-shrink: 0;
+}
+
+.iconBadge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  display: flex;
+  width: 16px;
+  height: 16px;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: 500;
+  background-color: var(--ant-color-bg-text-active);
+  color: var(--ant-color-text-secondary);
+  pointer-events: none;
+}
+
+.iconClear {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  font-size: 14px;
+  color: var(--ant-color-text-quaternary);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--ant-color-text-tertiary);
   }
 }

@@ -42,15 +42,22 @@ const DropdownButtons: React.FC<
     return true;
   });
 
+  const headItem = _.head(items) as any;
+  const isDisabled = !!(headItem?.disabled || disabled);
+  const headProps = _.omit(headItem?.props, ['disabled', 'onClick']);
+
   const handleMenuClick = (item: any) => {
+    if (isDisabled) {
+      return;
+    }
     const selectItem = _.find(items, { key: item.key });
     onSelect(item.key, selectItem);
   };
 
-  const headItem = _.head(items) as any;
-
-  const handleButtonClick = (e: any) => {
-    const headItem = _.head(items) as any;
+  const handleButtonClick = () => {
+    if (isDisabled) {
+      return;
+    }
     onSelect(headItem.key, headItem);
   };
 
@@ -58,55 +65,65 @@ const DropdownButtons: React.FC<
     return <span></span>;
   }
 
+  const iconBtnClass =
+    size === 'large'
+      ? dropdownButtonCss.iconLarge
+      : dropdownButtonCss.iconMiddle;
+
   return (
     <>
       {items?.length === 1 ? (
         <Tooltip title={intl.formatMessage({ id: headItem?.label })}>
-          <Button
-            className={dropdownButtonCss[size]}
-            icon={headItem?.icon}
-            size={size}
-            {...headItem?.props}
-            onClick={handleButtonClick}
-          ></Button>
+          <span className={dropdownButtonCss.tooltipWrap}>
+            <Button
+              className={iconBtnClass}
+              icon={headItem?.icon}
+              size={size}
+              {...headProps}
+              disabled={isDisabled}
+              onClick={handleButtonClick}
+            ></Button>
+          </span>
         </Tooltip>
       ) : (
         <Space.Compact>
-          <>
-            {showText ? (
-              <Button
-                {...headItem?.props}
-                disabled={headItem?.disabled || disabled}
-                className={dropdownButtonCss[size]}
-                onClick={handleButtonClick}
-                size={size}
-                icon={headItem?.icon}
-                variant={variant}
-                color={color}
-              >
-                {intl.formatMessage({
-                  id: headItem?.label
-                })}
-                {extra}
-              </Button>
-            ) : (
-              <Tooltip
-                title={intl.formatMessage({ id: headItem?.label })}
-                key="leftButton"
-              >
+          {showText ? (
+            <Button
+              {...headProps}
+              disabled={isDisabled}
+              className={dropdownButtonCss.textAction}
+              onClick={handleButtonClick}
+              size={size}
+              icon={headItem?.icon}
+              variant={variant}
+              color={color}
+            >
+              {intl.formatMessage({
+                id: headItem?.label
+              })}
+              {extra}
+            </Button>
+          ) : (
+            <Tooltip
+              title={intl.formatMessage({ id: headItem?.label })}
+              key="leftButton"
+            >
+              <span className={dropdownButtonCss.tooltipWrap}>
                 <Button
-                  {...headItem?.props}
-                  className={dropdownButtonCss[size]}
+                  {...headProps}
+                  className={iconBtnClass}
                   onClick={handleButtonClick}
                   size={size}
                   icon={headItem?.icon}
-                  disabled={headItem?.disabled}
+                  disabled={isDisabled}
+                  variant={variant ?? 'outlined'}
+                  color={color ?? 'default'}
                 ></Button>
-              </Tooltip>
-            )}
-          </>
+              </span>
+            </Tooltip>
+          )}
           <Dropdown
-            disabled={disabled}
+            disabled={isDisabled}
             trigger={trigger}
             placement="bottomRight"
             styles={{
@@ -136,9 +153,10 @@ const DropdownButtons: React.FC<
               icon={<MoreOutlined />}
               size={size}
               key="menu"
-              variant={variant}
-              color="default"
-              className={dropdownButtonCss[size]}
+              disabled={isDisabled}
+              variant={variant ?? 'outlined'}
+              color={color ?? 'default'}
+              className={iconBtnClass}
             ></Button>
           </Dropdown>
         </Space.Compact>

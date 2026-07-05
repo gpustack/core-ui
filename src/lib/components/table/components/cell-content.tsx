@@ -1,16 +1,51 @@
 import { CheckOutlined, FormOutlined, UndoOutlined } from '@ant-design/icons';
 import { Button, Input, InputNumber, Tooltip } from 'antd';
+import classNames from 'classnames';
 import _ from 'lodash';
 import React, { useContext } from 'react';
 import styled from 'styled-components';
 import { useIntl } from '../../../../lib/hooks/useIntl';
 import RowContext from '../row-context';
 import { type CellContentProps } from '../types';
+import { buildSubmittedRow } from './cell-edit-utils';
 
-const CellContentWrapper = styled.div`
+const CellContentWrapper = styled.div<{
+  $mobile?: boolean;
+  $mobileAlign?: 'left' | 'right';
+}>`
   max-width: 100%;
+  min-width: 0;
   display: flex;
   align-items: center;
+  ${(props) =>
+    props.$mobile
+      ? `
+    width: 100%;
+    flex: 1;
+    overflow: hidden;
+    justify-content: ${props.$mobileAlign === 'left' ? 'flex-start' : 'flex-end'};
+
+    > *:first-child:not(.status-tag):not(.cell-intrinsic):not(.ant-tag) {
+      flex: 1;
+      min-width: 0;
+      max-width: 100%;
+      width: 100%;
+    }
+
+    > .status-tag,
+    > .cell-intrinsic,
+    > .ant-tag,
+    > *:first-child:has(> .ant-tag:only-child) {
+      flex: none !important;
+      width: max-content !important;
+      max-width: 100%;
+      margin-left: ${props.$mobileAlign === 'left' ? '0' : 'auto'};
+      align-self: ${props.$mobileAlign === 'left' ? 'flex-start' : 'flex-end'};
+      justify-content: ${props.$mobileAlign === 'left' ? 'flex-start' : 'flex-end'};
+      display: inline-flex !important;
+    }
+  `
+      : ''}
 `;
 
 interface EditButtonsProps {
@@ -117,31 +152,30 @@ const Content: React.FC<ContentProps> = (props) => {
   return current;
 };
 
+const getRowValue = (row: any, dataIndex: CellContentProps['dataIndex']) =>
+  _.get(row, dataIndex as any);
+
 const CellContent: React.FC<CellContentProps> = (props) => {
-  const { row, onCell } = useContext(RowContext);
+  const { row, onCell, mobile, mobileAlign = 'right' } = useContext(RowContext);
   const { dataIndex, render, editable } = props;
   const [isEditing, setIsEditing] = React.useState(false);
   const [editingValue, setEditingValue] = React.useState(null);
+  const showEditable = editable && !mobile;
 
-  const displayValue = isEditing ? editingValue : row[dataIndex];
+  const displayValue = isEditing ? editingValue : getRowValue(row, dataIndex);
 
   const handleEdit = () => {
-    setEditingValue(row[dataIndex]);
+    setEditingValue(getRowValue(row, dataIndex));
     setIsEditing(true);
   };
 
   const handleSubmit = async () => {
-    await onCell?.(
-      {
-        ...row,
-        [dataIndex]: editingValue
-      },
-      {
-        dataIndex,
-        newValue: editingValue,
-        oldValue: row[dataIndex]
-      }
-    );
+    const nextRow = buildSubmittedRow(row, dataIndex, editingValue);
+    await onCell?.(nextRow, {
+      dataIndex: dataIndex as any,
+      newValue: editingValue,
+      oldValue: getRowValue(row, dataIndex)
+    });
     setIsEditing(false);
   };
 
@@ -153,23 +187,38 @@ const CellContent: React.FC<CellContentProps> = (props) => {
     setEditingValue(val);
   };
 
-  return (
-    <CellContentWrapper>
+  const body = (
+    <>
       <Content
         onChange={handleValueChange}
         isEditing={isEditing}
-        editable={editable}
+        editable={showEditable ? editable : undefined}
         current={displayValue}
         row={row}
         render={render}
       ></Content>
       <EditButtons
-        editable={editable}
+        editable={showEditable ? editable : undefined}
         isEditing={isEditing}
         handleEdit={handleEdit}
         handleSubmit={handleSubmit}
         handleUndo={handleUndo}
       ></EditButtons>
+    </>
+  );
+
+  return (
+    <CellContentWrapper
+      $mobile={mobile}
+      $mobileAlign={mobile ? mobileAlign : undefined}
+    >
+      {mobile ? (
+        <span className={classNames('cell-intrinsic', 'mobile-cell-value')}>
+          {body}
+        </span>
+      ) : (
+        body
+      )}
     </CellContentWrapper>
   );
 };

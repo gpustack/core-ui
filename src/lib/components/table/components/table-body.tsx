@@ -19,6 +19,7 @@ interface TableBodyProps {
   loadChildrenAPI?: any;
   onCell?: any;
   empty?: React.ReactNode;
+  mobile?: boolean;
 }
 
 const TableBody: React.FC<TableBodyProps> = ({
@@ -36,7 +37,8 @@ const TableBody: React.FC<TableBodyProps> = ({
   loadChildrenAPI,
   columns,
   onCell,
-  empty
+  empty,
+  mobile
 }) => {
   if (!dataSource.length) {
     return (
@@ -66,6 +68,7 @@ const TableBody: React.FC<TableBodyProps> = ({
           onCell={onCell}
           onExpand={onExpand}
           expandedRowKeys={expandedRowKeys}
+          mobile={mobile}
         />
       ))}
     </div>

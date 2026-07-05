@@ -10,7 +10,7 @@ export type OnSortFn = (
 ) => void;
 
 export interface CellContentProps {
-  dataIndex: string;
+  dataIndex: string | number | readonly (string | number)[];
   render?: (text: any, record: any) => React.ReactNode;
   editable?:
     | boolean
@@ -40,6 +40,11 @@ export interface ColumnProps {
       };
   valueType?: 'text' | 'number' | 'date' | 'datetime' | 'time';
   sortOrder?: 'ascend' | 'descend' | null;
+  responsive?: {
+    hideBelow?: 'sm' | 'md' | 'lg';
+  };
+  mobileCard?: 'primary' | 'detail' | 'action' | 'hidden';
+  mobileTitle?: React.ReactNode;
   [key: string]: any;
 }
 

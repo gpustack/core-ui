@@ -10,6 +10,16 @@ export { default as useDeferredRequest } from './use-deferred-request';
 export { default as useDownloadLogs } from './use-download-logs';
 export { default as useDownloadStream } from './use-download-stream';
 export { default as useExpandedRowKeys } from './use-expanded-row-keys';
+export {
+  buildClearedFilters,
+  countActiveFilters,
+  default as useFilterDrawer
+} from './use-filter-drawer';
+export {
+  getInitialCollapsed,
+  isBelowBreakpoint,
+  default as useInitialCollapsed
+} from './use-initial-collapsed';
 export { default as useOverlayScroller } from './use-overlay-scroller';
 export {
   useQueryData,
@@ -18,6 +28,7 @@ export {
 } from './use-query-data-list';
 export { default as useRequestToken } from './use-request-token';
 export { default as useResponsive } from './use-responsive';
+export { default as useResponsiveLayout } from './use-responsive-layout';
 export { default as useTableRowSelection } from './use-table-row-selection';
 export { useTableMultiSort, default as useTableSort } from './use-table-sort';
 export { default as useUpdateChunkedList } from './use-update-chunk-list';

@@ -1,6 +1,7 @@
 import classNames from 'classnames';
-import React from 'react';
+import React, { useContext } from 'react';
 import styled from 'styled-components';
+import RowContext from '../row-context';
 import { type ColumnProps } from '../types';
 import CellContent from './cell-content';
 
@@ -15,6 +16,11 @@ const CellWrapper = styled.div`
   min-width: 20px;
   overflow: hidden;
   color: var(--ant-color-text-secondary);
+
+  &.cell-compact {
+    min-height: unset;
+    padding: 0;
+  }
 
   &.left {
     justify-content: flex-start;
@@ -31,13 +37,15 @@ const CellWrapper = styled.div`
 
 const TableCell: React.FC<ColumnProps> = (props) => {
   const { dataIndex, render, align, editable, dataField } = props;
+  const { mobile, mobileAlign = 'right' } = useContext(RowContext);
 
   return (
     <CellWrapper
       className={classNames('cell', {
-        left: align === 'left',
-        center: align === 'center',
-        right: align === 'right'
+        'cell-compact': mobile,
+        left: mobile ? mobileAlign === 'left' : align === 'left',
+        center: !mobile && align === 'center',
+        right: mobile ? mobileAlign === 'right' : align === 'right'
       })}
     >
       <CellContent
