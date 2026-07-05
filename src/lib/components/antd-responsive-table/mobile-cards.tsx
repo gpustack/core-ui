@@ -1,12 +1,19 @@
 import type { TableProps } from 'antd';
 import { Checkbox, Empty, Spin } from 'antd';
 import type { Key, RowSelectMethod } from 'antd/es/table/interface';
-import _ from 'lodash';
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import useWindowResize from '../../hooks/use-window-resize';
 import { MobileCardRow } from '../table/mobile-card';
 import { getMobileCardColumns } from '../table/mobile-card/mobile-card-utils';
 import { type ColumnProps } from '../table/types';
+import {
+  applyRowSelectChange,
+  applySelectAllChange,
+  computeSelectAllState,
+  getSelectableRowKeys,
+  resolveRowKey,
+  updateRecordCache
+} from './mobile-cards-selection';
 import { normalizeAntdColumns } from './utils';
 
 type MobileCardsProps<T> = Pick<
@@ -21,38 +28,6 @@ type MobileCardsProps<T> = Pick<
 > & {
   empty?: React.ReactNode;
 };
-
-function resolveRowKey<T>(
-  record: T,
-  index: number,
-  rowKey?: TableProps<T>['rowKey']
-) {
-  if (typeof rowKey === 'function') {
-    return rowKey(record, index);
-  }
-  if (rowKey != null) {
-    return _.get(record, rowKey as string);
-  }
-  return index;
-}
-
-function resolveSelectedRows<T>(
-  keys: Key[],
-  records: readonly T[],
-  rowKey?: TableProps<T>['rowKey'],
-  extraRecords: readonly T[] = []
-): T[] {
-  const recordByKey = new Map<Key, T>();
-  records.forEach((record, index) => {
-    recordByKey.set(resolveRowKey(record, index, rowKey), record);
-  });
-  extraRecords.forEach((record, index) => {
-    recordByKey.set(resolveRowKey(record, index, rowKey), record);
-  });
-  return keys
-    .map((key) => recordByKey.get(key))
-    .filter((record): record is T => record !== undefined);
-}
 
 function notifyRowSelectionChange<T>(
   rowSelection: NonNullable<TableProps<T>['rowSelection']>,
@@ -95,6 +70,10 @@ const MobileCards = <T extends object>({
   empty
 }: MobileCardsProps<T>) => {
   const { size } = useWindowResize();
+  const recordCache = useRef<Map<Key, T>>(new Map());
+
+  updateRecordCache(recordCache.current, dataSource, rowKey);
+
   const normalizedColumns = useMemo(
     () => (normalizeAntdColumns(columns) ?? []) as ColumnProps[],
     [columns]
@@ -106,58 +85,50 @@ const MobileCards = <T extends object>({
 
   const selectedKeys = rowSelection?.selectedRowKeys ?? [];
   const selectedKeySet = useMemo(() => new Set(selectedKeys), [selectedKeys]);
-  const allRowKeys = useMemo(
+  const selectableRowKeys = useMemo(
     () =>
-      dataSource.map((record, index) => resolveRowKey(record, index, rowKey)),
-    [dataSource, rowKey]
+      getSelectableRowKeys(dataSource, rowKey, rowSelection?.getCheckboxProps),
+    [dataSource, rowKey, rowSelection?.getCheckboxProps]
   );
 
-  const selectAllState = useMemo(() => {
-    if (!rowSelection || !allRowKeys.length) {
-      return { checked: false, indeterminate: false };
-    }
-    const selectedCount = allRowKeys.filter((key) =>
-      selectedKeySet.has(key)
-    ).length;
-    return {
-      checked: selectedCount === allRowKeys.length,
-      indeterminate: selectedCount > 0 && selectedCount < allRowKeys.length
-    };
-  }, [allRowKeys, rowSelection, selectedKeySet]);
+  const selectAllState = useMemo(
+    () => computeSelectAllState(selectedKeys, selectableRowKeys),
+    [selectedKeys, selectableRowKeys]
+  );
 
   const handleSelectAll = (checked: boolean) => {
     if (!rowSelection) return;
 
-    if (checked) {
-      const nextKeys = _.uniq([...selectedKeys, ...allRowKeys]);
-      const nextRows = resolveSelectedRows(nextKeys, dataSource, rowKey);
-      notifyRowSelectionChange(rowSelection, nextKeys, nextRows, 'all');
-      return;
-    }
-
-    const currentKeySet = new Set(allRowKeys);
-    const nextKeys = selectedKeys.filter((key) => !currentKeySet.has(key));
-    const nextRows = resolveSelectedRows(nextKeys, dataSource, rowKey);
-    notifyRowSelectionChange(rowSelection, nextKeys, nextRows, 'none');
+    const { keys, rows } = applySelectAllChange(
+      checked,
+      selectedKeys,
+      dataSource,
+      rowKey,
+      rowSelection.getCheckboxProps,
+      recordCache.current
+    );
+    notifyRowSelectionChange(
+      rowSelection,
+      keys,
+      rows,
+      checked ? 'all' : 'none'
+    );
   };
 
   const handleSelectRow = (record: T, index: number, checked: boolean) => {
     if (!rowSelection) return;
 
     const key = resolveRowKey(record, index, rowKey);
-
-    if (checked) {
-      const nextKeys = _.uniq([...selectedKeys, key]);
-      const nextRows = resolveSelectedRows(nextKeys, dataSource, rowKey, [
-        record
-      ]);
-      notifyRowSelectionChange(rowSelection, nextKeys, nextRows, 'single');
-      return;
-    }
-
-    const nextKeys = selectedKeys.filter((selectedKey) => selectedKey !== key);
-    const nextRows = resolveSelectedRows(nextKeys, dataSource, rowKey);
-    notifyRowSelectionChange(rowSelection, nextKeys, nextRows, 'single');
+    const { keys, rows } = applyRowSelectChange(
+      checked,
+      key,
+      record,
+      selectedKeys,
+      dataSource,
+      rowKey,
+      recordCache.current
+    );
+    notifyRowSelectionChange(rowSelection, keys, rows, 'single');
   };
 
   const emptyDescription =
@@ -189,7 +160,7 @@ const MobileCards = <T extends object>({
               <SelectionCheckbox
                 checked={selectAllState.checked}
                 indeterminate={selectAllState.indeterminate}
-                disabled={!dataSource.length}
+                disabled={!selectableRowKeys.length}
                 onChange={(event) => handleSelectAll(event.target.checked)}
               />
             </div>
