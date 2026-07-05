@@ -108,6 +108,15 @@ export { default as Popover } from './popover';
 export { default as ProgressBar } from './progress-bar';
 export { default as RadioButtons } from './radio-buttons';
 export { default as ResizeContainer } from './resize-container';
+export { default as ResponsiveColGrid } from './responsive-col-grid';
+export type { ResponsiveColGridProps } from './responsive-col-grid';
+export { default as ResponsiveSegmented } from './responsive-segmented';
+export type {
+  ResponsiveSegmentedOption,
+  ResponsiveSegmentedProps
+} from './responsive-segmented';
+export { default as ResponsiveTabsExtra } from './responsive-tabs-extra';
+export type { ResponsiveTabsExtraProps } from './responsive-tabs-extra';
 export { default as ScrollSpyTabs } from './scroll-spy-tabs';
 export { default as useFinishFailed } from './scroll-spy-tabs/use-finish-failed';
 export { default as useScrollActiveChange } from './scroll-spy-tabs/use-scroll-active-change';
