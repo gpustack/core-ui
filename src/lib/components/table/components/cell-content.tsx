@@ -7,6 +7,7 @@ import styled from 'styled-components';
 import { useIntl } from '../../../../lib/hooks/useIntl';
 import RowContext from '../row-context';
 import { type CellContentProps } from '../types';
+import { buildSubmittedRow } from './cell-edit-utils';
 
 const CellContentWrapper = styled.div<{
   $mobile?: boolean;
@@ -169,17 +170,12 @@ const CellContent: React.FC<CellContentProps> = (props) => {
   };
 
   const handleSubmit = async () => {
-    await onCell?.(
-      {
-        ...row,
-        [dataIndex as string]: editingValue
-      },
-      {
-        dataIndex: dataIndex as string,
-        newValue: editingValue,
-        oldValue: getRowValue(row, dataIndex)
-      }
-    );
+    const nextRow = buildSubmittedRow(row, dataIndex, editingValue);
+    await onCell?.(nextRow, {
+      dataIndex: dataIndex as any,
+      newValue: editingValue,
+      oldValue: getRowValue(row, dataIndex)
+    });
     setIsEditing(false);
   };
 
