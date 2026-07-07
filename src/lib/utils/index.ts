@@ -1,6 +1,8 @@
 import _ from 'lodash';
 import tinycolor from 'tinycolor2';
 
+export * from './storage-namespace';
+
 export const isNotEmptyValue = (value: any) => {
   if (Array.isArray(value)) {
     return value.length > 0;
