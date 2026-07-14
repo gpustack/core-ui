@@ -155,7 +155,15 @@ function makeJSONStorage<Value>(getStore: () => Storage | undefined) {
     typeof window.addEventListener === 'function'
   ) {
     storage.subscribe = (key, callback, initialValue) => {
-      const store = getStore();
+      // Accessing window.localStorage can itself throw (blocked storage,
+      // sandboxed iframe, Safari private mode) — guard before subscribing.
+      let store: Storage | undefined;
+      try {
+        store = getStore();
+      } catch {
+        return () => {};
+      }
+      if (!store) return () => {};
       const physicalKey = nsKey(key);
       const handler = (e: StorageEvent) => {
         if (e.storageArea !== store || e.key !== physicalKey) return;
