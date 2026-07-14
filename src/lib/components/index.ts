@@ -47,6 +47,7 @@ export { default as Cascader } from './form/cascader';
 export { default as Checkbox } from './form/checkbox';
 export { default as CheckboxField } from './form/checkbox-field';
 export { default as LabelInfo } from './form/components/label-info';
+export { default as DatePicker, RangePicker } from './form/date-picker';
 export { default as FieldComponent } from './form/field-component';
 export { default as Input } from './form/input';
 export { default as InputNumber } from './form/input-number';
