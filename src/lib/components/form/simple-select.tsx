@@ -81,13 +81,15 @@ const SimpleSelect: React.FC<
 
   const optionRender = (option: any, info: any) => {
     const { value, label } = option;
+    const isMultiple = restProps.mode === 'multiple';
     return (
       <OptionWrapper>
-        {restProps.value?.includes?.(value) ? (
-          <Checkbox checked></Checkbox>
-        ) : (
-          <Checkbox></Checkbox>
-        )}
+        {isMultiple &&
+          (restProps.value?.includes?.(value) ? (
+            <Checkbox checked></Checkbox>
+          ) : (
+            <Checkbox></Checkbox>
+          ))}
         <AutoTooltip ghost>
           {optionLabelRender ? optionLabelRender(option) : label}
         </AutoTooltip>
