@@ -56,6 +56,10 @@ const NoResult: React.FC<
     dataSource?: any[];
     buttonText?: React.ReactNode;
     onClick?: () => void;
+    // Center the empty state within a box of this height. Number → px,
+    // string → used as-is (e.g. '40vh', 'calc(100vh - 300px)'). Omit to
+    // keep the default top-aligned layout.
+    minHeight?: number | string;
   }
 > = (props) => {
   const {
@@ -65,7 +69,8 @@ const NoResult: React.FC<
     loading,
     dataSource,
     buttonText,
-    onClick
+    onClick,
+    minHeight
   } = props;
 
   const hasFilters = useMemo(() => {
@@ -89,38 +94,60 @@ const NoResult: React.FC<
     );
   };
 
-  return (
-    <>
-      {!loading && loadend && !dataSource?.length ? (
-        <StyledEmpty
-          image={
-            hasFilters ? (
-              <SimpleImageWrapper>
-                {Empty.PRESENTED_IMAGE_SIMPLE}
-              </SimpleImageWrapper>
-            ) : (
-              <ImageWrapper>{props.image}</ImageWrapper>
-            )
-          }
-          description={
-            <Description>
-              {!hasFilters && (
-                <Typography.Text style={{ fontSize: '16px', fontWeight: 500 }}>
-                  {props.title}
-                </Typography.Text>
-              )}
-              <Typography.Text type="secondary">
-                {hasFilters ? noFoundText : props.subTitle}
-              </Typography.Text>
-            </Description>
-          }
-        >
-          {!hasFilters && renderChildren()}
-        </StyledEmpty>
-      ) : (
-        <span></span>
-      )}
-    </>
+  if (loading || !loadend || dataSource?.length) {
+    return <span></span>;
+  }
+
+  const emptyEl = (
+    <StyledEmpty
+      // Drop the fixed top margin when centered, so the content sits in
+      // the true middle of the height box rather than 60px below it.
+      style={minHeight != null ? { marginBlock: 0 } : undefined}
+      image={
+        hasFilters ? (
+          <SimpleImageWrapper>
+            {Empty.PRESENTED_IMAGE_SIMPLE}
+          </SimpleImageWrapper>
+        ) : (
+          <ImageWrapper>{props.image}</ImageWrapper>
+        )
+      }
+      description={
+        <Description>
+          {!hasFilters && (
+            <Typography.Text style={{ fontSize: '16px', fontWeight: 500 }}>
+              {props.title}
+            </Typography.Text>
+          )}
+          <Typography.Text type="secondary">
+            {hasFilters ? noFoundText : props.subTitle}
+          </Typography.Text>
+        </Description>
+      }
+    >
+      {!hasFilters && renderChildren()}
+    </StyledEmpty>
+  );
+
+  // Opt-in vertical centering: with a `minHeight` the empty content is
+  // centered inside a box of that height, so it no longer clings to the
+  // top of a tall, otherwise-blank list area. Off by default so modal /
+  // embedded tables keep their compact empty state. React appends `px`
+  // to a numeric minHeight; a string is used as-is ('40vh', 'calc(...)').
+  return minHeight != null ? (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight
+      }}
+    >
+      {emptyEl}
+    </div>
+  ) : (
+    emptyEl
   );
 };
 
