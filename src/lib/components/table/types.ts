@@ -87,6 +87,11 @@ export interface TableProps {
   rowSelection?: RowSelectionProps;
   children?: React.ReactElement<ColumnProps>[];
   empty?: React.ReactNode;
+  // Reserved height for the empty/loading body area. Keeping this equal to the
+  // `minHeight` of the `empty` node (e.g. <NoResult minHeight="calc(100vh - 300px)" />)
+  // makes the first-load spinner, the empty state, and eventual rows occupy one
+  // stable block, so entering the page no longer jumps.
+  emptyMinHeight?: number | string;
   expandable?: React.ReactNode;
   dataSource: any[];
   pollingChildren?: boolean;

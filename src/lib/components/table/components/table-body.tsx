@@ -19,6 +19,7 @@ interface TableBodyProps {
   loadChildrenAPI?: any;
   onCell?: any;
   empty?: React.ReactNode;
+  emptyMinHeight?: number | string;
 }
 
 const TableBody: React.FC<TableBodyProps> = ({
@@ -36,11 +37,15 @@ const TableBody: React.FC<TableBodyProps> = ({
   loadChildrenAPI,
   columns,
   onCell,
-  empty
+  empty,
+  emptyMinHeight
 }) => {
   if (!dataSource.length) {
     return (
-      <div className="empty-wrapper">
+      <div
+        className="empty-wrapper"
+        style={emptyMinHeight ? { minHeight: emptyMinHeight } : undefined}
+      >
         {empty || <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />}
       </div>
     );

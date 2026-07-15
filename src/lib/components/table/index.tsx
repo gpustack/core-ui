@@ -49,6 +49,7 @@ const Table: React.FC<TableProps & { pagination?: PaginationProps }> = (
     rowSelection,
     pagination,
     empty,
+    emptyMinHeight,
     sortDirections,
     showSorterTooltip,
     renderChildren,
@@ -155,8 +156,6 @@ const Table: React.FC<TableProps & { pagination?: PaginationProps }> = (
     pagination?.onShowSizeChange?.(current, size);
   };
 
-  console.log('token.table', token);
-
   return (
     <Wrapper
       $token={{
@@ -190,6 +189,7 @@ const Table: React.FC<TableProps & { pagination?: PaginationProps }> = (
         <Spin spinning={loading} size="middle">
           <TableBody
             empty={empty}
+            emptyMinHeight={emptyMinHeight}
             dataSource={props.dataSource}
             columns={parsedColumns}
             rowSelection={rowSelection}
