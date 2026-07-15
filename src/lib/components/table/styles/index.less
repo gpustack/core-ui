@@ -88,5 +88,21 @@
     min-height: 160px;
     justify-content: center;
     align-items: center;
+
+    // The empty node (e.g. <NoResult>) renders nothing while loading and only
+    // mounts its <Empty> once the request settles, so this fires exactly when
+    // the empty state appears — a seamless fade-in instead of a hard pop.
+    .ant-empty {
+      animation: sealTableEmptyFadeIn 0.3s ease-in-out;
+    }
+  }
+}
+
+@keyframes sealTableEmptyFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
