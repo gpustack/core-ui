@@ -10,7 +10,7 @@ const CellWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  min-height: 68px;
+  min-height: var(--seal-table-row-min-height, 68px);
   word-break: break-word;
   min-width: 20px;
   overflow: hidden;

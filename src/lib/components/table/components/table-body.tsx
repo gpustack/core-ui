@@ -6,6 +6,8 @@ import TableRow from './table-row';
 interface TableBodyProps {
   dataSource: any[];
   columns: ColumnProps[];
+  gridTemplate?: string;
+  prefixWidth?: number;
   rowKey: string;
   rowSelection?: any;
   expandable?: any;
@@ -36,6 +38,8 @@ const TableBody: React.FC<TableBodyProps> = ({
   loadChildren,
   loadChildrenAPI,
   columns,
+  gridTemplate,
+  prefixWidth,
   onCell,
   empty,
   emptyMinHeight
@@ -59,6 +63,8 @@ const TableBody: React.FC<TableBodyProps> = ({
           record={item}
           rowIndex={index}
           columns={columns}
+          gridTemplate={gridTemplate}
+          prefixWidth={prefixWidth}
           rowSelection={rowSelection}
           expandable={expandable}
           rowKey={rowKey}

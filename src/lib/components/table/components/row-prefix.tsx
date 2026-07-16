@@ -21,6 +21,7 @@ interface RowPrefixProps {
   expanded?: boolean;
   checked?: boolean;
   disableExpand?: boolean;
+  prefixWidth?: number;
   handleRowExpand?: () => void;
   handleSelectChange?: (e: any) => void;
 }
@@ -32,6 +33,7 @@ const RowPrefix: React.FC<RowPrefixProps> = (props) => {
     expanded,
     checked,
     disableExpand,
+    prefixWidth,
     handleRowExpand,
     handleSelectChange
   } = props;
@@ -40,9 +42,15 @@ const RowPrefix: React.FC<RowPrefixProps> = (props) => {
     return expanded;
   }, [expanded]);
 
+  // Fixed gutter shared with the header prefix and expanded child rows.
+  const wrapperStyle: React.CSSProperties = {
+    width: prefixWidth,
+    boxSizing: 'border-box'
+  };
+
   if (expandable && enableSelection) {
     return (
-      <div className="row-prefix-wrapper">
+      <div className="row-prefix-wrapper" style={wrapperStyle}>
         <ButtonWrapper
           className={classNames({ 'disable-expand': disableExpand })}
         >
@@ -64,7 +72,7 @@ const RowPrefix: React.FC<RowPrefixProps> = (props) => {
   }
   if (expandable) {
     return (
-      <div className="row-prefix-wrapper">
+      <div className="row-prefix-wrapper" style={wrapperStyle}>
         <ButtonWrapper
           className={classNames({ 'disable-expand': disableExpand })}
         >
@@ -90,7 +98,7 @@ const RowPrefix: React.FC<RowPrefixProps> = (props) => {
   }
   if (enableSelection) {
     return (
-      <div className="row-prefix-wrapper">
+      <div className="row-prefix-wrapper" style={wrapperStyle}>
         {<Checkbox onChange={handleSelectChange} checked={checked}></Checkbox>}
       </div>
     );

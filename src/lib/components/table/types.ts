@@ -43,6 +43,20 @@ export interface ColumnProps {
   [key: string]: any;
 }
 
+/**
+ * The options object passed to `renderChildren`. Besides the parent record and
+ * expanded flag, it carries the parent row's layout (`gridTemplate` /
+ * `prefixWidth` / `columns`) so a child row can reuse the parent column grid
+ * and align its cells without magic paddings. See `ExpandedRowGrid`.
+ */
+export interface ChildGridOptions {
+  parent?: any;
+  currentExpanded?: boolean;
+  gridTemplate?: string;
+  prefixWidth?: number;
+  columns?: ColumnProps[];
+}
+
 export interface TableHeaderProps {
   showSorterTooltip?: boolean;
   sorterList?: TableOrder | Array<TableOrder>;
@@ -102,10 +116,7 @@ export interface TableProps {
   onTableSort?: (order: TableOrder | Array<TableOrder>) => void;
   onExpand?: (expanded: boolean, record: any, rowKey: any) => void;
   onExpandAll?: (expanded: boolean) => void;
-  renderChildren?: (
-    data: any,
-    options: { parent?: any; [key: string]: any }
-  ) => React.ReactNode;
+  renderChildren?: (data: any, options: ChildGridOptions) => React.ReactNode;
   loadChildren?: (record: any, options?: any) => Promise<any[]>;
   loadChildrenAPI?: (record: any) => string;
   contentRendered?: () => void;
