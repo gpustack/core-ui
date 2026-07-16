@@ -14,6 +14,7 @@ interface HeaderPrefixProps {
   selectAll?: boolean;
   hasColumns?: boolean;
   disabled?: boolean;
+  prefixWidth?: number;
 }
 
 const HeaderPrefix: React.FC<HeaderPrefixProps> = (props) => {
@@ -26,10 +27,17 @@ const HeaderPrefix: React.FC<HeaderPrefixProps> = (props) => {
     indeterminate,
     selectAll,
     expandAll,
-    disabled
+    disabled,
+    prefixWidth
   } = props;
 
   const intl = useIntl();
+  // Fixed gutter shared with body/child rows; padding-left comes from the
+  // `.header-row-prefix-wrapper` less rule (same token as the row prefix).
+  const wrapperStyle: React.CSSProperties = {
+    width: prefixWidth,
+    boxSizing: 'border-box'
+  };
 
   const handleToggleExpand = () => {
     onExpandAll?.(!expandAll);
@@ -50,7 +58,7 @@ const HeaderPrefix: React.FC<HeaderPrefixProps> = (props) => {
     return (
       <div
         className="header-row-prefix-wrapper flex-center"
-        style={{ paddingLeft: 16 }}
+        style={wrapperStyle}
       >
         <span style={{ marginRight: 5 }}>
           {_.isBoolean(expandable) ? (
@@ -89,7 +97,7 @@ const HeaderPrefix: React.FC<HeaderPrefixProps> = (props) => {
     return (
       <div
         className="header-row-prefix-wrapper flex-center"
-        style={{ paddingLeft: 16 }}
+        style={wrapperStyle}
       >
         <span style={{ marginRight: 5 }}>
           {_.isBoolean(expandable) ? (
@@ -120,7 +128,7 @@ const HeaderPrefix: React.FC<HeaderPrefixProps> = (props) => {
   }
   if (enableSelection) {
     return (
-      <div className="header-row-prefix-wrapper">
+      <div className="header-row-prefix-wrapper" style={wrapperStyle}>
         {<Checkbox disabled={disabled}></Checkbox>}
       </div>
     );

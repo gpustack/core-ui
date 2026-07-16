@@ -119,10 +119,17 @@ export { default as SubDrawer, type SubDrawerProps } from './sub-drawer';
 export { default as SwitchCard } from './switch-card';
 export { default as Table } from './table';
 export { default as CellContent } from './table/components/cell-content';
+export {
+  default as ExpandedRowGrid,
+  cellStyle as expandedRowCellStyle,
+  type ExpandedRowCellProps,
+  type ExpandedRowGridProps
+} from './table/components/expanded-row-grid';
 export { default as RowChildren } from './table/components/row-children';
 export { default as TableProvider } from './table/table-provider';
 export { default as TableRowProvider } from './table/table-row-provider';
 export type {
+  ChildGridOptions,
   ColumnProps as TableColumnProps,
   TableOrder,
   TableProps

@@ -1,7 +1,6 @@
 import { Pagination, Spin, theme, type PaginationProps } from 'antd';
 import _ from 'lodash';
 import React, { useMemo } from 'react';
-import styled from 'styled-components';
 import Header from './components/header';
 import HeaderPrefix from './components/header-prefix';
 import RowChildren from './components/row-children';
@@ -10,23 +9,11 @@ import './styles/index.less';
 import { type ColumnProps, type TableProps } from './types';
 import useSorter from './use-sorter';
 
-const Wrapper = styled.div<{ $token: any }>`
-  width: 100%;
-  --ant-table-cell-padding-inline: ${(props) =>
-    props.$token.cellPaddingInline}px;
-  --ant-table-cell-padding-block: ${(props) => props.$token.cellPaddingBlock}px;
-  --ant-table-header-border-radius: ${(props) =>
-    props.$token.headerBorderRadius}px;
-  --ant-table-header-split-color: ${(props) => props.$token.headerSplitColor};
-  --ant-table-row-selected-bg: ${(props) => props.$token.rowSelectedBg};
-  --ant-table-row-selected-hover-bg: ${(props) =>
-    props.$token.rowSelectedHoverBg};
-  --ant-table-row-hover-bg: ${(props) => props.$token.rowHoverBg};
-  --ant-table-header-icon-color: ${(props) =>
-    props.$token.tableHeaderIconColor};
-  --ant-table-header-icon-hover-color: ${(props) =>
-    props.$token.tableHeaderIconHoverColor};
-`;
+// Fixed control widths reserved inside the row prefix gutter. Kept as
+// constants so the header prefix, row prefix and any expanded child row all
+// derive the SAME gutter width and therefore align by construction.
+const PREFIX_EXPAND_WIDTH = 35; // expand toggle button (30) + margin (5)
+const PREFIX_SELECT_WIDTH = 24; // selection checkbox
 
 const Table: React.FC<TableProps & { pagination?: PaginationProps }> = (
   props
@@ -79,6 +66,33 @@ const Table: React.FC<TableProps & { pagination?: PaginationProps }> = (
         };
       });
   }, [columns, children]);
+
+  // Shared column template for header and body so their columns always align.
+  // A column with an explicit `width` becomes a fixed px track; otherwise its
+  // `span` becomes a proportional fr track. `minmax(0, …fr)` lets a track shrink
+  // below its content width so long text wraps/clips instead of blowing out.
+  const gridTemplate = useMemo(() => {
+    return parsedColumns
+      .map((col) =>
+        col.width ? `${col.width}px` : `minmax(0, ${col.span ?? 1}fr)`
+      )
+      .join(' ');
+  }, [parsedColumns]);
+
+  // Fixed width of the left prefix gutter (expand toggle + selection
+  // checkbox). Shared by header prefix, every row prefix and the expanded
+  // child rows so their column tracks all start at the same x offset.
+  const prefixWidth = (() => {
+    const hasExpand = !!expandable;
+    const hasSelect = !!rowSelection?.enableSelection;
+    if (!hasExpand && !hasSelect) return 0;
+    const paddingInline = token.Table?.cellPaddingInline ?? 16;
+    return (
+      paddingInline +
+      (hasExpand ? PREFIX_EXPAND_WIDTH : 0) +
+      (hasSelect ? PREFIX_SELECT_WIDTH : 0)
+    );
+  })();
 
   const expandAll = (() => {
     const data = props.dataSource;
@@ -156,18 +170,29 @@ const Table: React.FC<TableProps & { pagination?: PaginationProps }> = (
     pagination?.onShowSizeChange?.(current, size);
   };
 
+  // Expose the antd Table theme tokens as CSS variables so the less files can
+  // consume them via `var(--ant-table-*)`. Inline (not a styled wrapper)
+  // because the values are resolved from the runtime theme token.
+  const tableToken: any = token.Table ?? {};
+  const wrapperStyle = {
+    width: '100%',
+    '--ant-table-cell-padding-inline': `${tableToken.cellPaddingInline}px`,
+    '--ant-table-cell-padding-block': `${tableToken.cellPaddingBlock}px`,
+    '--ant-table-header-border-radius': `${tableToken.headerBorderRadius}px`,
+    '--ant-table-header-split-color': tableToken.headerSplitColor,
+    '--ant-table-row-selected-bg': tableToken.rowSelectedBg,
+    '--ant-table-row-selected-hover-bg': tableToken.rowSelectedHoverBg,
+    '--ant-table-row-hover-bg': tableToken.rowHoverBg,
+    '--ant-table-header-icon-color': token.colorTextQuaternary,
+    '--ant-table-header-icon-hover-color': token.colorTextSecondary
+  } as React.CSSProperties;
+
   return (
-    <Wrapper
-      $token={{
-        ...token.Table,
-        tableHeaderIconColor: token.colorTextQuaternary,
-        tableHeaderIconHoverColor: token.colorTextSecondary,
-        colorBorderSecondary: token.colorBorderSecondary
-      }}
-    >
+    <div style={wrapperStyle}>
       <div className="seal-table-container">
         <div className="header-row-wrapper">
           <HeaderPrefix
+            prefixWidth={prefixWidth}
             selectAll={selectState.selectAll}
             indeterminate={selectState.indeterminate}
             onSelectAll={handleSelectAllChange}
@@ -181,6 +206,7 @@ const Table: React.FC<TableProps & { pagination?: PaginationProps }> = (
           <Header
             onSort={handleOnTableSort}
             columns={parsedColumns}
+            gridTemplate={gridTemplate}
             sortDirections={sortDirections}
             sorterList={sorterList}
             showSorterTooltip={showSorterTooltip}
@@ -192,6 +218,8 @@ const Table: React.FC<TableProps & { pagination?: PaginationProps }> = (
             emptyMinHeight={emptyMinHeight}
             dataSource={props.dataSource}
             columns={parsedColumns}
+            gridTemplate={gridTemplate}
+            prefixWidth={prefixWidth}
             rowSelection={rowSelection}
             expandable={expandable}
             rowKey={rowKey}
@@ -216,7 +244,7 @@ const Table: React.FC<TableProps & { pagination?: PaginationProps }> = (
           ></Pagination>
         </div>
       )}
-    </Wrapper>
+    </div>
   );
 };
 

@@ -1,5 +1,5 @@
 import { useMemoizedFn } from 'ahooks';
-import { Col, Row, Spin } from 'antd';
+import { Spin } from 'antd';
 import classNames from 'classnames';
 import _ from 'lodash';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
@@ -12,7 +12,10 @@ import TableCell from './table-cell';
 
 const TableRow: React.FC<
   RowContextProps &
-    Omit<TableProps, 'dataSource' | 'loading' | 'children' | 'empty'>
+    Omit<TableProps, 'dataSource' | 'loading' | 'children' | 'empty'> & {
+      gridTemplate?: string;
+      prefixWidth?: number;
+    }
 > = (props) => {
   const {
     record,
@@ -23,6 +26,8 @@ const TableRow: React.FC<
     rowKey,
     childParentKey,
     columns,
+    gridTemplate,
+    prefixWidth,
     pollingChildren,
     watchChildren,
     onCell,
@@ -75,7 +80,12 @@ const TableRow: React.FC<
     }
     return renderChildren?.(childrenData, {
       parent: record,
-      currentExpanded: currentExpand
+      currentExpanded: currentExpand,
+      // Layout info so a child row can reuse the parent's column grid and
+      // align its cells to the parent columns without magic paddings.
+      gridTemplate,
+      prefixWidth,
+      columns
     });
   };
 
@@ -198,22 +208,24 @@ const TableRow: React.FC<
             enableSelection={rowSelection?.enableSelection}
             expanded={expanded}
             checked={checked}
+            prefixWidth={prefixWidth}
             handleRowExpand={handleRowExpand}
             handleSelectChange={handleSelectChange}
             disableExpand={disableExpand}
           ></RowPrefix>
-          <Row className="seal-table-row">
+          <div
+            className="seal-table-row"
+            style={{ gridTemplateColumns: gridTemplate }}
+          >
             {columns?.map(({ key, ...restProps }) => {
               return (
-                <Col
+                <TableCell
                   key={`${restProps.dataIndex}-${rowIndex}`}
-                  span={restProps.span}
-                >
-                  <TableCell {...restProps}></TableCell>
-                </Col>
+                  {...restProps}
+                ></TableCell>
               );
             })}
-          </Row>
+          </div>
         </div>
         {expanded && !disableExpand && (
           <div className="expanded-row">
