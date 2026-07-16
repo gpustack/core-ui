@@ -17,7 +17,7 @@ const useStyles = createStyles(({ css }) => {
       opacity: 0.7;
       margin: 0;
       &.tag-ghost {
-        background-color: transparent;
+        background-color: transparent !important;
       }
     `
   };
@@ -46,7 +46,7 @@ const ThemeTag: React.FC<TagProps & { opacity?: number; ghost?: boolean }> = ({
         'tag-ghost': ghost
       })}
     >
-      {children}
+      <span>{children}</span>
     </Tag>
   );
 };
