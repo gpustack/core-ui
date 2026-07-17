@@ -143,6 +143,7 @@ export { default as TemplateCard } from './templates/card';
 export { default as TemplateCardList } from './templates/card-list';
 export { default as TemplateCardSkeleton } from './templates/card-skeleton';
 export { default as ResizePanel } from './terminal-tabs/resize-panel';
+export { default as TextAttribute } from './text-attribute';
 export { default as ThumbImage } from './thumb-image';
 export { default as TooltipList } from './tooltip-list';
 export { default as Transfer } from './transfer';
