@@ -13,7 +13,7 @@ import { type SealFormItemProps } from './types';
 import Wrapper from './wrapper';
 import styles from './wrapper/date-picker.module.less';
 
-type SealPickerProps = SealFormItemProps & {
+export type SealPickerProps = SealFormItemProps & {
   alwaysFocus?: boolean;
   ref?: any;
   style?: React.CSSProperties;
@@ -25,7 +25,7 @@ type SealPickerProps = SealFormItemProps & {
  * a `Wrapper` draws the bordered box + floating label, and an `isFocus` state
  * machine keeps the label raised whenever the field is focused, open, or filled.
  */
-const PickerField: React.FC<
+export const PickerField: React.FC<
   Record<string, any> & SealPickerProps & { Picker: React.ComponentType<any> }
 > = forwardRef((props, ref) => {
   const {
