@@ -8,9 +8,12 @@ import RowContext from '../row-context';
 import { type CellContentProps } from '../types';
 
 const CellContentWrapper = styled.div`
+  flex: 1 1 auto;
+  min-width: 0;
   max-width: 100%;
   display: flex;
   align-items: center;
+  justify-content: inherit;
 `;
 
 interface EditButtonsProps {
