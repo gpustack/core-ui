@@ -10,10 +10,12 @@ const useStyles = createStyles(({ css }) => {
       display: flex;
       align-items: center;
       justify-content: center;
+      width: fit-content;
       padding: 2px 6px;
       border-radius: 4px;
       font-size: 12px;
       height: 22px;
+      line-height: 20px;
       opacity: 0.7;
       margin: 0;
       &.tag-ghost {
@@ -46,7 +48,7 @@ const ThemeTag: React.FC<TagProps & { opacity?: number; ghost?: boolean }> = ({
         'tag-ghost': ghost
       })}
     >
-      <span>{children}</span>
+      {children}
     </Tag>
   );
 };
