@@ -5,10 +5,10 @@ const useStyles = createStyles(({ css }) => ({
   attr: css`
     display: inline-flex;
     align-items: center;
-    padding: 1px 6px;
+    padding: 1px 7px;
     border-radius: 12px;
     color: var(--ant-color-text-tertiary);
-    font-size: 12px;
+    font-size: 11px;
     line-height: 18px;
     white-space: nowrap;
   `,
