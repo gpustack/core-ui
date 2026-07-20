@@ -134,6 +134,10 @@ const NoResult: React.FC<
   // top of a tall, otherwise-blank list area. Off by default so modal /
   // embedded tables keep their compact empty state. React appends `px`
   // to a numeric minHeight; a string is used as-is ('40vh', 'calc(...)').
+  //
+  // Optical centering: a geometrically-centered block reads as too low, so
+  // the bottom padding lifts the content ~1/12 of the box height above dead
+  // center (justify-content: center shifts the block up by paddingBottom/2).
   return minHeight != null ? (
     <div
       style={{
@@ -141,7 +145,11 @@ const NoResult: React.FC<
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
-        minHeight
+        minHeight,
+        paddingBottom:
+          typeof minHeight === 'number'
+            ? minHeight / 6
+            : `calc(${minHeight} / 6)`
       }}
     >
       {emptyEl}
