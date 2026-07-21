@@ -9,6 +9,12 @@ export { default as AutoImage } from './auto-image';
 export { default as SingleImage } from './auto-image/single-image';
 export { default as AutoTooltip } from './auto-tooltip';
 export { default as BibtexViewer } from './bibtex-viewer';
+export {
+  default as CardRadioGroup,
+  type CardRadioGroupProps,
+  type CardRadioOption,
+  type CardRadioSlot
+} from './card-radio-group';
 export { default as CardWrapper } from './card-wrapper';
 export { default as SimpleCard } from './card-wrapper/simple-card';
 export { default as CheckButtons } from './check-buttons';
