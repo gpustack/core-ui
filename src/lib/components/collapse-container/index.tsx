@@ -39,7 +39,7 @@ const useStyles = createStyles(({ css, token }) => {
   return {
     title: css`
       font-weight: 400;
-      min-height: 56px;
+      min-height: var(--ant-card-header-height);
       font-size: var(--font-size-base);
       display: flex;
       justify-content: space-between;
