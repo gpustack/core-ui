@@ -110,7 +110,6 @@ const ContentWrapper = styled.div<{ $hasTitle: boolean }>`
     props.$hasTitle
       ? 'var(--ant-color-text-secondary)'
       : 'var(--ant-color-text)'};
-  font-weight: var(--font-weight-500);
   white-space: pre-line;
 `;
 
