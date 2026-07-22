@@ -71,11 +71,17 @@ const Table: React.FC<TableProps & { pagination?: PaginationProps }> = (
   // A column with an explicit `width` becomes a fixed px track; otherwise its
   // `span` becomes a proportional fr track. `minmax(0, …fr)` lets a track shrink
   // below its content width so long text wraps/clips instead of blowing out.
+  // `minWidth` raises that shrink floor; `maxWidth` caps growth — the track then
+  // sizes up to the cap instead of sharing leftover space proportionally, since
+  // a grid growth limit cannot mix px with fr.
   const gridTemplate = useMemo(() => {
     return parsedColumns
-      .map((col) =>
-        col.width ? `${col.width}px` : `minmax(0, ${col.span ?? 1}fr)`
-      )
+      .map((col) => {
+        if (col.width) return `${col.width}px`;
+        const min = col.minWidth ? `${col.minWidth}px` : '0';
+        const max = col.maxWidth ? `${col.maxWidth}px` : `${col.span ?? 1}fr`;
+        return `minmax(${min}, ${max})`;
+      })
       .join(' ');
   }, [parsedColumns]);
 
