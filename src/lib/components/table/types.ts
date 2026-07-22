@@ -27,6 +27,8 @@ export interface ColumnProps {
   key?: string;
   dataField?: string; // Added dataField property, aviods conflict with dataIndex, because dataIndex maybe used in sorting
   width?: number;
+  minWidth?: number;
+  maxWidth?: number;
   span: number;
   align?: 'left' | 'center' | 'right';
   headerStyle?: React.CSSProperties;
