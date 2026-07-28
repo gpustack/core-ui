@@ -82,6 +82,22 @@ export default function useWatchList<T = Record<string, any>>(API: string) {
     }
   });
 
+  // Pause/resume for when the page is hidden or its tab is switched away. The
+  // caller owns the `visibilitychange` listener, because a page with several
+  // watches has to route by which tab is active.
+  const cancelRequestsOnPageInactive = useMemoizedFn(() => {
+    cancelWatch();
+    // drop the cache: DELETE events fired while we were not watching are never
+    // re-sent, so items deleted in the meantime would linger forever. Resume
+    // rebuilds the baseline from a fresh snapshot instead.
+    cacheWatchDataListRef.current = [];
+  });
+
+  const resumeRequestsOnPageActive = useMemoizedFn(async () => {
+    await getAllDataList();
+    await createWatchChunkRequest();
+  });
+
   useEffect(() => {
     createWatchChunkRequest();
     return () => {
@@ -94,6 +110,8 @@ export default function useWatchList<T = Record<string, any>>(API: string) {
     setWatchDataList,
     startWatch: createWatchChunkRequest,
     cancelWatch,
+    cancelRequestsOnPageInactive,
+    resumeRequestsOnPageActive,
     deleteItemFromCache: handleDeleteItemFromCache
   };
 }
