@@ -68,7 +68,12 @@ const MetadataList: React.FC<MetadataListProps> = ({
         <ItemContainer
           key={index}
           className="item-container"
-          style={styles?.item}
+          style={{
+            ...styles?.item,
+            ...(disabled && index === dataList.length - 1
+              ? { marginBottom: 0 }
+              : {})
+          }}
         >
           {children?.(item, index)}
           {!disabled && (
