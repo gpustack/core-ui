@@ -14,7 +14,6 @@ type EventsType = 'CREATE' | 'UPDATE' | 'DELETE' | 'INSERT';
 export function useUpdateChunkedList(options: {
   events?: EventsType[];
   dataList?: any[];
-  triggerAt?: React.MutableRefObject<number>;
   limit?: number;
   onCreate?: (args: any) => void;
   onUpdate?: (args: any) => void;
@@ -24,9 +23,9 @@ export function useUpdateChunkedList(options: {
   filterFun?: (args: any) => boolean;
   mapFun?: (args: any) => any;
   computedID?: (d: object) => string;
+  isNewItem?: (item: any) => boolean;
 }) {
-  const { events = ['CREATE', 'DELETE', 'UPDATE', 'INSERT'], triggerAt } =
-    options;
+  const { events = ['CREATE', 'DELETE', 'UPDATE', 'INSERT'] } = options;
   const deletedIdsRef = useRef<Set<number | string>>(new Set());
   const cacheDataListRef = useRef<any[]>(options.dataList || []);
   const timerRef = useRef<any>(null);
@@ -47,7 +46,6 @@ export function useUpdateChunkedList(options: {
     }, 200);
   };
   const updateChunkedList = (data: ChunkedCollection) => {
-    // console.log('updateChunkedList data:', data);
     let collections = data?.collection || [];
     if (options?.computedID) {
       collections = collections?.map((item: any) => {
@@ -71,17 +69,14 @@ export function useUpdateChunkedList(options: {
           (sItem: any) => sItem.id === item.id
         );
         const updateItem = { ...item };
-        if (updateIndex === -1 && !triggerAt?.current) {
+        if (updateIndex === -1) {
           acc.push(updateItem);
-        } else if (!triggerAt?.current) {
+        } else {
           cacheDataListRef.current[updateIndex] = updateItem;
         }
+        // only push items created after the watch started
 
-        // TODO： only push items created after triggerAt
-        if (
-          triggerAt?.current &&
-          Date.parse(item.created_at) >= triggerAt.current
-        ) {
+        if (options.isNewItem?.(item)) {
           latestCreateList.push(updateItem);
         }
 
@@ -93,6 +88,10 @@ export function useUpdateChunkedList(options: {
         ...cacheDataListRef.current
       ].slice(0, limit);
 
+      options.setDataList?.([...cacheDataListRef.current], {
+        createdIds: newDataList.map((item) => item.id)
+      });
+
       options.onCreate?.(latestCreateList);
     }
 
@@ -102,11 +101,11 @@ export function useUpdateChunkedList(options: {
 
       cacheDataListRef.current = cacheDataListRef.current?.filter(
         (item: any) => {
-          // collect deleted items
-          if (triggerAt?.current) {
-            if (ids?.includes(item.id)) {
-              deletedList.push(item);
-            }
+          // collect deleted items. isNewItem is a CREATE-side concern only —
+          // gating here would hide the deletion of a just-created row from
+          // callers that refetch on delete (see use-table-fetch updateManually)
+          if (ids?.includes(item.id)) {
+            deletedList.push(item);
           }
           return !ids?.includes(item.id);
         }
@@ -133,10 +132,8 @@ export function useUpdateChunkedList(options: {
             updateItem,
             ...cacheDataListRef.current.slice(0, limit - 1)
           ];
-          if (options.onUpdate && triggerAt?.current) {
-            if (Date.parse(item.created_at) >= triggerAt.current) {
-              options.onUpdate?.([updateItem]);
-            }
+          if (options.onUpdate && options.isNewItem?.(item)) {
+            options.onUpdate?.([updateItem]);
           }
         }
       });
