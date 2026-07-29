@@ -3,6 +3,7 @@ import _ from 'lodash';
 import { useEffect, useRef, useState } from 'react';
 import { WatchEventType } from '../../lib/config';
 import {
+  MAX_WATCH_REQUESTS,
   cancelWatchRequest,
   clearWatchRequestId,
   updateWatchIDValue,
@@ -54,7 +55,6 @@ export const sliceData = (data: string, loaded: number, loadedSize: any) => {
 const useSetChunkRequest = () => {
   const { services } = useCoreUIContext();
   const { request } = services;
-  const watchRequestList = window.__GPUSTACK_WATCH_REQUEST_CLEAR__.requestList;
   const [requestReadyState, setRequestReadyState] = useState(0);
   const axiosToken = useRef<any>(null);
   const requestConfig = useRef<any>({});
@@ -110,8 +110,13 @@ const useSetChunkRequest = () => {
     axiosToken.current = createAxiosToken();
 
     updateWatchRequest(axiosToken.current);
-    if (watchRequestList.length >= 4) {
-      cancelWatchRequest(watchRequestList.length - 4 || 1);
+    // read the list live: a snapshot captured at hook-call time goes stale as
+    // soon as any watch is cancelled, and would cancel the wrong requests
+    const watchRequestList =
+      window.__GPUSTACK_WATCH_REQUEST_CLEAR__.requestList;
+    if (watchRequestList.length > MAX_WATCH_REQUESTS) {
+      // trim only the excess, oldest first
+      cancelWatchRequest(watchRequestList.length - MAX_WATCH_REQUESTS);
     }
 
     if (contentType === 'json') {
@@ -195,7 +200,8 @@ const useSetChunkRequest = () => {
   }, []);
 
   useEffect(() => {
-    if (requestReadyState === 4 && retryCount.current > 0) {
+    if (requestReadyState !== 4) return;
+    if (retryCount.current > 0) {
       requestConfig.current.beforeReconnect?.();
       clearTimeout(timer.current);
       timer.current = setTimeout(
@@ -204,7 +210,11 @@ const useSetChunkRequest = () => {
         },
         2 ** (totalCount - retryCount.current) * 1000
       );
+      return;
     }
+    // retries exhausted: deregister the dead token, otherwise it occupies a
+    // slot forever and inflates the count the MAX_WATCH_REQUESTS guard reads
+    axiosToken.current?.cancel?.();
   }, [requestReadyState]);
 
   return {

@@ -39,7 +39,6 @@ async function parseErrorResponse(response: Response) {
 }
 
 function extractErrorMessage(error: any, fallback: string): string {
-  console.log('error==========', error);
   if (!error) return fallback;
   if (typeof error === 'string') return error;
   const msg =
