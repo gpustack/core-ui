@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { breakpoints } from '../../lib/config';
 
 export default function useWindowResize() {
@@ -42,19 +42,24 @@ export default function useWindowResize() {
     };
   }, [size.width]);
 
-  const handleResize = useCallback(() => {
-    const fn = _.throttle(() => {
-      setSize({
-        width: window.innerWidth,
-        height: window.innerHeight
-      });
-    }, 200);
-    fn();
-  }, []);
+  // one stable throttled instance: building a new one per event and calling it
+  // right away fires on every leading edge, i.e. no throttling at all
+  const handleResize = useMemo(
+    () =>
+      _.throttle(() => {
+        setSize({
+          width: window.innerWidth,
+          height: window.innerHeight
+        });
+      }, 200),
+    []
+  );
 
   useEffect(() => {
     window.addEventListener('resize', handleResize);
     return () => {
+      // drop a pending trailing call so it can't set state after unmount
+      handleResize.cancel();
       window.removeEventListener('resize', handleResize);
     };
   }, [handleResize]);
