@@ -2,10 +2,19 @@ import { useMemoizedFn } from 'ahooks';
 import _ from 'lodash';
 import { useEffect, useRef, useState } from 'react';
 import useSetChunkRequest from '../../lib/hooks/use-chunk-request';
+import usePageVisibility from '../../lib/hooks/use-page-visibility';
 import useUpdateChunkedList from '../../lib/hooks/use-update-chunk-list';
 import useCoreUIContext from './useCoreUIContext';
 
-export default function useWatchList<T = Record<string, any>>(API: string) {
+export default function useWatchList<T = Record<string, any>>(
+  API: string,
+  options?: {
+    // set false when the caller already routes pause/resume by its own in-app
+    // tab state, otherwise the listener here would resume an inactive tab
+    pauseOnHidden?: boolean;
+  }
+) {
+  const { pauseOnHidden = true } = options || {};
   const watchAPI = API;
   const { services } = useCoreUIContext();
   const { request } = services;
@@ -18,7 +27,10 @@ export default function useWatchList<T = Record<string, any>>(API: string) {
   const { updateChunkedList, cacheDataListRef: cacheWatchDataListRef } =
     useUpdateChunkedList({
       dataList: watchDataList,
-      limit: 100,
+      // unbounded: the watch replays every existing item as a CREATE event on
+      // each (re)connect, so a finite limit would truncate that snapshot and
+      // shrink the list right after a resume
+      limit: Infinity,
       setDataList: setWatchDataList
     });
 
@@ -94,8 +106,16 @@ export default function useWatchList<T = Record<string, any>>(API: string) {
   });
 
   const resumeRequestsOnPageActive = useMemoizedFn(async () => {
-    await getAllDataList();
+    // re-watching is enough: the stream replays a full snapshot on connect and
+    // the cache was dropped on hide, so the list rebuilds from it. Fetching the
+    // list over REST here would only duplicate that snapshot.
     await createWatchChunkRequest();
+  });
+
+  usePageVisibility({
+    enabled: pauseOnHidden,
+    onHidden: cancelRequestsOnPageInactive,
+    onVisible: resumeRequestsOnPageActive
   });
 
   useEffect(() => {
@@ -112,6 +132,9 @@ export default function useWatchList<T = Record<string, any>>(API: string) {
     cancelWatch,
     cancelRequestsOnPageInactive,
     resumeRequestsOnPageActive,
+    // not used by the pause/resume pair — exposed for callers that need to
+    // re-align with the backend explicitly (note: untested path, `page: -1`)
+    getAllDataList,
     deleteItemFromCache: handleDeleteItemFromCache
   };
 }

@@ -4,20 +4,31 @@ export { default as useAppUtils } from './use-app-utils';
 export { default as useBodyScroll } from './use-body-scroll';
 export { default as useChunkFetch } from './use-chunk-fetch';
 export type { HandlerOptions } from './use-chunk-fetch';
-export { default as useChunkRequest } from './use-chunk-request';
+export {
+  createAxiosToken,
+  sliceData,
+  sliceJsonStr,
+  default as useChunkRequest
+} from './use-chunk-request';
 export { default as useContainerScroll } from './use-container-scroll';
 export { default as useDeferredRequest } from './use-deferred-request';
 export { default as useDownloadLogs } from './use-download-logs';
 export { default as useDownloadStream } from './use-download-stream';
 export { default as useExpandedRowKeys } from './use-expanded-row-keys';
 export { default as useOverlayScroller } from './use-overlay-scroller';
+export { default as usePageVisibility } from './use-page-visibility';
 export {
   useQueryData,
   useQueryDataList,
   useQueryData as useRequest
 } from './use-query-data-list';
-export { default as useRequestToken } from './use-request-token';
+export {
+  useAbortController,
+  useCancelToken,
+  default as useRequestToken
+} from './use-request-token';
 export { default as useResponsive } from './use-responsive';
+export { default as useSubmitLock } from './use-submit-lock';
 export { default as useTableRowSelection } from './use-table-row-selection';
 export { useTableMultiSort, default as useTableSort } from './use-table-sort';
 export { default as useUpdateChunkedList } from './use-update-chunk-list';
