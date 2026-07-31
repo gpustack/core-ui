@@ -81,7 +81,6 @@
     "classnames": "^2.5.1",
     "dayjs": "^1.11.20",
     "dompurify": "^3.4.12",
-    "epubjs": "^0.3.93",
     "highlight.js": "^11.10.0",
     "jszip": "^3.10.1",
     "katex": "^0.16.21",
