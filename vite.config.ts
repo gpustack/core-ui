@@ -8,8 +8,7 @@ const libraryChunks: Record<string, string> = {
   mammoth: 'mammoth',
   jszip: 'jszip',
   'pdfjs-dist': 'pdfjs-dist',
-  xlsx: 'xlsx',
-  epubjs: 'epubjs'
+  xlsx: 'xlsx'
 };
 
 const exactExternalPackages = new Set([

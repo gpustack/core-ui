@@ -368,7 +368,6 @@ export const parseParamsString = (paramsString: string): string[] => {
 };
 
 export { downloadFile } from './download-stream';
-export { default as readEpubContent } from './epub-reader';
 export { exportJsonToExcel, default as readExcelContent } from './excel-reader';
 export {
   createFormData,
