@@ -3,6 +3,7 @@ import React, { useCallback, useMemo, useRef } from 'react';
 import Chart from '../../../lib/components/echarts/chart';
 import useChartConfig from '../../../lib/components/echarts/config';
 import EmptyData from '../../../lib/components/empty-data';
+import { escapeHtml } from '../../../lib/utils';
 import { type ChartProps } from './types';
 
 const Scatter: React.FC<
@@ -160,12 +161,13 @@ const Scatter: React.FC<
     if (!dataList.length || dataList.length < 2) {
       return null;
     }
+    // Raw HTML rendered by ECharts via innerHTML — escape every value.
     const renderText = (item: any) => {
       return `<span class="tooltip-item-name">
                <span style="display:flex;justify-content:center;align-items: center;color:#fff;
                margin-right:0;border-radius:4px;width:14px;
-               height:14px;background-color:${item?.itemStyle?.color};"
-               >${item.name}</span>
+               height:14px;background-color:${escapeHtml(item?.itemStyle?.color)};"
+               >${escapeHtml(item.name)}</span>
              </span>`;
     };
     return renderText;
@@ -195,7 +197,7 @@ const Scatter: React.FC<
             result += `
             <span class="tooltip-item" style="justify-content: flex-start;">
              ${renderText ? renderText(item) : ''}
-             <span class="tooltip-value">${item.text}</span>
+             <span class="tooltip-value">${escapeHtml(item.text)}</span>
             </span>`;
           });
           return `<div class="tooltip-wrapper scatter">${result}</div>`;
