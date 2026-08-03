@@ -2,7 +2,7 @@ import { theme } from 'antd';
 import { isFunction } from 'lodash';
 import { useMemo } from 'react';
 import { useCoreUIContext } from '../../../lib/hooks';
-import { formatLargeNumber } from '../../../lib/utils';
+import { escapeHtml, formatLargeNumber } from '../../../lib/utils';
 
 export const grid = {
   left: 0,
@@ -40,8 +40,10 @@ export default function useChartConfig() {
     trigger: 'axis',
     backgroundColor: chartColorMap.colorBgContainerHover,
     borderColor: 'transparent',
+    // Returns raw HTML that ECharts renders via innerHTML, so every
+    // interpolated value goes through escapeHtml.
     formatter(params: any, callback?: (val: any) => any) {
-      let result = `<span class="tooltip-x-name">${params[0].axisValue}</span>`;
+      let result = `<span class="tooltip-x-name">${escapeHtml(params[0].axisValue)}</span>`;
       let visibleItemCount = 0;
 
       params.forEach((item: any) => {
@@ -58,10 +60,10 @@ export default function useChartConfig() {
 
         result += `<span class="tooltip-item">
           <span class="tooltip-item-name">
-            <span class="tooltip-item-dot" style="border-radius:${borderRadius};background-color:${item.color};"></span>
-            <span class="tooltip-item-title">${item.seriesName}</span>:
+            <span class="tooltip-item-dot" style="border-radius:${borderRadius};background-color:${escapeHtml(item.color)};"></span>
+            <span class="tooltip-item-title">${escapeHtml(item.seriesName)}</span>:
           </span>
-            <span class="tooltip-value">${value}</span>
+            <span class="tooltip-value">${escapeHtml(value)}</span>
       </span>`;
       });
 

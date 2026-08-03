@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import tinycolor from 'tinycolor2';
 
+export * from './escape-html';
 export * from './storage-namespace';
 
 export const isNotEmptyValue = (value: any) => {
