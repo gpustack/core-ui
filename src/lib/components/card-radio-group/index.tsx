@@ -33,6 +33,9 @@ export interface CardRadioGroupProps<T extends string | number = string> {
   // Cards share the row equally by default. Set a number to lay them out
   // in a fixed-column grid instead (useful when there are many options).
   columns?: number;
+  // Selected cards are tinted with `colorPrimaryBg` by default. Set `ghost`
+  // to keep the container background and mark selection by border only.
+  ghost?: boolean;
   className?: string;
   // Per-slot overrides, following antd's semantic-DOM API: inline styles
   // via `styles`, extra class names via `classNames`. Both merge with
@@ -79,6 +82,9 @@ const useStyles = createStyles(({ css, token }) => ({
     &:hover {
       border-color: ${token.colorPrimary};
     }
+  `,
+  cardActiveGhost: css`
+    background-color: ${token.colorBgContainer};
   `,
   cardDisabled: css`
     cursor: not-allowed;
@@ -137,6 +143,7 @@ function CardRadioGroup<T extends string | number = string>(
     options = [],
     disabled,
     columns,
+    ghost,
     className,
     styles: slotStyles,
     classNames: slotClassNames
@@ -177,6 +184,7 @@ function CardRadioGroup<T extends string | number = string>(
               classes.card,
               {
                 [classes.cardActive]: checked,
+                [classes.cardActiveGhost]: checked && ghost,
                 [classes.cardDisabled]: isDisabled
               },
               slotClassNames?.card
