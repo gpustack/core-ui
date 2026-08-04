@@ -1,10 +1,12 @@
 import { Pagination, Spin, theme, type PaginationProps } from 'antd';
+import classNames from 'classnames';
 import _ from 'lodash';
 import React, { useMemo } from 'react';
 import Header from './components/header';
 import HeaderPrefix from './components/header-prefix';
 import RowChildren from './components/row-children';
 import TableBody from './components/table-body';
+import { resolveScroll } from './scroll';
 import './styles/index.less';
 import { type ColumnProps, type TableProps } from './types';
 import useSorter from './use-sorter';
@@ -39,6 +41,7 @@ const Table: React.FC<TableProps & { pagination?: PaginationProps }> = (
     emptyMinHeight,
     sortDirections,
     showSorterTooltip,
+    scroll,
     renderChildren,
     loadChildren,
     loadChildrenAPI
@@ -74,6 +77,11 @@ const Table: React.FC<TableProps & { pagination?: PaginationProps }> = (
   // `minWidth` raises that shrink floor; `maxWidth` caps growth — the track then
   // sizes up to the cap instead of sharing leftover space proportionally, since
   // a grid growth limit cannot mix px with fr.
+  // `scroll.x` deliberately does NOT touch this template: it only widens the
+  // rows (see `resolveScroll`), so header and body keep resolving the very same
+  // track list and stay aligned column by column. The overflow comes from the
+  // `width` / `minWidth` floors above, which no amount of extra width can
+  // shrink — pure `fr` tracks simply distribute the wider row instead.
   const gridTemplate = useMemo(() => {
     return parsedColumns
       .map((col) => {
@@ -99,6 +107,13 @@ const Table: React.FC<TableProps & { pagination?: PaginationProps }> = (
       (hasSelect ? PREFIX_SELECT_WIDTH : 0)
     );
   })();
+
+  // Scroll flags + sizes for `.seal-table-container`, which is the ONE scroll
+  // viewport wrapping both the header row and the body rows.
+  const scrollState = resolveScroll(scroll, {
+    columns: parsedColumns,
+    prefixWidth
+  });
 
   const expandAll = (() => {
     const data = props.dataSource;
@@ -193,53 +208,76 @@ const Table: React.FC<TableProps & { pagination?: PaginationProps }> = (
     '--ant-table-header-icon-hover-color': token.colorTextSecondary
   } as React.CSSProperties;
 
+  const headerAndBody = (
+    <>
+      <div className="header-row-wrapper">
+        <HeaderPrefix
+          prefixWidth={prefixWidth}
+          selectAll={selectState.selectAll}
+          indeterminate={selectState.indeterminate}
+          onSelectAll={handleSelectAllChange}
+          onExpandAll={handleExpandAll}
+          expandAll={expandAll}
+          expandable={expandable}
+          enableSelection={rowSelection?.enableSelection}
+          disabled={!props.dataSource?.length}
+          hasColumns={parsedColumns.length > 0}
+        ></HeaderPrefix>
+        <Header
+          onSort={handleOnTableSort}
+          columns={parsedColumns}
+          gridTemplate={gridTemplate}
+          sortDirections={sortDirections}
+          sorterList={sorterList}
+          showSorterTooltip={showSorterTooltip}
+        ></Header>
+      </div>
+      <Spin spinning={loading} size="middle">
+        <TableBody
+          empty={empty}
+          emptyMinHeight={emptyMinHeight}
+          dataSource={props.dataSource}
+          columns={parsedColumns}
+          gridTemplate={gridTemplate}
+          prefixWidth={prefixWidth}
+          rowSelection={rowSelection}
+          expandable={expandable}
+          rowKey={rowKey}
+          childParentKey={childParentKey}
+          pollingChildren={pollingChildren}
+          watchChildren={watchChildren}
+          renderChildren={renderChildren}
+          loadChildren={loadChildren}
+          loadChildrenAPI={loadChildrenAPI}
+          onCell={onCell}
+          onExpand={onExpand}
+          expandedRowKeys={expandedRowKeys}
+        />
+      </Spin>
+    </>
+  );
+
   return (
     <div style={wrapperStyle}>
-      <div className="seal-table-container">
-        <div className="header-row-wrapper">
-          <HeaderPrefix
-            prefixWidth={prefixWidth}
-            selectAll={selectState.selectAll}
-            indeterminate={selectState.indeterminate}
-            onSelectAll={handleSelectAllChange}
-            onExpandAll={handleExpandAll}
-            expandAll={expandAll}
-            expandable={expandable}
-            enableSelection={rowSelection?.enableSelection}
-            disabled={!props.dataSource?.length}
-            hasColumns={parsedColumns.length > 0}
-          ></HeaderPrefix>
-          <Header
-            onSort={handleOnTableSort}
-            columns={parsedColumns}
-            gridTemplate={gridTemplate}
-            sortDirections={sortDirections}
-            sorterList={sorterList}
-            showSorterTooltip={showSorterTooltip}
-          ></Header>
-        </div>
-        <Spin spinning={loading} size="middle">
-          <TableBody
-            empty={empty}
-            emptyMinHeight={emptyMinHeight}
-            dataSource={props.dataSource}
-            columns={parsedColumns}
-            gridTemplate={gridTemplate}
-            prefixWidth={prefixWidth}
-            rowSelection={rowSelection}
-            expandable={expandable}
-            rowKey={rowKey}
-            childParentKey={childParentKey}
-            pollingChildren={pollingChildren}
-            watchChildren={watchChildren}
-            renderChildren={renderChildren}
-            loadChildren={loadChildren}
-            loadChildrenAPI={loadChildrenAPI}
-            onCell={onCell}
-            onExpand={onExpand}
-            expandedRowKeys={expandedRowKeys}
-          />
-        </Spin>
+      <div
+        className={classNames('seal-table-container', {
+          'seal-table-scroll-x': scrollState.hasX,
+          'seal-table-scroll-y': scrollState.hasY
+        })}
+        style={scrollState.style}
+      >
+        {scrollState.hasX ? (
+          // With `scroll.x` the header row and the body rows must be stretched
+          // by ONE element that resolves the width once. `scroll.x` may be a
+          // keyword (`'max-content'`) and the two resolve it to wildly
+          // different lengths on their own — the header only holds short titles
+          // while the body holds full cell content — which would give them
+          // different track sizes and misalign every column. Rendered only when
+          // x-scrolling is on, so the plain table keeps its original DOM.
+          <div className="seal-table-scroll-content">{headerAndBody}</div>
+        ) : (
+          headerAndBody
+        )}
       </div>
       {pagination && (
         <div className="pagination-wrapper">

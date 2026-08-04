@@ -140,7 +140,8 @@ export type {
   ChildGridOptions,
   ColumnProps as TableColumnProps,
   TableOrder,
-  TableProps
+  TableProps,
+  TableScroll
 } from './table/types';
 export { default as useTableSorter } from './table/use-sorter';
 export { default as TagsWrapper } from './tags-wrapper';
