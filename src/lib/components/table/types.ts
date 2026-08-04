@@ -29,7 +29,13 @@ export interface ColumnProps {
   width?: number;
   minWidth?: number;
   maxWidth?: number;
-  span: number;
+  /**
+   * Proportional share of the leftover width, as a `fr` track. Omit it to let
+   * the column take an equal share — every column defaults to `1fr`, so a table
+   * that sets no `span` at all divides the width evenly. Only set it where a
+   * column genuinely needs more or less room than its neighbours.
+   */
+  span?: number;
   align?: 'left' | 'center' | 'right';
   headerStyle?: React.CSSProperties;
   sorter?: boolean | { multiple?: number };
@@ -94,6 +100,32 @@ export type TableOrder = {
   field?: string;
   order: 'ascend' | 'descend' | null;
 };
+
+/**
+ * Scrolling limits, same semantics as antd `Table`'s `scroll`.
+ *
+ * - `x` — make the table horizontally scrollable. A number is px, a string is
+ *   passed through as-is (e.g. `'max-content'`), `true` only turns the overflow
+ *   on and lets the columns' own `width` / `minWidth` decide how far the table
+ *   may grow.
+ *
+ *   Prefer `true` or a px number over `'max-content'`. The columns are `fr`
+ *   tracks, and under a content-driven constraint one greedy cell sets the `fr`
+ *   unit for EVERY track: an 11-column / 24-span worker table whose labels cell
+ *   wants 582px on a 3-span track resolves to 582 / 3 = 194px per `fr`, i.e.
+ *   24 × 194 = 4694px of table instead of the 1370px its column floors ask for.
+ *   Columns stay aligned either way — the table is just far wider than intended.
+ * - `y` — cap the body height and scroll it vertically; the header stays put.
+ *   A number is px, a string is passed through (e.g. `'calc(100vh - 300px)'`).
+ *
+ * Omitting `scroll` leaves the table exactly as it was: no scroll viewport, no
+ * width/height limits.
+ */
+export interface TableScroll {
+  x?: number | string | true;
+  y?: number | string;
+}
+
 export interface TableProps {
   showSorterTooltip?: boolean;
   sortDirections?: ('ascend' | 'descend' | null)[];
@@ -108,6 +140,7 @@ export interface TableProps {
   // makes the first-load spinner, the empty state, and eventual rows occupy one
   // stable block, so entering the page no longer jumps.
   emptyMinHeight?: number | string;
+  scroll?: TableScroll;
   expandable?: React.ReactNode;
   dataSource: any[];
   pollingChildren?: boolean;

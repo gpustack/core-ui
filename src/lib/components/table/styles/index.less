@@ -5,12 +5,14 @@
 }
 
 .seal-table-container {
+  --seal-table-header-height: 50px;
+
   display: flex;
   flex-direction: column;
   width: 100%;
 
   .header-row-wrapper {
-    height: 50px;
+    height: var(--seal-table-header-height);
     display: flex;
     justify-content: flex-start;
     align-items: center;
@@ -100,6 +102,66 @@
     // the empty state appears — a seamless fade-in instead of a hard pop.
     .ant-empty {
       animation: sealTableEmptyFadeIn 0.3s ease-in-out;
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // `scroll` support. Both axes scroll on THIS element, never on the header or
+  // the body alone: those two are siblings that align only because they render
+  // the same `gridTemplate`, so a scroll offset applied to one and not the
+  // other would drift the header away from its data columns.
+  // ---------------------------------------------------------------------------
+  &.seal-table-scroll-x,
+  &.seal-table-scroll-y {
+    // Same thin, unobtrusive scrollbar as the host app's `.scroll-table`.
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-scrollbar-thumb) transparent;
+
+    &::-webkit-scrollbar {
+      width: var(--scrollbar-size);
+      height: var(--scrollbar-size);
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background-color: var(--color-scrollbar-thumb);
+      border-radius: 4px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background-color: transparent;
+    }
+  }
+
+  &.seal-table-scroll-x {
+    overflow-x: auto;
+
+    // The single owner of the horizontal size. `width: 100%` keeps the table
+    // flush with the viewport while there is room for it; `min-width` then takes
+    // over and pushes it wider, which is what creates the scrollable overflow.
+    // The header row and the row list are stretched by this box (never sized
+    // from `--seal-table-scroll-x` themselves), so both grids always resolve
+    // their tracks against one identical width — even when the value is a
+    // keyword like `max-content`, which each of them would otherwise resolve to
+    // a different length.
+    > .seal-table-scroll-content {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      min-width: var(--seal-table-scroll-x);
+    }
+  }
+
+  &.seal-table-scroll-y {
+    overflow-y: auto;
+
+    // `max-height` comes from `scroll.y` (+ header height) as an inline style.
+    // The header rides along inside the same viewport and sticks to its top, so
+    // it stays visible while the rows scroll under it — and it keeps moving
+    // horizontally with the rows when `scroll.x` is on as well.
+    .header-row-wrapper {
+      position: sticky;
+      top: 0;
+      z-index: 2;
     }
   }
 }
