@@ -56,6 +56,10 @@ export default defineConfig({
         'src/file-readers.ts',
         'src/yaml-editor.ts'
       ],
+      // `include` above is whole directories, so specs would otherwise each
+      // emit an (empty) declaration into dist. The JS bundles never contain
+      // them — rollup only walks the lib entries — this is declarations only.
+      exclude: ['**/*.test.ts', '**/*.test.tsx', '**/__tests__/**'],
       entryRoot: 'src',
       compilerOptions: {
         noEmit: false,
