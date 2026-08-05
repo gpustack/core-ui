@@ -116,7 +116,6 @@ interface FilterBarProps {
   buttonText?: string;
   buttonIcon?: React.ReactNode;
   marginBottom?: number;
-  marginTop?: number;
   inputHolder?: string;
   selectHolder?: string;
   actionType?: 'dropdown' | 'button';
@@ -153,8 +152,7 @@ export const FilterBar: React.FC<FilterBarProps> = (props) => {
     buttonText,
     buttonIcon,
     actionType = 'button',
-    marginBottom = 10,
-    marginTop = 10,
+    marginBottom = 16,
     inputHolder,
     selectHolder,
     select,
