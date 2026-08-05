@@ -50,6 +50,31 @@ describe('resolveScroll', () => {
     ).toEqual({ '--seal-table-scroll-x': '0px' });
   });
 
+  it('turns the x axis off while the body is empty', () => {
+    expect(
+      resolveScroll({ x: true }, { columns, prefixWidth: 40, hasRows: false })
+    ).toEqual({ hasX: false, hasY: false });
+    expect(resolveScroll({ x: 1200 }, { hasRows: false })).toEqual({
+      hasX: false,
+      hasY: false
+    });
+  });
+
+  it('still caps the height of an empty body', () => {
+    expect(
+      resolveScroll({ x: true, y: 400 }, { columns, hasRows: false })
+    ).toEqual({
+      hasX: false,
+      hasY: true,
+      style: { maxHeight: 'calc(400px + var(--seal-table-header-height))' }
+    });
+  });
+
+  it('keeps x when rows are present, explicitly or by default', () => {
+    expect(resolveScroll({ x: 1200 }, { hasRows: true }).hasX).toBe(true);
+    expect(resolveScroll({ x: 1200 }).hasX).toBe(true);
+  });
+
   it('caps the body with y and adds the header height back', () => {
     expect(resolveScroll({ y: 400 }).style).toEqual({
       maxHeight: 'calc(400px + var(--seal-table-header-height))'
