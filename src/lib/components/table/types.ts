@@ -118,6 +118,12 @@ export type TableOrder = {
  * - `y` — cap the body height and scroll it vertically; the header stays put.
  *   A number is px, a string is passed through (e.g. `'calc(100vh - 300px)'`).
  *
+ * `x` applies only while there are rows. An empty body drops the columns'
+ * `minWidth` floors and the x axis with them, so a table whose floors outgrow a
+ * narrow viewport shows its empty state flush instead of behind a horizontal
+ * scrollbar; the floors and the scroll come back with the first row. `y` keeps
+ * capping the empty block.
+ *
  * Omitting `scroll` leaves the table exactly as it was: no scroll viewport, no
  * width/height limits.
  */

@@ -6,6 +6,7 @@ import Header from './components/header';
 import HeaderPrefix from './components/header-prefix';
 import RowChildren from './components/row-children';
 import TableBody from './components/table-body';
+import { buildGridTemplate } from './grid-template';
 import { resolveScroll } from './scroll';
 import './styles/index.less';
 import { type ColumnProps, type TableProps } from './types';
@@ -70,28 +71,20 @@ const Table: React.FC<TableProps & { pagination?: PaginationProps }> = (
       });
   }, [columns, children]);
 
+  // An empty body resolves its layout differently: with no cells to keep
+  // readable and none for the header to align against, the columns' `minWidth`
+  // floors are dropped and the x axis is turned off, so a table whose floors
+  // outgrow a narrow viewport does not put a horizontal scrollbar under an empty
+  // placeholder. Both halves have to move together — dropping the scroll width
+  // alone would leave the header's own track floors overflowing the container,
+  // which scrolls just the same. See `buildGridTemplate` / `resolveScroll`.
+  const hasRows = !!props.dataSource?.length;
+
   // Shared column template for header and body so their columns always align.
-  // A column with an explicit `width` becomes a fixed px track; otherwise its
-  // `span` becomes a proportional fr track. `minmax(0, …fr)` lets a track shrink
-  // below its content width so long text wraps/clips instead of blowing out.
-  // `minWidth` raises that shrink floor; `maxWidth` caps growth — the track then
-  // sizes up to the cap instead of sharing leftover space proportionally, since
-  // a grid growth limit cannot mix px with fr.
-  // `scroll.x` deliberately does NOT touch this template: it only widens the
-  // rows (see `resolveScroll`), so header and body keep resolving the very same
-  // track list and stay aligned column by column. The overflow comes from the
-  // `width` / `minWidth` floors above, which no amount of extra width can
-  // shrink — pure `fr` tracks simply distribute the wider row instead.
-  const gridTemplate = useMemo(() => {
-    return parsedColumns
-      .map((col) => {
-        if (col.width) return `${col.width}px`;
-        const min = col.minWidth ? `${col.minWidth}px` : '0';
-        const max = col.maxWidth ? `${col.maxWidth}px` : `${col.span ?? 1}fr`;
-        return `minmax(${min}, ${max})`;
-      })
-      .join(' ');
-  }, [parsedColumns]);
+  const gridTemplate = useMemo(
+    () => buildGridTemplate(parsedColumns, { hasRows }),
+    [parsedColumns, hasRows]
+  );
 
   // Fixed width of the left prefix gutter (expand toggle + selection
   // checkbox). Shared by header prefix, every row prefix and the expanded
@@ -112,7 +105,8 @@ const Table: React.FC<TableProps & { pagination?: PaginationProps }> = (
   // viewport wrapping both the header row and the body rows.
   const scrollState = resolveScroll(scroll, {
     columns: parsedColumns,
-    prefixWidth
+    prefixWidth,
+    hasRows
   });
 
   const expandAll = (() => {

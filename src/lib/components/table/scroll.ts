@@ -48,14 +48,24 @@ export interface ResolvedScroll {
  * `scroll.y` caps the *body*, like antd does, but the header shares the same
  * scroll viewport (it is `position: sticky` there), so the header height is
  * added back on top of `y`.
+ *
+ * `hasRows: false` turns the x axis off entirely: an empty body has no cells to
+ * scroll to, and the column floors that `x` widens the rows out to are dropped
+ * from the track list too (see `buildGridTemplate`), so the header fits the
+ * viewport and a scrollbar over a placeholder would have nothing to reveal. `y`
+ * still applies — it caps the height of the empty block just as it caps rows.
  */
 export const resolveScroll = (
   scroll?: TableScroll,
-  options: { columns?: ColumnProps[]; prefixWidth?: number } = {}
+  options: {
+    columns?: ColumnProps[];
+    prefixWidth?: number;
+    hasRows?: boolean;
+  } = {}
 ): ResolvedScroll => {
   const x = scroll?.x;
   const y = scroll?.y;
-  const hasX = x !== undefined;
+  const hasX = x !== undefined && (options.hasRows ?? true);
   const hasY = y !== undefined;
 
   if (!hasX && !hasY) {
