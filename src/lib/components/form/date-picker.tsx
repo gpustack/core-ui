@@ -119,7 +119,7 @@ export const PickerField: React.FC<
           {...rest}
           ref={pickerRef}
           // label already lives in the floating Wrapper label
-          placeholder={isFocus || !label ? placeholder : ''}
+          placeholder={alwaysFocus || isFocus || !label ? placeholder : ''}
           onChange={handleChange}
           onFocus={handleOnFocus}
           onBlur={handleOnBlur}

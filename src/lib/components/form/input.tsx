@@ -9,7 +9,9 @@ import { type SealFormItemProps } from './types';
 import Wrapper from './wrapper';
 import InputWrapper from './wrapper/input';
 
-const CInput: React.FC<InputProps & SealFormItemProps> = (props) => {
+const CInput: React.FC<
+  InputProps & SealFormItemProps & { alwaysFocus?: boolean }
+> = (props) => {
   const {
     label,
     placeholder,
@@ -23,9 +25,11 @@ const CInput: React.FC<InputProps & SealFormItemProps> = (props) => {
     loading,
     labelExtra,
     style,
+    alwaysFocus = false,
     ...rest
   } = props;
   const [isFocus, setIsFocus] = useState(false);
+  const focused = alwaysFocus || isFocus;
   const inputRef = useRef<any>(null);
   let status = '';
   const statusData = Form?.Item?.useStatus?.();
@@ -79,7 +83,7 @@ const CInput: React.FC<InputProps & SealFormItemProps> = (props) => {
         status={checkStatus || status}
         label={label}
         labelExtra={labelExtra}
-        isFocus={isFocus}
+        isFocus={focused}
         required={required}
         description={description}
         disabled={props.disabled}
@@ -90,7 +94,7 @@ const CInput: React.FC<InputProps & SealFormItemProps> = (props) => {
         <Input
           {...rest}
           autoComplete={rest.autoComplete || 'off'}
-          placeholder={isFocus || !label ? placeholder : ''}
+          placeholder={focused || !label ? placeholder : ''}
           ref={inputRef}
           onInput={handleInput}
           onFocus={handleOnFocus}
