@@ -6,15 +6,16 @@ import { type SealFormItemProps } from './types';
 import Wrapper from './wrapper';
 import InputWrapper from './wrapper/input';
 
-const SealInputNumber: React.FC<InputNumberProps & SealFormItemProps> = (
-  props
-) => {
+const SealInputNumber: React.FC<
+  InputNumberProps & SealFormItemProps & { alwaysFocus?: boolean }
+> = (props) => {
   const {
     label,
     placeholder,
     required,
     description,
     isInFormItems = true,
+    alwaysFocus = false,
     ...rest
   } = props;
   const [isFocus, setIsFocus] = useState(false);
@@ -64,7 +65,7 @@ const SealInputNumber: React.FC<InputNumberProps & SealFormItemProps> = (
       <Wrapper
         status={status}
         label={label}
-        isFocus={isFocus}
+        isFocus={alwaysFocus || isFocus}
         required={required}
         description={description}
         disabled={props.disabled}

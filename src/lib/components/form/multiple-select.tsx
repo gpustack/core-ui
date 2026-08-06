@@ -13,6 +13,7 @@ const SealSelect: React.FC<
   SelectProps &
     SealFormItemProps & {
       showTags?: boolean;
+      alwaysFocus?: boolean;
       styles?: {
         wrapper?: React.CSSProperties;
         select?: React.CSSProperties;
@@ -29,6 +30,7 @@ const SealSelect: React.FC<
     allowNull,
     isInFormItems = true,
     notFoundContent = null,
+    alwaysFocus = false,
     ...rest
   } = props;
   const intl = useIntl();
@@ -99,7 +101,7 @@ const SealSelect: React.FC<
         className="seal-select-wrapper"
         status={status}
         label={label}
-        isFocus={isFocus}
+        isFocus={alwaysFocus || isFocus}
         required={required}
         description={description}
         disabled={props.disabled}

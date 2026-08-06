@@ -15,6 +15,7 @@ const SealAutoComplete: React.FC<
       onPaste?: (e: any) => void;
       onInput?: (e: Event) => void;
       clearSpaceOnBlur?: boolean;
+      alwaysFocus?: boolean;
     }
 > = (props) => {
   const {
@@ -35,9 +36,11 @@ const SealAutoComplete: React.FC<
     allowClear,
     clearSpaceOnBlur,
     showSearch,
+    alwaysFocus = false,
     ...rest
   } = props;
   const [isFocus, setIsFocus] = useState(false);
+  const focused = alwaysFocus || isFocus;
   const inputRef = useRef<any>(null);
   let status = '';
   const statusData = Form?.Item?.useStatus?.();
@@ -120,7 +123,7 @@ const SealAutoComplete: React.FC<
         status={checkStatus || status}
         extra={extra}
         label={label}
-        isFocus={isFocus}
+        isFocus={focused}
         required={required}
         description={description}
         disabled={props.disabled}
@@ -130,7 +133,7 @@ const SealAutoComplete: React.FC<
           {...rest}
           ref={inputRef}
           placeholder={
-            isFocus || !label ? (
+            focused || !label ? (
               <span style={{ paddingLeft: '12px' }}>{placeholder}</span>
             ) : (
               ''
