@@ -12,3 +12,22 @@ export { default as HBarChart } from './lib/components/echarts/h-bar';
 export { default as LineChart } from './lib/components/echarts/line-chart';
 export { default as MixLineBarChart } from './lib/components/echarts/mix-line-bar';
 export { default as ScatterChart } from './lib/components/echarts/scatter';
+
+// The pieces a bespoke chart needs, for a shape the components above don't
+// cover. Without these a caller has only one way to draw one: `import * as
+// echarts from 'echarts'`, which pulls the whole ~860KB package in alongside
+// this tree-shaken instance and silently skips the registrations below.
+//
+// Build the option, then hand it to <Chart> — it owns init / setOption /
+// throttled ResizeObserver / dispose, and gets that lifecycle right.
+export { default as echarts } from './lib/components/echarts';
+export type { ECOption } from './lib/components/echarts';
+
+// Theme tokens for chart internals. echarts can't read CSS variables, so axis,
+// tooltip and series colors have to be passed as resolved values — take them
+// from here rather than hardcoding hex, or the chart won't follow dark mode.
+export { default as useChartConfig } from './lib/components/echarts/config';
+export type {
+  AreaChartItemProps,
+  ChartProps
+} from './lib/components/echarts/types';

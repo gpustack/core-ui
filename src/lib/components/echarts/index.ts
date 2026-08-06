@@ -13,20 +13,17 @@ import {
   ScatterChart
 } from 'echarts/charts';
 import type {
-  DatasetComponentOption,
   GridComponentOption,
   TitleComponentOption,
   TooltipComponentOption
 } from 'echarts/components';
 import {
-  DataZoomComponent,
-  DatasetComponent,
   GridComponent,
   LegendComponent,
+  MarkAreaComponent,
+  MarkLineComponent,
   TitleComponent,
-  TooltipComponent,
-  // (filter, sort)
-  TransformComponent
+  TooltipComponent
 } from 'echarts/components';
 import type { ComposeOption } from 'echarts/core';
 import * as echarts from 'echarts/core';
@@ -39,21 +36,32 @@ type ECOption = ComposeOption<
   | TitleComponentOption
   | TooltipComponentOption
   | GridComponentOption
-  | DatasetComponentOption
   | GaugeSeriesOption
   | ScatterSeriesOption
   | PieSeriesOption
 >;
 
 // register components and charts
+//
+// A missing registration fails SILENTLY — echarts drops the option and TS can't
+// catch it, because markLine/markArea are declared on SeriesOption and so type
+// as valid whether or not their component is installed. Anything a chart puts in
+// its option has to be listed here.
+//
+// AxisPointerComponent is deliberately absent: GridComponent's install already
+// pulls it in, so `tooltip.axisPointer` works without a separate entry.
+//
+// Dataset / Transform / DataZoom are absent because nothing uses them — every
+// chart here passes `series.data` directly. Add them back with the chart that
+// needs them; an unused registration is bundle weight on every chart route.
 echarts.use([
   LegendComponent,
   TitleComponent,
   TooltipComponent,
   GridComponent,
-  DatasetComponent,
-  TransformComponent,
-  DataZoomComponent,
+  // Reference lines and shaded x-ranges (a target line, an overload region).
+  MarkLineComponent,
+  MarkAreaComponent,
   BarChart,
   LineChart,
   ScatterChart,
