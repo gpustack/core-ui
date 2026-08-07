@@ -67,7 +67,7 @@ const CheckboxWrapper = styled.div`
   }
 `;
 
-interface DataOptions {
+export interface DeleteModalOptions {
   content?: string;
   selection?: boolean;
   name?: string;
@@ -80,6 +80,15 @@ interface DataOptions {
     checkText: string;
     defautlChecked: boolean;
   };
+  // Footer controls. The dialog defaults to a delete confirmation — Cancel
+  // plus a danger primary OK — so callers reusing it for a softer action
+  // (a revert, an acknowledge-only notice) can drop a button or restyle it.
+  //
+  // `okButtonProps` / `cancelButtonProps` come from `ModalFuncProps` and are
+  // spread over the defaults, so `{ danger: false }` un-reds the OK button.
+  // `onClick` and the OK button's `loading` stay owned by the component.
+  showOk?: boolean;
+  showCancel?: boolean;
 }
 
 interface Configuration {
@@ -96,9 +105,11 @@ const DeleteModal = forwardRef((props, ref) => {
     checked: false
   });
   const [delLoading, setDelLoading] = useState(false);
-  const [config, setConfig] = useState<ModalFuncProps & DataOptions>({} as any);
+  const [config, setConfig] = useState<ModalFuncProps & DeleteModalOptions>(
+    {} as any
+  );
 
-  const show = (data: ModalFuncProps & DataOptions) => {
+  const show = (data: ModalFuncProps & DeleteModalOptions) => {
     saveScrollHeight();
     setConfig(data);
     setConfiguration({
@@ -170,22 +181,31 @@ const DeleteModal = forwardRef((props, ref) => {
       }}
       footer={
         <Space size={20}>
-          <Button onClick={handleCancel} size="middle">
-            {config.cancelText
-              ? intl.formatMessage({ id: config.cancelText })
-              : intl.formatMessage({ id: 'common.button.cancel' })}
-          </Button>
-          <Button
-            type="primary"
-            onClick={handleOk}
-            size="middle"
-            danger
-            loading={delLoading}
-          >
-            {config.okText
-              ? intl.formatMessage({ id: config.okText })
-              : intl.formatMessage({ id: 'common.button.delete' })}
-          </Button>
+          {config.showCancel !== false && (
+            <Button
+              size="middle"
+              {...config.cancelButtonProps}
+              onClick={handleCancel}
+            >
+              {config.cancelText
+                ? intl.formatMessage({ id: config.cancelText })
+                : intl.formatMessage({ id: 'common.button.cancel' })}
+            </Button>
+          )}
+          {config.showOk !== false && (
+            <Button
+              type="primary"
+              size="middle"
+              danger
+              {...config.okButtonProps}
+              onClick={handleOk}
+              loading={delLoading}
+            >
+              {config.okText
+                ? intl.formatMessage({ id: config.okText })
+                : intl.formatMessage({ id: 'common.button.delete' })}
+            </Button>
+          )}
         </Space>
       }
     >

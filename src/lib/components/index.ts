@@ -32,6 +32,7 @@ export { default as CommandViewer } from './command-viewer';
 export { default as ContentWrapper } from './content-wrapper';
 export { default as CopyButton } from './copy-button';
 export { default as DeleteModal } from './delete-modal';
+export type { DeleteModalOptions } from './delete-modal';
 export { default as DividerLine } from './divider-line';
 export { default as DocLink } from './doc-link';
 export { default as DropdownActions } from './drop-down-actions';
