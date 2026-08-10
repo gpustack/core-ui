@@ -9,7 +9,6 @@ import _, { throttle } from 'lodash';
 import React, {
   forwardRef,
   useCallback,
-  useEffect,
   useImperativeHandle,
   useMemo,
   useRef,
@@ -45,8 +44,18 @@ interface SpeechContentProps {
   audioUrl: string;
   onPlay?: () => void;
   onPause?: () => void;
-  isStream?: boolean;
-  isPlaying?: boolean;
+  /**
+   * State and controls of a stream played by the caller's own player instead of
+   * by an audio element. `duration` stays 0 until generation ends — seeking and
+   * downloading unlock at that point, pause / resume works throughout.
+   */
+  streamPlayer?: {
+    isPlaying?: boolean;
+    currentTime?: number;
+    duration?: number;
+    downloadUrl?: string;
+    onSeek?: (position: number) => void;
+  };
   analyserData?: {
     data: Uint8Array;
     analyser: any;
@@ -54,20 +63,15 @@ interface SpeechContentProps {
 }
 const SpeechItem: React.FC<SpeechContentProps> = forwardRef(
   (props, playerRef) => {
-    const { isStream } = props;
-    console.log(
-      'Rendering SpeechItem with props:',
-      props.isStream,
-      props.analyserData
-    );
     const intl = useIntl();
-    const [isPlay, setIsPlay] = useState(props.autoplay || props.isPlaying);
+    const [isPlay, setIsPlay] = useState(props.autoplay);
     const [duration, setDuration] = useState<number>(0);
     const [animationSize, setAnimationSize] = useState({
       width: 900,
       height: 0
     });
     const [currentTime, setCurrentTime] = useState(0);
+    const [seekingValue, setSeekingValue] = useState<number | null>(null);
     const [audioChunks, setAudioChunks] = useState<any>({
       data: new Uint8Array(128),
       analyser: null
@@ -75,13 +79,14 @@ const SpeechItem: React.FC<SpeechContentProps> = forwardRef(
     const wrapper = useRef<any>(null);
     const ref = useRef<any>(null);
 
-    useEffect(() => {
-      setIsPlay(props.autoplay || props.isPlaying);
-    }, [props.autoplay, props.isPlaying]);
-
+    // A PCM stream is played by the caller's own player instead of by an audio
+    // element, so for those items every playback state comes from props.
     const isPCMStream = useMemo(() => {
       return props.audioUrl?.startsWith('pcm-stream://');
     }, [props.audioUrl]);
+
+    const stream = isPCMStream ? props.streamPlayer : undefined;
+    const playing = stream ? !!stream.isPlaying : isPlay;
 
     // Sync internal ref with external playerRef if provided
 
@@ -102,6 +107,17 @@ const SpeechItem: React.FC<SpeechContentProps> = forwardRef(
     };
 
     const handlePlay = async () => {
+      // A stream is not ours to control: report the intent and let the caller's
+      // player decide, it owns `isPlaying`.
+      if (isPCMStream) {
+        if (playing) {
+          props.onPause?.();
+        } else {
+          props.onPlay?.();
+        }
+        return;
+      }
+
       try {
         if (ref.current?.wavesurfer.current?.isPlaying()) {
           onPause();
@@ -158,16 +174,24 @@ const SpeechItem: React.FC<SpeechContentProps> = forwardRef(
     }, 200);
 
     const handleSliderChange = (value: number) => {
+      // A stream reports its position through props, so let the thumb follow the
+      // drag locally and commit once — reseeking a stream means requeueing all
+      // of its remaining audio.
+      if (stream) {
+        setSeekingValue(value);
+        return;
+      }
       debounceSeek(value);
+    };
+
+    const handleSliderChangeComplete = (value: number) => {
+      if (!stream) return;
+      setSeekingValue(null);
+      stream.onSeek?.(value);
     };
 
     const handleReady = useCallback((duration: number) => {
       setDuration(duration);
-    }, []);
-
-    const handlOnChangeComplete = useCallback((value: number) => {
-      ref.current?.seekTo(value / duration);
-      setCurrentTime(value);
     }, []);
 
     const convertFormat = () => {
@@ -178,7 +202,7 @@ const SpeechItem: React.FC<SpeechContentProps> = forwardRef(
     };
 
     const onDownload = useCallback(() => {
-      const url = props.audioUrl || '';
+      const url = stream?.downloadUrl || props.audioUrl || '';
       const filename = `audio-${dayjs().format('YYYYMMDDHHmmss')}.${convertFormat()}`;
 
       const link = document.createElement('a');
@@ -189,43 +213,58 @@ const SpeechItem: React.FC<SpeechContentProps> = forwardRef(
       link.remove();
     }, [props.audioUrl, props.format]);
 
-    console.log('isPCMStream:', isPCMStream, isPlay);
-
-    console.log('props.analyserData:', props.analyserData);
-
+    // Pause / resume works throughout — for a stream it is the caller's player
+    // that answers, otherwise the audio element. Seeking and downloading need
+    // the whole audio: for an element that means metadata has loaded, for a
+    // stream that generation has ended (its length is what reports that).
     const renderPlayerActions = () => {
-      if (isPCMStream) {
-        return null;
-      }
+      const hasCompleteAudio = !!props.audioUrl && duration > 0;
+      // A stream reports no length while it is still being generated: there is
+      // no total to measure a position against yet, so the bar stays empty.
+      const generating = !!stream && !stream.duration;
+      const totalDuration = stream ? stream.duration || 0 : duration;
+      const position = generating
+        ? 0
+        : stream
+          ? (seekingValue ?? stream.currentTime ?? 0)
+          : currentTime;
+      const canPlay = stream ? true : hasCompleteAudio;
+      const canSeek = stream ? !generating : hasCompleteAudio;
+      const canDownload = stream ? !!stream.downloadUrl : hasCompleteAudio;
+
       return (
         <div>
           <Slider
             className="slider-progress"
-            value={currentTime}
-            max={duration}
+            value={position}
+            max={totalDuration}
             step={0.01}
+            disabled={!canSeek}
             onChange={handleSliderChange}
+            onChangeComplete={handleSliderChangeComplete}
           ></Slider>
           <div className="speech-actions">
             <span className="tags">
               <span className="item">{props.format}</span>
             </span>
             <span className="duration">
-              {_.round(currentTime, 2) || _.round(duration, 2)}
+              {generating
+                ? ''
+                : _.round(position, 2) || _.round(totalDuration, 2)}
             </span>
             <div className="actions">
               <Tooltip
                 title={
-                  isPlay
+                  playing
                     ? intl.formatMessage({ id: 'playground.audio.button.stop' })
                     : intl.formatMessage({ id: 'playground.audio.button.play' })
                 }
               >
                 <Button
-                  disabled={!props.audioUrl || duration === 0}
+                  disabled={!canPlay}
                   onClick={handlePlay}
                   icon={
-                    isPlay ? (
+                    playing ? (
                       <PauseCircleOutlined className="font-size-16" />
                     ) : (
                       <PlayCircleOutlined className="font-size-16" />
@@ -241,7 +280,7 @@ const SpeechItem: React.FC<SpeechContentProps> = forwardRef(
                 })}
               >
                 <Button
-                  disabled={!props.audioUrl || duration === 0}
+                  disabled={!canDownload}
                   onClick={onDownload}
                   icon={<DownloadOutlined className="font-size-16" />}
                   type="text"
@@ -263,19 +302,6 @@ const SpeechItem: React.FC<SpeechContentProps> = forwardRef(
             ref={wrapper}
           >
             <>
-              {/* {!isPCMStream && (
-              <AudioPlayer
-                {...props}
-                audioUrl={props.audioUrl}
-                onReady={handleReady}
-                onFinish={handleOnFinish}
-                onPlay={handleOnPlay}
-                onPause={handleOnPause}
-                onAnalyse={handleOnAnalyse}
-                onAudioprocess={handleOnAudioprocess}
-                ref={ref}
-              ></AudioPlayer>
-            )} */}
               {!isPCMStream && (
                 <RawAudioPlayer
                   {...props}
@@ -289,7 +315,7 @@ const SpeechItem: React.FC<SpeechContentProps> = forwardRef(
                   ref={ref}
                 ></RawAudioPlayer>
               )}
-              {isPlay &&
+              {playing &&
                 (props.analyserData?.analyser?.current ||
                   audioChunks.analyser?.current) && (
                   <AudioAnimation
