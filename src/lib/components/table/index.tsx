@@ -73,11 +73,12 @@ const Table: React.FC<TableProps & { pagination?: PaginationProps }> = (
 
   // An empty body resolves its layout differently: with no cells to keep
   // readable and none for the header to align against, the columns' `minWidth`
-  // floors are dropped and the x axis is turned off, so a table whose floors
-  // outgrow a narrow viewport does not put a horizontal scrollbar under an empty
-  // placeholder. Both halves have to move together — dropping the scroll width
-  // alone would leave the header's own track floors overflowing the container,
-  // which scrolls just the same. See `buildGridTemplate` / `resolveScroll`.
+  // floors and `maxWidth` caps are both dropped and the x axis is turned off, so
+  // a table whose floors outgrow a narrow viewport does not put a horizontal
+  // scrollbar under an empty placeholder. Both halves have to move together —
+  // dropping the scroll width alone would leave the header's own track floors
+  // overflowing the container, which scrolls just the same. See
+  // `buildGridTemplate` / `resolveScroll`.
   const hasRows = !!props.dataSource?.length;
 
   // Shared column template for header and body so their columns always align.

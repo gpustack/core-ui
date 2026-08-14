@@ -22,9 +22,9 @@ describe('buildGridTemplate', () => {
     ).toBe('minmax(0, 1fr)');
   });
 
-  it('drops the minWidth floors while the body is empty', () => {
+  it('drops both the minWidth floors and the maxWidth caps while the body is empty', () => {
     expect(buildGridTemplate(columns, { hasRows: false })).toBe(
-      '200px minmax(0, 1fr) minmax(0, 2fr) minmax(0, 120px)'
+      '200px minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr)'
     );
   });
 

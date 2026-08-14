@@ -17,14 +17,18 @@ import { type ColumnProps } from './types';
  * `minWidth` floors above, which no amount of extra width can shrink — pure
  * `fr` tracks simply distribute the wider row instead.
  *
- * `hasRows: false` drops the `minWidth` floors. An empty body has no cells to
- * keep readable and none to align the header against, so those floors would
- * only push the lone header row past a narrow viewport and hand the table a
- * horizontal scrollbar over a placeholder. Header titles truncate through
- * `AutoTooltip`, so a squeezed header degrades to an ellipsis instead of
- * overflowing, and the floors come back with the first row. An explicit `width`
- * stays a fixed track either way — a column that asked to be pinned should not
- * drift when the data lands.
+ * `hasRows: false` drops BOTH elastic bounds — the `minWidth` floors and the
+ * `maxWidth` caps — leaving every non-fixed column a plain `minmax(0, …fr)`
+ * track. An empty body has no cells to keep readable and none to align the
+ * header against, so both bounds only work against the lone header row: the
+ * floors push it past a narrow viewport (the x axis is off there, see
+ * `resolveScroll`, so it just overflows the container) and the caps stop the
+ * tracks from spanning the full width, leaving dead space on the right. Without
+ * them the `fr` tracks always resolve to exactly the container width. Header
+ * titles truncate through `AutoTooltip`, so a squeezed header degrades to an
+ * ellipsis instead of overflowing, and both bounds come back with the first row.
+ * An explicit `width` stays a fixed track either way — a column that asked to be
+ * pinned should not drift when the data lands.
  */
 export const buildGridTemplate = (
   columns: ColumnProps[] = [],
@@ -36,7 +40,8 @@ export const buildGridTemplate = (
     .map((col) => {
       if (col.width) return `${col.width}px`;
       const min = hasRows && col.minWidth ? `${col.minWidth}px` : '0';
-      const max = col.maxWidth ? `${col.maxWidth}px` : `${col.span ?? 1}fr`;
+      const max =
+        hasRows && col.maxWidth ? `${col.maxWidth}px` : `${col.span ?? 1}fr`;
       return `minmax(${min}, ${max})`;
     })
     .join(' ');
