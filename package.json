@@ -86,7 +86,7 @@
     "katex": "^0.16.21",
     "lamejs": "github:zhuker/lamejs",
     "lodash": "^4.17.21",
-    "mammoth": "^1.8.0",
+    "mammoth": "^1.12.1",
     "marked": "^14.1.0",
     "pdfjs-dist": "^4.7.76",
     "query-string": "^9.0.0",
