@@ -12,9 +12,15 @@ export default function useWatchList<T = Record<string, any>>(
     // set false when the caller already routes pause/resume by its own in-app
     // tab state, otherwise the listener here would resume an inactive tab
     pauseOnHidden?: boolean;
+    // Gate the whole watch on a caller-side condition — a list page whose
+    // current rows can't have any of these children shouldn't hold a stream
+    // open for them. While false no request is made and the list stays empty;
+    // flipping it to true starts the watch, which replays a full snapshot on
+    // connect, so nothing has to be back-filled.
+    enabled?: boolean;
   }
 ) {
-  const { pauseOnHidden = true } = options || {};
+  const { pauseOnHidden = true, enabled = true } = options || {};
   const watchAPI = API;
   const { services } = useCoreUIContext();
   const { request } = services;
@@ -113,17 +119,25 @@ export default function useWatchList<T = Record<string, any>>(
   });
 
   usePageVisibility({
-    enabled: pauseOnHidden,
+    enabled: pauseOnHidden && enabled,
     onHidden: cancelRequestsOnPageInactive,
     onVisible: resumeRequestsOnPageActive
   });
 
   useEffect(() => {
+    if (!enabled) {
+      // Same reasoning as the hide path: events fired while we are not
+      // watching are never re-sent, so a kept list would go stale silently.
+      // Re-enabling rebuilds it from the stream's own snapshot.
+      cancelRequestsOnPageInactive();
+      setWatchDataList([]);
+      return;
+    }
     createWatchChunkRequest();
     return () => {
       cancelWatch();
     };
-  }, []);
+  }, [enabled]);
 
   return {
     watchDataList,
