@@ -1,21 +1,27 @@
-import { ImportOutlined } from '@ant-design/icons';
-import { loader } from '@monaco-editor/react';
+import { ImportOutlined, LoadingOutlined } from '@ant-design/icons';
 import { Button, message, Typography, Upload } from 'antd';
 import { type RcFile } from 'antd/lib/upload';
-import * as monaco from 'monaco-editor';
 import React, {
   forwardRef,
+  lazy,
+  Suspense,
+  useCallback,
   useEffect,
   useImperativeHandle,
   useRef
 } from 'react';
 import styled from 'styled-components';
 import { useIntl } from '../../hooks/useIntl';
-import EditorInner from './editor';
+
+// `monaco-editor` is ~2.5MB parsed and it is pinned into whatever chunk
+// imports it — a static `./editor` import would make every consumer route
+// block on it before first paint, even though the editor only ever renders
+// inside a drawer/modal the user has to open. Keep the whole monaco surface
+// (`monaco-editor`, `monaco-yaml`, `loader.config`) behind this boundary:
+// `./editor` is the ONLY module allowed to touch it.
+const EditorInner = lazy(() => import('./editor'));
 
 const { Text } = Typography;
-
-loader.config({ monaco });
 
 const Container = styled.div`
   position: relative;
@@ -38,6 +44,13 @@ const ErrorText = styled(Text)`
   padding: 4px 6px;
   background-color: var(--ant-color-bg-elevated);
   border-radius: 0 0 var(--ant-border-radius-lg) var(--ant-border-radius-lg);
+`;
+
+const Loading = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ant-color-text-tertiary);
 `;
 
 const Header = styled.div`
@@ -90,10 +103,46 @@ const YamlEditor: React.FC<ViewerProps> = forwardRef((props, ref) => {
   const intl = useIntl();
 
   const editorRef = useRef<any>(null);
+  const pendingValueRef = useRef<string | null>(null);
 
+  // monaco is lazy-loaded, so `editorRef` is empty for the first few hundred
+  // ms after mount. Callers push content imperatively (the inner editor pins
+  // its model to a fixed path, so a remount reuses the old model instead of
+  // the `value` prop) and that push used to land on a null ref and vanish.
+  // Buffer it here and flush on attach — every consumer gets the guarantee
+  // once, instead of each one polling for the editor to come up.
   const setContent = (val: string) => {
-    editorRef.current?.setValue?.(val);
+    if (editorRef.current?.setValue) {
+      editorRef.current.setValue(val);
+    } else {
+      pendingValueRef.current = val;
+    }
   };
+
+  // monaco's `createModel` throws an opaque `factory.create is not a function`
+  // on anything but a string, and it takes down the whole drawer. Callers with
+  // a structured config must serialize it themselves — core-ui can't, because
+  // the parse side may use a custom YAML schema (tags, key order) that only
+  // the caller knows. So: keep the editor alive, and say what went wrong.
+  const safeValue = typeof value === 'string' ? value : '';
+  if (value != null && typeof value !== 'string') {
+    console.error(
+      '[YamlEditor] `value` must be a YAML string, received',
+      typeof value,
+      '— serialize it before passing it in.'
+    );
+  }
+
+  // Stable identity on purpose: an inline callback ref is re-created every
+  // render, which makes React detach (call with null) and re-attach on each
+  // one — the flush below would then run against a torn-down editor.
+  const attachEditor = useCallback((instance: any) => {
+    editorRef.current = instance;
+    if (instance && pendingValueRef.current !== null) {
+      instance.setValue?.(pendingValueRef.current);
+      pendingValueRef.current = null;
+    }
+  }, []);
 
   const beforeUpload = (file: RcFile) => {
     const isYaml =
@@ -146,7 +195,7 @@ const YamlEditor: React.FC<ViewerProps> = forwardRef((props, ref) => {
       return editorRef.current?.getValue?.();
     },
     setValue: (val: string) => {
-      editorRef.current?.setValue?.(val);
+      setContent(val);
     },
     dispose: () => {
       editorRef.current?.dispose?.();
@@ -168,19 +217,27 @@ const YamlEditor: React.FC<ViewerProps> = forwardRef((props, ref) => {
         minHeight: height
       }}
     >
-      <EditorInner
-        ref={editorRef}
-        header={renderHeader()}
-        variant={variant}
-        height={height}
-        theme={isDarkTheme ? 'vs-dark' : 'light'}
-        value={value}
-        placeholder={placeholder}
-        schema={schema}
-        onChange={onChange}
-        onBlur={onBlur}
-        onFocus={onFocus}
-      />
+      <Suspense
+        fallback={
+          <Loading style={{ height }}>
+            <LoadingOutlined style={{ fontSize: 24 }} />
+          </Loading>
+        }
+      >
+        <EditorInner
+          ref={attachEditor}
+          header={renderHeader()}
+          variant={variant}
+          height={height}
+          theme={isDarkTheme ? 'vs-dark' : 'light'}
+          value={safeValue}
+          placeholder={placeholder}
+          schema={schema}
+          onChange={onChange}
+          onBlur={onBlur}
+          onFocus={onFocus}
+        />
+      </Suspense>
       {validateMessage && (
         <ErrorText type="danger">{validateMessage}</ErrorText>
       )}
