@@ -106,10 +106,17 @@ const CodeViewer: React.FC<CodeViewerProps> = (props) => {
   const hljs = (fullLoaded && getFullHighlighter()) || getCommonHighlighter();
 
   const autodetectLang = autodetect && !lang;
-  // Autodetection scores every registered language, so it only means something
-  // against the full build.
+  // Two reasons to want the full build: autodetection, which only means
+  // something when it can score every registered language, or a named language
+  // outside the common set.
+  //
+  // The `!!lang` guard is defensive, not a live fix: `autodetect` defaults to
+  // true here and `HighlightCode` never forwards it, so today an empty `lang`
+  // always lands in `autodetectLang` above. Should that ever change, an empty
+  // `lang` with autodetection off must NOT pull the full build — that path
+  // renders plain text either way, so loading it would buy nothing.
   const needsFullHighlighter =
-    !fullLoaded && (autodetectLang || !hljs.getLanguage(lang));
+    !fullLoaded && (autodetectLang || (!!lang && !hljs.getLanguage(lang)));
 
   useEffect(() => {
     if (!needsFullHighlighter) {
