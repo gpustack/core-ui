@@ -1,8 +1,13 @@
 import classNames from 'classnames';
-import hljs from 'highlight.js';
-import { useMemo } from 'react';
+import { startTransition, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import CopyButton from '../copy-button';
+import {
+  getCommonHighlighter,
+  getFullHighlighter,
+  loadFullHighlighter,
+  warnUnknownLanguage
+} from './highlighter';
 import { escapeHtml } from './utils';
 
 interface CodeViewerProps {
@@ -96,18 +101,49 @@ const CodeViewer: React.FC<CodeViewerProps> = (props) => {
     xScrollable = false
   } = props || {};
 
-  const highlightedCode = useMemo(() => {
-    const autodetectLang = autodetect && !lang;
-    const cannotDetectLanguage = !autodetectLang && !hljs.getLanguage(lang);
-    let className = '';
+  // Flips once the full build lands, to re-run the highlight below.
+  const [fullLoaded, setFullLoaded] = useState(() => !!getFullHighlighter());
+  const hljs = (fullLoaded && getFullHighlighter()) || getCommonHighlighter();
 
-    if (!cannotDetectLanguage) {
-      className = `hljs ${lang}`;
+  const autodetectLang = autodetect && !lang;
+  // Autodetection scores every registered language, so it only means something
+  // against the full build.
+  const needsFullHighlighter =
+    !fullLoaded && (autodetectLang || !hljs.getLanguage(lang));
+
+  useEffect(() => {
+    if (!needsFullHighlighter) {
+      return;
     }
+    let alive = true;
+    loadFullHighlighter()
+      .then(() => {
+        if (alive) {
+          // A long document can hold many code blocks — let React interrupt
+          // the re-highlight instead of committing them in one blocking pass.
+          startTransition(() => setFullLoaded(true));
+        }
+      })
+      .catch(() => {
+        // The block is already readable as plain text; nothing to degrade to.
+      });
+    return () => {
+      alive = false;
+    };
+  }, [needsFullHighlighter]);
+
+  const highlightedCode = useMemo(() => {
+    const cannotDetectLanguage = !autodetectLang && !hljs.getLanguage(lang);
+    // `hljs` carries the block's padding and overflow rules, so it stays on
+    // even in the plain-text fallback — dropping it would resize the block
+    // when the full build arrives.
+    const className = cannotDetectLanguage ? 'hljs' : `hljs ${lang}`;
 
     // No idea what language to use, return raw code
     if (cannotDetectLanguage) {
-      console.warn(`The language "${lang}" you specified could not be found.`);
+      if (fullLoaded) {
+        warnUnknownLanguage(lang);
+      }
       return {
         value: escapeHtml(code),
         className: className
@@ -129,7 +165,7 @@ const CodeViewer: React.FC<CodeViewerProps> = (props) => {
       value: result.value,
       className: className
     };
-  }, [code, lang, autodetect]);
+  }, [code, lang, autodetectLang, hljs, fullLoaded]);
 
   return (
     <Wrapper>
