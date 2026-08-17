@@ -1,15 +1,9 @@
 // vite.config.ts
 import react from '@vitejs/plugin-react';
+import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
-
-const libraryChunks: Record<string, string> = {
-  mammoth: 'mammoth',
-  jszip: 'jszip',
-  'pdfjs-dist': 'pdfjs-dist',
-  xlsx: 'xlsx'
-};
 
 const exactExternalPackages = new Set([
   'react',
@@ -31,9 +25,28 @@ const exactExternalPackages = new Set([
 
 const prefixExternalPackages = ['antd', 'echarts'];
 
+// Everything in `dependencies` is the host's to resolve, so the host dedupes it
+// against its own copy instead of downloading ours alongside it — lodash was
+// shipping twice, once inside this bundle and once in the host's. Package
+// managers install these for the consumer either way, so nothing has to change
+// downstream.
+//
+// Matched by exact name only, which leaves the CSS subpaths
+// (`katex/dist/katex.min.css`, `@xterm/xterm/css/xterm.css`) bundled into
+// dist/index.css — the same treatment simplebar-react already gets from
+// `exactExternalPackages`. `cssCodeSplit: false` below is what keeps that a
+// single stylesheet, and `exports['./style.css']` promises consumers exactly one.
+const runtimeDependencies = new Set(
+  Object.keys(
+    JSON.parse(readFileSync(resolve(__dirname, 'package.json'), 'utf8'))
+      .dependencies ?? {}
+  )
+);
+
 const isExternalPackage = (id: string) => {
   return (
     exactExternalPackages.has(id) ||
+    runtimeDependencies.has(id) ||
     prefixExternalPackages.some((pkg) => id === pkg || id.startsWith(`${pkg}/`))
   );
 };
@@ -92,15 +105,24 @@ export default defineConfig({
     cssCodeSplit: false,
     rollupOptions: {
       external: isExternalPackage,
+      // One module in, one module out. Bundling the `index` entry into a single
+      // file made the whole package indivisible: tree-shaking works per module,
+      // so a host importing one export got all 174 of them, and with them the 41
+      // antd components this library touches in total — DatePicker (169KB in a
+      // host's bundle) included, on a screen with no date picker. Measured on
+      // gpustack-ui: `import { icons }` cost 361KB + 28 antd components before,
+      // 4KB and none after.
+      //
+      // `manualChunks` is gone because it cannot coexist with preserveModules,
+      // and it no longer has anything to group — the packages it split out
+      // (mammoth/jszip/pdfjs-dist/xlsx) are external now.
       output: {
-        chunkFileNames: '[name]-[hash].js',
-        manualChunks: (id) => {
-          for (const [pkg, chunkName] of Object.entries(libraryChunks)) {
-            if (id.includes(`/node_modules/${pkg}/`)) {
-              return chunkName;
-            }
-          }
-        }
+        preserveModules: true,
+        preserveModulesRoot: 'src',
+        // Applies to every emitted module in preserveModules mode, not just the
+        // entries, so the `exports` map keeps resolving `dist/index.es.js`.
+        entryFileNames: '[name].es.js',
+        chunkFileNames: '[name]-[hash].js'
       }
     }
   }
