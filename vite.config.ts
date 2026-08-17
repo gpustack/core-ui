@@ -115,7 +115,7 @@ export default defineConfig({
       //
       // `manualChunks` is gone because it cannot coexist with preserveModules,
       // and it no longer has anything to group — the packages it split out
-      // (mammoth/jszip/pdfjs-dist/xlsx) are external now.
+      // (mammoth/jszip/xlsx) are external now.
       output: {
         preserveModules: true,
         preserveModulesRoot: 'src',
