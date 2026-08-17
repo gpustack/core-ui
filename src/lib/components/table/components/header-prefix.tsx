@@ -126,10 +126,18 @@ const HeaderPrefix: React.FC<HeaderPrefixProps> = (props) => {
       </div>
     );
   }
+  // Selection without expansion. The checkbox needs the same wiring as the
+  // expandable+selection branch above: without `onChange` it is uncontrolled,
+  // so it ticks on click but never reaches `onSelectAll` and selects nothing.
   if (enableSelection) {
     return (
       <div className="header-row-prefix-wrapper" style={wrapperStyle}>
-        {<Checkbox disabled={disabled}></Checkbox>}
+        <Checkbox
+          onChange={onSelectAll}
+          indeterminate={indeterminate}
+          checked={selectAll}
+          disabled={disabled}
+        ></Checkbox>
       </div>
     );
   }
