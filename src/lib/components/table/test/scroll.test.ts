@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { resolveScroll } from './scroll';
-import { type ColumnProps } from './types';
+import { resolveScroll } from '../scroll';
+import { type ColumnProps } from '../types';
 
 const columns = [
   { title: 'Name', dataIndex: 'name', span: 1, width: 200 },

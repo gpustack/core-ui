@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { buildGridTemplate } from './grid-template';
-import { type ColumnProps } from './types';
+import { buildGridTemplate } from '../grid-template';
+import { type ColumnProps } from '../types';
 
 const columns = [
   { title: 'Name', dataIndex: 'name', width: 200 },
