@@ -30,12 +30,6 @@ const prefixExternalPackages = ['antd', 'echarts'];
 // shipping twice, once inside this bundle and once in the host's. Package
 // managers install these for the consumer either way, so nothing has to change
 // downstream.
-//
-// Matched by exact name only, which leaves the CSS subpaths
-// (`katex/dist/katex.min.css`, `@xterm/xterm/css/xterm.css`) bundled into
-// dist/index.css — the same treatment simplebar-react already gets from
-// `exactExternalPackages`. `cssCodeSplit: false` below is what keeps that a
-// single stylesheet, and `exports['./style.css']` promises consumers exactly one.
 const runtimeDependencies = new Set(
   Object.keys(
     JSON.parse(readFileSync(resolve(__dirname, 'package.json'), 'utf8'))
@@ -43,11 +37,35 @@ const runtimeDependencies = new Set(
   )
 );
 
+const getPackageName = (id: string) => {
+  const segments = id.split('/');
+  return id.startsWith('@') ? segments.slice(0, 2).join('/') : segments[0];
+};
+
+/**
+ * A dependency's JavaScript is the host's to resolve; its assets are not.
+ *
+ * Vite still has to process those itself — fold CSS into dist/index.css, emit
+ * whatever `?worker` / `?url` / `?raw` names — so only bare and .js-ish
+ * subpaths go external. Deciding by extension rather than by listing the CSS
+ * ones keeps a future asset import from silently becoming external, which
+ * fails at runtime in the host rather than here at build time.
+ *
+ * Subpaths have to be covered at all because matching the package name alone
+ * left `highlight.js/lib/core` and its `lib/languages/*` behind: bundled here,
+ * while `import('highlight.js')` for the full build resolved from the host, so
+ * highlight.js's core shipped twice.
+ */
+const isJsSubpath = (id: string) =>
+  !id.includes('?') && /^[^.]*$|\.[mc]?js$/.test(id.split('/').pop() ?? '');
+
 const isExternalPackage = (id: string) => {
   return (
     exactExternalPackages.has(id) ||
-    runtimeDependencies.has(id) ||
-    prefixExternalPackages.some((pkg) => id === pkg || id.startsWith(`${pkg}/`))
+    prefixExternalPackages.some(
+      (pkg) => id === pkg || id.startsWith(`${pkg}/`)
+    ) ||
+    (runtimeDependencies.has(getPackageName(id)) && isJsSubpath(id))
   );
 };
 
