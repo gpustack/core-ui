@@ -4,64 +4,63 @@
  * `localStorage` / `sessionStorage` / IndexedDB are isolated per *origin*,
  * not per *path*. When the app is embedded as a sub-system under a shared
  * origin (e.g. `https://portal.customer.com/gpustack/` alongside other
- * apps or another GPUStack instance), bare storage keys collide and clobber
- * each other. Prefixing every key with a per-deployment namespace fixes it.
+ * apps), bare keys like `userSettings` collide with whatever the neighbours
+ * store under the same name. Prefixing every key with a fixed brand
+ * namespace fixes that.
  *
- * The namespace is derived from `window.location.pathname`. The host uses
- * **hash history**, so the pathname equals the deploy base path and stays
- * constant across in-app navigation — it is the natural per-instance
- * discriminator and is available at the earliest module-eval time (before
- * React, for the non-React readers in the access / request seams).
+ * The namespace is a CONSTANT — deliberately not derived from
+ * `window.location.pathname` or any other runtime input. A path-derived
+ * namespace makes the whole persisted state depend on the URL the user
+ * happened to type: a typo'd path (on a host with a catch-all rewrite) or a
+ * second proxy alias pointing at the same instance would silently switch the
+ * app onto a different set of keys. A constant is immune to all of it and is
+ * available at the earliest module-eval time (before React, for the
+ * non-React readers in the access / request seams).
  *
- * Root deployments (`base '/'`) get an EMPTY prefix, so their keys are
- * byte-for-byte identical to the pre-namespacing behavior — existing users
- * keep their persisted state on upgrade. Only sub-path deployments opt into
- * the prefix.
+ * Trade-off: two GPUStack instances under the SAME origin (`/a/` and `/b/`)
+ * share one namespace and will still clobber each other. That is accepted —
+ * co-hosting two instances on one origin is not a supported topology, while
+ * co-hosting GPUStack next to other apps is.
  *
  * All storage access across the three packages must route through the
  * helpers here (`nsLocal` / `nsSession` / `nsLocalJSONStorage` for jotai,
  * `NS_STORE_NAME` for localForage). Keys shared across packages — notably
  * `currentOrganizationId`, read/written by the OSS atoms, the enterprise
  * atoms, and the access/request seams — only stay in sync because every
- * side computes the same prefix from this single source.
+ * side goes through this single source.
  */
 
 const BRAND = 'gpustack';
 
-// Legacy localForage instance name (root deploy). Kept verbatim so root
-// deployments continue reading their existing IndexedDB store on upgrade.
-const LEGACY_STORE_NAME = '_xWXJKJ_S1Sna_';
+/** Key prefix applied to every namespaced key. */
+export const STORAGE_PREFIX = `${BRAND}:`;
 
-// Deploy base path → namespace segment. Empty string for root deploy.
-// Under hash history `pathname` is the base path (e.g. `/gpustack/`);
-// strip a trailing file segment (`.../index.html`), trim slashes, and
-// sanitize to a key/DB-safe token.
-function computeNamespaceSegment(): string {
-  if (typeof window === 'undefined') return '';
-  let path = window.location?.pathname || '/';
-  path = path.replace(/\/[^/]*\.[^/]*$/, '/'); // drop trailing `index.html` etc.
-  const trimmed = path.replace(/^\/+|\/+$/g, ''); // `a/b` or ``
-  return trimmed.replace(/[^a-zA-Z0-9_-]+/g, '-'); // `a-b`
-}
+/**
+ * localForage instance name.
+ *
+ * Left at its historical value on purpose: an IndexedDB database cannot be
+ * renamed in place, so changing it would strand the existing store (column
+ * settings, `is_first_login`) instead of migrating it. The name is already
+ * unique enough that no neighbouring app would pick it, which is all the
+ * prefix buys elsewhere — so there is nothing to gain by renaming it.
+ */
+export const NS_STORE_NAME = '_xWXJKJ_S1Sna_';
 
-const SEGMENT = computeNamespaceSegment();
-
-/** Key prefix applied to every namespaced key. Empty for root deploys. */
-export const STORAGE_PREFIX = SEGMENT ? `${BRAND}:${SEGMENT}:` : '';
-
-/** localForage instance name; distinct IndexedDB store per sub-path deploy. */
-export const NS_STORE_NAME = SEGMENT
-  ? `${BRAND}_${SEGMENT}`
-  : LEGACY_STORE_NAME;
-
-/** Prefix a bare storage key with the deployment namespace. */
+/** Prefix a bare storage key with the brand namespace. */
 export const nsKey = (key: string): string => `${STORAGE_PREFIX}${key}`;
 
 // —— Raw string read/write for non-React callers (access / request seams,
 // probes, direct atom-file readers). Defensive: storage may be unavailable
 // (SSR, Safari private mode) — mirror the existing try/catch call sites. ——
 
-interface RawStorage {
+/**
+ * Namespaced raw-string storage. Every method fails soft: a missing key,
+ * an unavailable store and a throwing store all collapse to `null` / a
+ * no-op. Callers that must distinguish "storage threw" from "key absent"
+ * — e.g. a fail-closed guard that has to decline when it can't record an
+ * attempt — cannot use this and should talk to `Storage` directly.
+ */
+export interface RawStorage {
   get(key: string): string | null;
   set(key: string, value: string): void;
   remove(key: string): void;
