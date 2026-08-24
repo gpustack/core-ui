@@ -29,6 +29,9 @@ export interface ChartProps {
   smooth?: boolean;
   color?: string;
   yAxisName?: string;
+  // pins the y-axis ceiling (e.g. 100 for percentage charts); left
+  // unset, echarts scales the axis to the data
+  yAxisMax?: number;
   stack?: string | false;
   gaugeConfig?: {
     radius?: string;
