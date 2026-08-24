@@ -13,6 +13,7 @@ const LineChart: React.FC<ChartProps> = (props) => {
     seriesData,
     xAxisData,
     yAxisName,
+    yAxisMax,
     height,
     width,
     labelFormatter,
@@ -132,6 +133,7 @@ const LineChart: React.FC<ChartProps> = (props) => {
       yAxis: {
         ...options.yAxis,
         name: yAxisName,
+        max: yAxisMax ?? undefined,
         nameTextStyle: {
           fontSize: 12,
           align: 'right'
@@ -147,6 +149,7 @@ const LineChart: React.FC<ChartProps> = (props) => {
     seriesData,
     xAxisData,
     yAxisName,
+    yAxisMax,
     title,
     smooth,
     titleOptions,
