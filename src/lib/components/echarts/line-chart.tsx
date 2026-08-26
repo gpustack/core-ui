@@ -97,6 +97,9 @@ const LineChart: React.FC<ChartProps> = (props) => {
       return {
         ...item,
         ...lineItemConfig,
+        // a series whose data marks isolated points (per-item symbol)
+        // opts back into symbol rendering
+        showSymbol: item.showSymbol ?? lineItemConfig.showSymbol,
         smooth: smooth,
         itemStyle: {
           ...lineItemConfig.itemStyle,
