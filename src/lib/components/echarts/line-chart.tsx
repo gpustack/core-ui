@@ -13,6 +13,7 @@ const LineChart: React.FC<ChartProps> = (props) => {
     seriesData,
     xAxisData,
     yAxisName,
+    yAxisMax,
     height,
     width,
     labelFormatter,
@@ -96,6 +97,9 @@ const LineChart: React.FC<ChartProps> = (props) => {
       return {
         ...item,
         ...lineItemConfig,
+        // a series whose data marks isolated points (per-item symbol)
+        // opts back into symbol rendering
+        showSymbol: item.showSymbol ?? lineItemConfig.showSymbol,
         smooth: smooth,
         itemStyle: {
           ...lineItemConfig.itemStyle,
@@ -132,6 +136,7 @@ const LineChart: React.FC<ChartProps> = (props) => {
       yAxis: {
         ...options.yAxis,
         name: yAxisName,
+        max: yAxisMax ?? undefined,
         nameTextStyle: {
           fontSize: 12,
           align: 'right'
@@ -147,6 +152,7 @@ const LineChart: React.FC<ChartProps> = (props) => {
     seriesData,
     xAxisData,
     yAxisName,
+    yAxisMax,
     title,
     smooth,
     titleOptions,
