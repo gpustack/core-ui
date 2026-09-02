@@ -1,6 +1,6 @@
 import { useMemoizedFn } from 'ahooks';
 import _ from 'lodash';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import useSetChunkRequest from '../../lib/hooks/use-chunk-request';
 import usePageVisibility from '../../lib/hooks/use-page-visibility';
 import useUpdateChunkedList from '../../lib/hooks/use-update-chunk-list';
@@ -138,6 +138,20 @@ export default function useWatchList<T = Record<string, any>>(
       cancelWatch();
     };
   }, [enabled]);
+
+  // Hidden-subtree teardown; see the layout effect in use-chunk-request for
+  // why this belongs in a layout effect. Resuming is left to that hook — it
+  // rebuilds its own stream when the subtree is shown again, and doing it here
+  // as well would open a second one. Dropping the cache is still ours to do,
+  // for the same reason the hide path drops it: that rebuild replays a full
+  // snapshot, and rows deleted while we were off-screen would otherwise
+  // survive it. `listRequestTokenRef` is ours alone too, which is why this
+  // cleanup stays even though the stream is covered a level down.
+  useLayoutEffect(() => {
+    return () => {
+      cancelRequestsOnPageInactive();
+    };
+  }, []);
 
   return {
     watchDataList,

@@ -1,7 +1,7 @@
 import { useMemoizedFn } from 'ahooks';
 import { throttle } from 'lodash';
 import qs from 'query-string';
-import { useEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 import { convertFileSize } from '../../lib/utils';
 import useCoreUIContext from './useCoreUIContext';
 
@@ -277,6 +277,13 @@ const useSetChunkFetch = () => {
       axiosToken.current?.abort?.();
       throttledRef.current?.cancel?.();
       window.removeEventListener('beforeunload', handleUnload);
+    };
+  }, []);
+
+  useLayoutEffect(() => {
+    return () => {
+      axiosToken.current?.abort?.();
+      throttledRef.current?.cancel?.();
     };
   }, []);
 
