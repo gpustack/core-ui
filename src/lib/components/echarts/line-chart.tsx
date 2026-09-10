@@ -136,7 +136,7 @@ const LineChart: React.FC<ChartProps> = (props) => {
       yAxis: {
         ...options.yAxis,
         name: yAxisName,
-        max: yAxisMax ?? undefined,
+        max: yAxisMax,
         nameTextStyle: {
           fontSize: 12,
           align: 'right'
