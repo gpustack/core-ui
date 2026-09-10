@@ -77,6 +77,19 @@ interface ViewerProps {
   variant?: 'bordered' | 'borderless';
   validateMessage?: React.ReactNode;
   schema?: any;
+  // URI of the monaco model backing this editor. Leave it unset for a lone
+  // editor; give each one its own path when two are mounted at the same time.
+  //
+  // monaco keys models by URI and reuses an existing one, so two editors on
+  // one path do not just show the same text and undo stack — whichever
+  // unmounts first disposes that shared model out from under the other, which
+  // stays on screen as a dead editor.
+  //
+  // Must stay constant for the editor's lifetime. @monaco-editor/react reacts
+  // to a changed `path` by calling `setModel` without disposing the old one,
+  // so every change leaks a model, and the new one is rebuilt from `value` —
+  // dropping anything pushed in through the imperative `setValue`.
+  path?: string;
   isDarkTheme?: boolean;
   onUpload?: (content: string) => void;
   onChange?: (value: string | undefined, event: any) => void;
@@ -91,6 +104,7 @@ const YamlEditor: React.FC<ViewerProps> = forwardRef((props, ref) => {
     variant = 'borderless',
     isDarkTheme,
     schema,
+    path,
     placeholder,
     validateMessage,
     title,
@@ -106,11 +120,10 @@ const YamlEditor: React.FC<ViewerProps> = forwardRef((props, ref) => {
   const pendingValueRef = useRef<string | null>(null);
 
   // monaco is lazy-loaded, so `editorRef` is empty for the first few hundred
-  // ms after mount. Callers push content imperatively (the inner editor pins
-  // its model to a fixed path, so a remount reuses the old model instead of
-  // the `value` prop) and that push used to land on a null ref and vanish.
-  // Buffer it here and flush on attach — every consumer gets the guarantee
-  // once, instead of each one polling for the editor to come up.
+  // ms after mount, and a caller that pushes content imperatively in its own
+  // mount effect used to land on a null ref and vanish. Buffer it here and
+  // flush on attach — every consumer gets the guarantee once, instead of each
+  // one polling for the editor to come up.
   const setContent = (val: string) => {
     if (editorRef.current?.setValue) {
       editorRef.current.setValue(val);
@@ -233,6 +246,7 @@ const YamlEditor: React.FC<ViewerProps> = forwardRef((props, ref) => {
           value={safeValue}
           placeholder={placeholder}
           schema={schema}
+          path={path}
           onChange={onChange}
           onBlur={onBlur}
           onFocus={onFocus}
