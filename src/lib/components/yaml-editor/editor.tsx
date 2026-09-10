@@ -78,9 +78,10 @@ const applySchemas = (path: string, schema: any) => {
   });
 };
 
-// Only clears the entry this editor put there. Two editors can legitimately
-// share a path (one with a schema, one without); an unconditional delete on
-// the second one's unmount would strip the first one's schema and leave it
+// Only clears the entry this editor put there. Two editors sharing a path is
+// a caller mistake — see the `path` prop on `YamlEditor` — but it is a silent
+// one, and an unconditional delete would compound it: a schema-less editor
+// unmounting would strip a still-mounted sibling's schema and leave it
 // without completions for the rest of its life.
 const releaseSchema = (path: string, schema: any) => {
   if (!schema) return;
