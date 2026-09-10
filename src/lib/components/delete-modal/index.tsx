@@ -2,14 +2,15 @@ import { ExclamationCircleFilled } from '@ant-design/icons';
 import {
   Button,
   Checkbox,
+  ConfigProvider,
   Modal,
   Space,
   message,
+  theme,
   type ModalFuncProps
 } from 'antd';
 import { createStyles } from 'antd-style';
 import { forwardRef, useImperativeHandle, useState } from 'react';
-import styled from 'styled-components';
 import useBodyScroll from '../../../lib/hooks/use-body-scroll';
 import { useIntl } from '../../../lib/hooks/useIntl';
 
@@ -18,54 +19,44 @@ const useStyles = createStyles(({ css }) => ({
     display: flex;
     font-size: var(--font-size-middle);
     .anticon {
-      font-size: 20px;
-      margin-right: 10px;
+      font-size: 28px;
+      margin-right: 12px;
       color: var(--ant-color-warning);
     }
     .title {
       display: flex;
       align-items: center;
       font-weight: var(--font-weight-500);
+      font-size: var(--font-size-large);
     }
   `,
   content: css`
-    padding-top: 15px;
-    padding-left: 30px;
+    padding-top: 20px;
     color: var(--ant-color-text-secondary);
     white-space: pre-line;
     word-break: normal;
     overflow-wrap: break-word;
     hyphens: auto;
-    span {
+    > span {
       color: var(--ant-color-text);
       display: flex;
-      margin-top: 8px;
+      margin-top: 16px;
+      background-color: var(--ant-color-fill-tertiary);
+      padding: 8px 12px;
+      border-radius: var(--ant-border-radius);
     }
   `,
   checkboxWrapper: css`
     margin-top: 20px;
-    margin-left: 30px;
     display: flex;
     justify-content: flex-start;
     align-items: center;
     .check-text {
-      font-weight: 700;
-      color: var(--ant-color-warning);
+      font-weight: 500;
+      width: 100%;
     }
   `
 }));
-
-const CheckboxWrapper = styled.div`
-  margin-top: 20px;
-  margin-left: 30px;
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  .check-text {
-    font-weight: 700;
-    color: var(--ant-color-warning);
-  }
-`;
 
 export interface DeleteModalOptions {
   content?: string;
@@ -99,6 +90,10 @@ interface Configuration {
 const DeleteModal = forwardRef((props, ref) => {
   const intl = useIntl();
   const { styles } = useStyles();
+  // Read from the theme rather than the `--ant-color-warning` CSS var:
+  // antd derives the component's own hover / focus colours from these
+  // token values, and it can't compute anything from a `var()` string.
+  const { token } = theme.useToken();
   const { saveScrollHeight, restoreScrollHeight } = useBodyScroll();
   const [visible, setVisible] = useState(false);
   const [configuration, setConfiguration] = useState<Configuration>({
@@ -175,6 +170,9 @@ const DeleteModal = forwardRef((props, ref) => {
       keyboard={false}
       width={460}
       styles={{
+        container: {
+          borderRadius: 'var(--modal-border-radius)'
+        },
         footer: {
           marginTop: '20px'
         }
@@ -237,18 +235,40 @@ const DeleteModal = forwardRef((props, ref) => {
       ></div>
       {config.checkConfig && (
         <div className={styles.checkboxWrapper}>
-          <Checkbox
-            checked={configuration.checked}
-            onChange={(e) =>
-              setConfiguration({
-                checked: e.target.checked
-              })
-            }
+          {/* The checkbox gates a destructive confirmation, so it ticks
+              warning-coloured rather than in the app's primary colour.
+              Done by remapping the component's primary tokens instead of
+              overriding `.ant-checkbox-*` selectors: antd 6 dropped
+              `.ant-checkbox-inner` and moved those styles onto
+              `.ant-checkbox`, and the token route survives that kind of
+              rename — it also covers hover / focus-ring in one go. */}
+          <ConfigProvider
+            theme={{
+              components: {
+                Checkbox: {
+                  colorPrimary: token.colorWarning,
+                  colorPrimaryHover: token.colorWarningHover,
+                  colorPrimaryBorder: token.colorWarningBorder,
+                  // The tick itself: antd draws it with `colorWhite`, so
+                  // that is the token to remap to get body-text colour.
+                  colorWhite: token.colorText
+                }
+              }
+            }}
           >
-            <span className="check-text">
-              {intl.formatMessage({ id: config.checkConfig?.checkText })}
-            </span>
-          </Checkbox>
+            <Checkbox
+              checked={configuration.checked}
+              onChange={(e) =>
+                setConfiguration({
+                  checked: e.target.checked
+                })
+              }
+            >
+              <span className="check-text">
+                {intl.formatMessage({ id: config.checkConfig?.checkText })}
+              </span>
+            </Checkbox>
+          </ConfigProvider>
         </div>
       )}
       {config.tips && (
