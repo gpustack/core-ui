@@ -65,9 +65,6 @@ const CodeHeader: React.FC<CodeHeaderProps> = ({
   theme,
   copyable
 }) => {
-  if (!copyable) {
-    return null;
-  }
   return (
     <CodeHeaderWrapper
       className={classNames({
@@ -76,14 +73,16 @@ const CodeHeader: React.FC<CodeHeaderProps> = ({
       })}
     >
       <span>{lang}</span>
-      <CopyButton
-        text={copyValue || ''}
-        size="small"
-        style={{
-          color: '#abb2bf',
-          backgroundColor: theme === 'dark' ? 'transparent' : '#fff'
-        }}
-      ></CopyButton>
+      {copyable && (
+        <CopyButton
+          text={copyValue || ''}
+          size="small"
+          style={{
+            color: '#abb2bf',
+            backgroundColor: theme === 'dark' ? 'transparent' : '#fff'
+          }}
+        ></CopyButton>
+      )}
     </CodeHeaderWrapper>
   );
 };
