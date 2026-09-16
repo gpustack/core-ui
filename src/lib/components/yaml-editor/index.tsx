@@ -18,7 +18,11 @@ import { useIntl } from '../../hooks/useIntl';
 // block on it before first paint, even though the editor only ever renders
 // inside a drawer/modal the user has to open. Keep the whole monaco surface
 // (`monaco-editor`, `monaco-yaml`, `loader.config`) behind this boundary:
-// `./editor` is the ONLY module allowed to touch it.
+// `./editor` is the ONLY module allowed to touch it. `YamlDiffEditor` sits
+// behind that same module rather than one of its own, so whichever of the
+// two a session opens first pays for monaco and the other is free;
+// `preloadYamlEditor` starts the fetch earlier still, for a caller that
+// would rather not spend the wait on a click.
 const EditorInner = lazy(() => import('./editor'));
 
 const { Text } = Typography;
