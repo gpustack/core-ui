@@ -11,8 +11,16 @@ const CollapseInner = styled(Collapse)`
     padding-inline: 5px !important;
     padding-block: 8px !important;
     border-radius: var(--border-radius-base) !important;
-    font-size: 14px !important;
-    font-weight: 600 !important;
+    /* 500, not the 600 this used to hardcode. These headers sit INSIDE a
+       drawer, and GSDrawer's own title is 14px/500 — the SAME size. So at
+       600 the child heading was simply heavier than the title it lives under,
+       with no size difference to justify it: a straight inversion.
+       Both are structural titles, so both are 500. Note this leaves the two
+       typographically identical, separated only by position and the rule under
+       the drawer title; if that turns out to be too flat, the fix is to raise
+       the DRAWER title to --font-size-large, not to put weight back here. */
+    font-size: var(--font-size-base) !important;
+    font-weight: var(--font-weight-medium) !important;
     &:hover {
       background-color: var(--ant-color-fill-tertiary) !important;
     }

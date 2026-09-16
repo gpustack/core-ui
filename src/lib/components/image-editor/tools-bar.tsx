@@ -75,7 +75,11 @@ const ToolsBar: React.FC<ToolsBarProps> = (props) => {
           </div>
         }
       >
-        <Button size="middle" type="text">
+        <Button
+          size="middle"
+          type="text"
+          aria-label={intl.formatMessage({ id: 'playground.image.brushSize' })}
+        >
           <FormatPainterOutlined className="font-size-14" />
         </Button>
       </Tooltip>
@@ -89,12 +93,24 @@ const ToolsBar: React.FC<ToolsBarProps> = (props) => {
           </span>
         }
       >
-        <Button onClick={undo} size="middle" type="text" disabled={disabled}>
+        <Button
+          onClick={undo}
+          size="middle"
+          type="text"
+          disabled={disabled}
+          aria-label={intl.formatMessage({ id: 'common.button.undo' })}
+        >
           <UndoOutlined className="font-size-14" />
         </Button>
       </Tooltip>
       <Tooltip title={intl.formatMessage({ id: 'common.button.clear' })}>
-        <Button onClick={onClear} size="middle" type="text" disabled={disabled}>
+        <Button
+          onClick={onClear}
+          size="middle"
+          type="text"
+          disabled={disabled}
+          aria-label={intl.formatMessage({ id: 'common.button.clear' })}
+        >
           <ClearOutlined className="font-size-14" />
         </Button>
       </Tooltip>
@@ -120,6 +136,7 @@ const ToolsBar: React.FC<ToolsBarProps> = (props) => {
           size="middle"
           type="text"
           disabled={loading}
+          aria-label={intl.formatMessage({ id: 'playground.image.fitview' })}
         >
           <ExpandOutlined className="font-size-14" />
         </Button>
@@ -179,7 +196,14 @@ const ImageActionsBar: React.FC<ImageActionsBarProps> = (props) => {
               id: 'playground.image.saveMask'
             })}
           >
-            <Button onClick={downloadMask} size="middle" type="text">
+            <Button
+              onClick={downloadMask}
+              size="middle"
+              type="text"
+              aria-label={intl.formatMessage({
+                id: 'playground.image.saveMask'
+              })}
+            >
               <IconFont className="font-size-14" type="icon-save1"></IconFont>
             </Button>
           </Tooltip>
@@ -189,7 +213,12 @@ const ImageActionsBar: React.FC<ImageActionsBarProps> = (props) => {
         <Tooltip
           title={intl.formatMessage({ id: 'playground.image.download' })}
         >
-          <Button onClick={download} size="middle" type="text">
+          <Button
+            onClick={download}
+            size="middle"
+            type="text"
+            aria-label={intl.formatMessage({ id: 'playground.image.download' })}
+          >
             <DownloadOutlined className="font-size-14" />
           </Button>
         </Tooltip>

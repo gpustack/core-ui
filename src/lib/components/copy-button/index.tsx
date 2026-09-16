@@ -166,6 +166,7 @@ const CopyButton: React.FC<CopyButtonProps> = ({
             size={size}
             onClick={handleCopy}
             style={{ ...btnStyle }}
+            aria-label={tipTitle}
             icon={
               copied ? (
                 <CheckCircleFilled

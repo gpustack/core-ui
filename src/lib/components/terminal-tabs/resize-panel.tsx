@@ -9,7 +9,7 @@ const StyledButton = styled(Button)`
   position: absolute;
   padding: 0;
   top: -12px;
-  font-size: var(--font-size-middle);
+  font-size: var(--font-size-base);
   left: calc(50% + 10px);
   transform: translateX(-50%);
   background: none !important;

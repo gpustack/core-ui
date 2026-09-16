@@ -2,6 +2,7 @@ import { CloseOutlined } from '@ant-design/icons';
 import { Button, Drawer, type DrawerProps } from 'antd';
 import React from 'react';
 import { useEscHint } from '../../../lib/hooks/use-esc-hint';
+import { useIntl } from '../../../lib/hooks/useIntl';
 
 /**
  * use ColumnWrapper to wrap content in Drawer with scroller
@@ -11,6 +12,7 @@ import { useEscHint } from '../../../lib/hooks/use-esc-hint';
  */
 const GSDrawer = (props: DrawerProps) => {
   const { title, closable = true, mask, styles, ...restProps } = props;
+  const intl = useIntl();
   const resolvedStyles = typeof styles === 'function' ? undefined : styles;
   const { EscHint } = useEscHint({
     enabled: !props.keyboard && props.open
@@ -49,14 +51,21 @@ const GSDrawer = (props: DrawerProps) => {
             <span
               style={{
                 color: 'var(--ant-color-text)',
+                // Title tier is one weight product-wide: page title, drawer
+                // title and section title are all `medium`.
                 fontWeight: 'var(--font-weight-medium)',
-                fontSize: 'var(--font-size-middle)'
+                fontSize: 'var(--font-size-base)'
               }}
             >
               {title}
             </span>
             {closable && (
-              <Button type="text" size="small" onClick={handleCancel}>
+              <Button
+                type="text"
+                size="small"
+                onClick={handleCancel}
+                aria-label={intl.formatMessage({ id: 'common.button.close' })}
+              >
                 <CloseOutlined></CloseOutlined>
               </Button>
             )}

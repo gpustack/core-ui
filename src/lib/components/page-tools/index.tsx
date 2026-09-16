@@ -115,6 +115,12 @@ interface FilterBarProps {
   showSelect?: boolean;
   buttonText?: string;
   buttonIcon?: React.ReactNode;
+  /**
+   * Gap to the table below. Defaults to 16 and every page should take that
+   * default — 34 call sites used to pass 22, which is off the 4px grid and
+   * loosened the one thing that binds the filter row to the table it controls.
+   * Only override for a layout that genuinely is not a filter-over-table.
+   */
   marginBottom?: number;
   inputHolder?: string;
   selectHolder?: string;
@@ -195,7 +201,10 @@ export const FilterBar: React.FC<FilterBarProps> = (props) => {
             showSearch={select?.showSearch}
             placeholder={selectHolder}
             style={{ width: widths?.select || 230 }}
-            size="large"
+            // No `size` — every other control in this bar (the search input,
+            // the refresh button, and the primary / delete buttons on the
+            // right) is the default middle size. `size="large"` made the filter
+            // select the one 40px control in a row of 32px ones.
             onChange={handleSelectChange}
             options={selectOptions}
           ></BaseSelect>
@@ -204,6 +213,10 @@ export const FilterBar: React.FC<FilterBarProps> = (props) => {
           type="text"
           style={{ color: 'var(--ant-color-text-tertiary)' }}
           onClick={handleSearch}
+          // Icon-only, so it has no accessible name of its own — and this bar
+          // is on every list page in the product.
+          aria-label={intl.formatMessage({ id: 'common.button.refresh' })}
+          title={intl.formatMessage({ id: 'common.button.refresh' })}
           icon={<SyncOutlined></SyncOutlined>}
         ></Button>
       </Space>

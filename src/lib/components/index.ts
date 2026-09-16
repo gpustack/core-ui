@@ -101,8 +101,7 @@ export {
   HeaderLeft,
   HeaderRight,
   HeaderSlotContext,
-  usePageContentStyle,
-  type HeaderSlotContextValue
+  usePageContentStyle
 } from './page-container';
 export { FilterBar, FiltersButton, default as PageTools } from './page-tools';
 export { default as Popover } from './popover';
@@ -114,6 +113,7 @@ export { default as useFinishFailed } from './scroll-spy-tabs/use-finish-failed'
 export { default as useScrollActiveChange } from './scroll-spy-tabs/use-scroll-active-change';
 export { default as ScrollerModal } from './scroller-modal';
 export { default as GSDrawer } from './scroller-modal/gs-drawer';
+export { default as SectionTitle } from './section-title';
 export { default as SegmentLine } from './segment-line';
 export { default as SelectPanel } from './select-panel';
 export { default as Shortcut } from './shortcut';

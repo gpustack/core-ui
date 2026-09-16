@@ -67,6 +67,11 @@ const HeaderPrefix: React.FC<HeaderPrefixProps> = (props) => {
               size="small"
               onClick={handleToggleExpand}
               style={{ paddingInline: 6 }}
+              aria-label={intl.formatMessage({
+                id: expandAll
+                  ? 'common.button.collapse'
+                  : 'common.button.expand'
+              })}
             >
               {expandAll ? (
                 <IconFont
@@ -106,6 +111,11 @@ const HeaderPrefix: React.FC<HeaderPrefixProps> = (props) => {
               size="small"
               onClick={handleToggleExpand}
               style={{ paddingInline: 6 }}
+              aria-label={intl.formatMessage({
+                id: expandAll
+                  ? 'common.button.collapse'
+                  : 'common.button.expand'
+              })}
             >
               {expandAll ? (
                 <IconFont

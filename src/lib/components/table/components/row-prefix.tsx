@@ -4,6 +4,7 @@ import _ from 'lodash';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import IconFont from '../../../../lib/components/icon-font';
+import { useIntl } from '../../../../lib/hooks/useIntl';
 
 const ButtonWrapper = styled.div`
   width: 30px;
@@ -37,6 +38,10 @@ const RowPrefix: React.FC<RowPrefixProps> = (props) => {
     handleRowExpand,
     handleSelectChange
   } = props;
+  const intl = useIntl();
+  const expandLabel = intl.formatMessage({
+    id: expanded ? 'common.button.collapse' : 'common.button.expand'
+  });
 
   const isExpanded = useMemo(() => {
     return expanded;
@@ -55,7 +60,12 @@ const RowPrefix: React.FC<RowPrefixProps> = (props) => {
           className={classNames({ 'disable-expand': disableExpand })}
         >
           {_.isBoolean(expandable) ? (
-            <Button type="text" size="small" onClick={handleRowExpand}>
+            <Button
+              type="text"
+              size="small"
+              onClick={handleRowExpand}
+              aria-label={expandLabel}
+            >
               <IconFont
                 type="icon-down"
                 rotate={isExpanded ? 0 : -90}
@@ -82,6 +92,7 @@ const RowPrefix: React.FC<RowPrefixProps> = (props) => {
               size="small"
               onClick={handleRowExpand}
               disabled={disableExpand}
+              aria-label={expandLabel}
             >
               <IconFont
                 type="icon-down"

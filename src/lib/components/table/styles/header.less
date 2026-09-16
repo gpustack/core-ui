@@ -19,8 +19,12 @@
     content: '';
   }
 
-  &-last {
-    border-right: none;
+  // The divider above is drawn with `::before`, not a border — so clearing
+  // `border-right` here never did anything and the trailing column kept a
+  // dangling separator against the table's own edge. Hide the pseudo-element
+  // instead, which is the channel that actually draws it.
+  &-last::before {
+    display: none;
   }
 
   &-cell {

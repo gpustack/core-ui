@@ -240,7 +240,13 @@ const ColumnSettings: React.FC<{
       <Tooltip
         title={intl.formatMessage({ id: 'benchmark.table.columnSettings' })}
       >
-        <Button onClick={handleToggle} icon={<SettingOutlined />}></Button>
+        <Button
+          onClick={handleToggle}
+          icon={<SettingOutlined />}
+          aria-label={intl.formatMessage({
+            id: 'benchmark.table.columnSettings'
+          })}
+        ></Button>
       </Tooltip>
     </Popover>
   );

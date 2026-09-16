@@ -3,6 +3,7 @@ import { Button, Tabs } from 'antd';
 import { throttle } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
+import { useIntl } from '../../../lib/hooks/useIntl';
 import XTerminal from '../x-terminal';
 import ResizeContainer from './resize-panel';
 import { type TerminalProps } from './types';
@@ -80,6 +81,7 @@ const TerminalTabs: React.FC<TerminalTabsProps> = ({
   currentActive,
   onClose
 }) => {
+  const intl = useIntl();
   const [activeKey, setActiveKey] = useState(
     currentActive || terminals[0]?.url || ''
   );
@@ -126,6 +128,7 @@ const TerminalTabs: React.FC<TerminalTabsProps> = ({
                 size="small"
                 style={{ marginRight: 8 }}
                 onClick={onClose}
+                aria-label={intl.formatMessage({ id: 'common.button.close' })}
               ></Button>
             )
           }}

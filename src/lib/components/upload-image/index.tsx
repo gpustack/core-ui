@@ -50,6 +50,13 @@ const UploadImg: React.FC<UploadImgProps> = ({
   const intl = useIntl();
   const uploadRef = useRef<any>(null);
 
+  // `title` is a ReactNode — it feeds a Tooltip, so a caller may pass an
+  // element. `aria-label` only takes a string, so it can only borrow `title`
+  // when that is what it happens to be, and otherwise falls back to the same
+  // default the tooltip shows.
+  const uploadHint = intl.formatMessage({ id: 'playground.img.upload' });
+  const uploadLabel = typeof title === 'string' ? title : uploadHint;
+
   const validateFile = useCallback(
     (file: RcFile): boolean => {
       const allowedTypes = accept.split(',').map((t) => t.trim());
@@ -194,16 +201,13 @@ const UploadImg: React.FC<UploadImgProps> = ({
           onChange={handleChange}
         >
           {children ?? (
-            <Tooltip
-              title={
-                title ?? intl.formatMessage({ id: 'playground.img.upload' })
-              }
-            >
+            <Tooltip title={title ?? uploadHint}>
               <Button
                 disabled={disabled}
                 size={size}
                 type="text"
                 icon={icon ?? <PictureOutlined />}
+                aria-label={uploadLabel}
               ></Button>
             </Tooltip>
           )}
@@ -224,16 +228,13 @@ const UploadImg: React.FC<UploadImgProps> = ({
           onChange={handleChange}
         >
           {children ?? (
-            <Tooltip
-              title={
-                title ?? intl.formatMessage({ id: 'playground.img.upload' })
-              }
-            >
+            <Tooltip title={title ?? uploadHint}>
               <Button
                 disabled={disabled}
                 size={size}
                 type="text"
                 icon={icon ?? <PictureOutlined />}
+                aria-label={uploadLabel}
               ></Button>
             </Tooltip>
           )}

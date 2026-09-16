@@ -20,6 +20,20 @@ type AddModalProps = {
   footer?: React.ReactNode;
   subTitle?: React.ReactNode;
   loading?: boolean;
+  /**
+   * Allow Esc and a mask click to close the drawer.
+   *
+   * Off by default, because the common case here is a long multi-step form
+   * (cluster creation, node pools) where a stray Esc throws away real work —
+   * `GSDrawer` shows the "Esc is disabled" hint in that state rather than
+   * silently swallowing the key.
+   *
+   * Turn it ON for a drawer that holds a field or two and nothing a user would
+   * mind retyping. Blanket-guarding those is the case this prop exists to fix:
+   * a one-field label editor cost the same two clicks to escape as a ten-step
+   * provisioning wizard.
+   */
+  dismissible?: boolean;
 };
 const FormDrawer: React.FC<AddModalProps> = ({
   title,
@@ -30,7 +44,8 @@ const FormDrawer: React.FC<AddModalProps> = ({
   width = 600,
   subTitle,
   footer,
-  loading
+  loading,
+  dismissible = false
 }) => {
   return (
     <GSDrawer
@@ -57,11 +72,10 @@ const FormDrawer: React.FC<AddModalProps> = ({
       open={open}
       onClose={onCancel}
       destroyOnHidden={true}
-      closeIcon={false}
       mask={{
-        closable: false
+        closable: dismissible
       }}
-      keyboard={false}
+      keyboard={dismissible}
       styles={{
         wrapper: { width }
       }}

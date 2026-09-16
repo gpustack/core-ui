@@ -346,6 +346,11 @@ const AudioPlayer: React.FC<AudioPlayerProps> = forwardRef((props, ref) => {
           onClick={handlePlay}
           shape="circle"
           disabled={!audioState?.duration}
+          aria-label={intl.formatMessage({
+            id: playOn
+              ? 'playground.audio.button.stop'
+              : 'playground.audio.button.play'
+          })}
           icon={
             !playOn ? (
               <IconFont
@@ -386,6 +391,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = forwardRef((props, ref) => {
             type="text"
             size="middle"
             shape="circle"
+            aria-label={intl.formatMessage({ id: 'common.button.more' })}
           ></Button>
         </Dropdown>
       </div>
