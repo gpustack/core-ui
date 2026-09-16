@@ -1,5 +1,5 @@
 import { LoadingOutlined } from '@ant-design/icons';
-import Editor, { loader } from '@monaco-editor/react';
+import Editor, { DiffEditor, loader } from '@monaco-editor/react';
 import * as monaco from 'monaco-editor';
 import { yamlDefaults } from 'monaco-yaml';
 import React, {
@@ -206,5 +206,161 @@ const EditorInner: React.FC<ViewerProps> = forwardRef((props, ref) => {
     </EditorWrap>
   );
 });
+
+export interface DiffViewerProps {
+  // Left-hand side, always read-only: what the value is now.
+  original: string;
+  // Right-hand side: what it would become, and the only side the user edits.
+  modified: string;
+  height?: string | number;
+  theme?: string;
+  header?: React.ReactNode;
+  readOnly?: boolean;
+  // The edited text, delivered when focus leaves it rather than per
+  // keystroke. A caller that re-derives `modified` from what it is told —
+  // re-planning it, reformatting it — would otherwise be rewriting the
+  // buffer under a cursor that is still in it.
+  onBlur?: (value: string) => void;
+  // The buffer's new content as it changes. Not a claim that the user typed
+  // it: @monaco-editor/react writes an externally changed `modified` into an
+  // editable side as an ordinary edit, indistinguishable from typing — into a
+  // read-only side it resets the model instead, and that is filtered out. So
+  // compare values to decide whether something is dirty, rather than counting
+  // events.
+  onChange?: (value: string) => void;
+}
+
+export interface DiffEditorHandle {
+  // The right-hand side as it stands. For a save path that never passes
+  // through a blur — a form submitting on Enter, a shortcut, a drawer
+  // closing on Esc — this is the only way to read what the user typed.
+  getValue: () => string;
+}
+
+// Hoisted: `DiffEditor` pushes `options` straight into `updateOptions` on
+// every change of identity, and monaco re-validates the whole set and fans it
+// out to both inner editors. An inline object would do that on every render
+// of whatever is holding this.
+const DIFF_OPTIONS = {
+  // YAML's structure *is* its indentation, so a key that moved a level down
+  // is one of the changes this component exists to show. monaco defaults
+  // this to `true`, under which the diff computer compares lines trimmed and
+  // renders exactly that move as no change at all.
+  ignoreTrimWhitespace: false,
+  // Present in both sets, and not only in the read-only one: monaco merges
+  // an options update into the current set rather than replacing it, and
+  // bails out early when every key it is given already matches. A `readOnly`
+  // that appeared only when true could therefore be turned on but never off.
+  readOnly: false,
+  scrollBeyondLastLine: false,
+  // Without this the editor swallows the wheel, and a page or drawer that
+  // scrolls behind it stops scrolling wherever the pointer crosses a diff.
+  scrollbar: {
+    alwaysConsumeMouseWheel: false,
+    verticalScrollbarSize: 6,
+    horizontalScrollbarSize: 6
+  },
+  wordWrap: 'on' as const,
+  fontSize: 14
+};
+
+const READ_ONLY_DIFF_OPTIONS = { ...DIFF_OPTIONS, readOnly: true };
+
+// Two YAML documents side by side, the right one editable.
+//
+// No `path` prop, deliberately: with none, `@monaco-editor/react` builds an
+// anonymous model per side and disposes both with the editor, so any number
+// of these can be mounted at once. Naming the models would instead make two
+// on one path share a buffer — and the first to unmount would dispose it out
+// from under the other. `YamlEditor` needs paths because monaco-yaml keys
+// schemas by them; a diff has no schema, so it needs nothing.
+const DiffEditorInner = forwardRef<DiffEditorHandle, DiffViewerProps>(
+  (
+    {
+      original,
+      modified,
+      height = 380,
+      theme = 'vs-dark',
+      header,
+      readOnly = false,
+      onBlur,
+      onChange
+    },
+    ref
+  ) => {
+    const editorRef = useRef<any>(null);
+
+    // Both are read long after mount — on a blur, on a keystroke — so they
+    // are reached through refs rather than captured in the mount closure.
+    const blurRef = useRef(onBlur);
+    const changeRef = useRef(onChange);
+
+    useEffect(() => {
+      blurRef.current = onBlur;
+      changeRef.current = onChange;
+    }, [onBlur, onChange]);
+
+    useImperativeHandle(
+      ref,
+      () => ({
+        // This handle is reachable a moment before `editorRef` is filled:
+        // @monaco-editor/react settles its loader before it creates anything,
+        // and only then is `onMount` called. Until it is, the buffer holds
+        // exactly what was passed in — there has been nothing to type into —
+        // so `modified` is an answer rather than a shrug. `YamlDiffEditor`
+        // does the same for the longer window before this component exists
+        // at all.
+        getValue: () => editorRef.current?.getValue?.() ?? modified
+      }),
+      [modified]
+    );
+
+    const handleMount = (editor: any) => {
+      const modifiedEditor = editor.getModifiedEditor();
+      editorRef.current = modifiedEditor;
+
+      // `DiffEditor` has no `onChange` of its own — only the single-model
+      // `Editor` does — so the edited side is listened to directly.
+      modifiedEditor.onDidChangeModelContent?.(
+        (event: monaco.editor.IModelContentChangedEvent) => {
+          // A reset of the whole model, which is how @monaco-editor/react
+          // pushes `modified` into a side it considers read-only — there it
+          // calls `setValue` unconditionally, without comparing first. Never
+          // something the user did: typing and `executeEdits` both leave this
+          // flag clear.
+          if (event.isFlush) return;
+          changeRef.current?.(modifiedEditor.getValue());
+        }
+      );
+
+      // The editor may be torn down by whatever the blur was — a collapsing
+      // panel, a closing drawer — before this runs, and a disposed model has
+      // nothing left to read.
+      modifiedEditor.onDidBlurEditorText?.(() => {
+        if (modifiedEditor.getModel()) {
+          blurRef.current?.(modifiedEditor.getValue());
+        }
+      });
+    };
+
+    return (
+      <EditorWrap header={header}>
+        <DiffEditor
+          height={height}
+          theme={theme}
+          className="monaco-editor"
+          language="yaml"
+          original={original}
+          modified={modified}
+          options={readOnly ? READ_ONLY_DIFF_OPTIONS : DIFF_OPTIONS}
+          loading={<LoadingOutlined style={{ fontSize: 24 }}></LoadingOutlined>}
+          onMount={handleMount}
+        />
+      </EditorWrap>
+    );
+  }
+);
+
+export { DiffEditorInner };
 
 export default EditorInner;
