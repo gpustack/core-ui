@@ -50,6 +50,14 @@ const CardWrapper = styled.div.attrs({
   &.clickable:not(.disabled) {
     cursor: pointer;
   }
+
+  // Keyboard users need to SEE the tab stop the role/tabIndex above created.
+  // focus-visible rather than focus, so the ring stays off mouse clicks.
+  &:focus-visible {
+    outline: 2px solid var(--ant-color-primary);
+    outline-offset: 2px;
+  }
+
   &.disabled {
     cursor: default;
     opacity: 0.6;
@@ -89,7 +97,7 @@ const Icon = styled.div.attrs({
 const Header = styled.div.attrs({
   className: 'template-card-header'
 })`
-  font-weight: bold;
+  font-weight: var(--font-weight-medium);
   font-size: var(--font-size-base);
   display: flex;
   align-items: center;
@@ -117,6 +125,25 @@ const Card: React.FC<CardProps> = (props) => {
     onClick?.();
   };
 
+  // A clickable card is a real control, so it has to behave like one. This is a
+  // `div` (a `button` cannot legally wrap the arbitrary content a card holds,
+  // including its own action buttons), which means the button role, tab stop
+  // and Enter/Space activation have to be supplied by hand. Without them a card
+  // grid is unreachable by keyboard — and on the backends page the card IS the
+  // only route into a backend's versions, so the whole flow was closed to
+  // keyboard and screen-reader users.
+  const interactive = clickable && !disabled;
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (!interactive) return;
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    // Space scrolls the page by default, and Enter would re-fire on a nested
+    // control that already handled it.
+    if (event.target !== event.currentTarget) return;
+    event.preventDefault();
+    onClick?.();
+  };
+
   return (
     <CardWrapper
       className={classNames(className, {
@@ -128,6 +155,9 @@ const Card: React.FC<CardProps> = (props) => {
       })}
       style={{ height: height || '180px' }}
       onClick={handleClick}
+      role={interactive ? 'button' : undefined}
+      tabIndex={interactive ? 0 : undefined}
+      onKeyDown={interactive ? handleKeyDown : undefined}
     >
       {icon && <Icon>{icon}</Icon>}
       <Inner>

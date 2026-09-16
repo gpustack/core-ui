@@ -43,6 +43,9 @@ const LogsPagination: React.FC<LogsPaginationProps> = (props) => {
               type="text"
               shape="circle"
               style={{ color: 'rgba(255,255,255,.7)', marginBottom: 10 }}
+              aria-label={intl.formatMessage({
+                id: 'models.logs.pagination.first'
+              })}
             >
               <VerticalLeftOutlined rotate={-90} />
             </Button>
@@ -59,6 +62,7 @@ const LogsPagination: React.FC<LogsPaginationProps> = (props) => {
               type="text"
               shape="circle"
               style={{ color: 'rgba(255,255,255,.7)' }}
+              aria-label={intl.formatMessage({ id: 'common.button.prev' })}
             >
               <UpOutlined />
             </Button>
@@ -83,6 +87,7 @@ const LogsPagination: React.FC<LogsPaginationProps> = (props) => {
               type="text"
               shape="circle"
               style={{ color: 'rgba(255,255,255,.7)' }}
+              aria-label={intl.formatMessage({ id: 'common.button.next' })}
             >
               <DownOutlined />
             </Button>
@@ -96,6 +101,9 @@ const LogsPagination: React.FC<LogsPaginationProps> = (props) => {
               type="text"
               shape="circle"
               style={{ color: 'rgba(255,255,255,.7)', marginTop: 10 }}
+              aria-label={intl.formatMessage({
+                id: 'models.logs.pagination.last'
+              })}
             >
               <VerticalLeftOutlined rotate={90} />
             </Button>

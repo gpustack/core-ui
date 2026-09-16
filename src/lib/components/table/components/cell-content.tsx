@@ -52,6 +52,7 @@ const EditButtons: React.FC<EditButtonsProps> = (props) => {
             size="small"
             className="m-l-10"
             onClick={handleSubmit}
+            aria-label={intl.formatMessage({ id: 'common.button.confirm' })}
           >
             <CheckOutlined />
           </Button>
@@ -65,6 +66,7 @@ const EditButtons: React.FC<EditButtonsProps> = (props) => {
             size="small"
             className="m-l-10"
             onClick={handleUndo}
+            aria-label={intl.formatMessage({ id: 'common.button.undo' })}
           >
             <UndoOutlined />
           </Button>
@@ -89,6 +91,7 @@ const EditButtons: React.FC<EditButtonsProps> = (props) => {
           size="small"
           className="m-l-10"
           onClick={handleEdit}
+          aria-label={intl.formatMessage({ id: 'common.button.edit' })}
         >
           <FormOutlined />
         </Button>

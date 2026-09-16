@@ -2,8 +2,14 @@
   position: relative;
   display: flex;
   align-items: center;
-  height: 54px;
-  border-radius: var(--border-radius-mdium);
+  // Was a literal 54px against a 68px parent row, so expanding a cluster
+  // dropped a set of rows on a different vertical rhythm into the table. Both
+  // now derive from one token.
+  height: var(--seal-table-child-row-height, 54px);
+  // Was `var(--border-radius-mdium)` — a typo for `medium`, and no such token
+  // exists in either package, so the declaration was invalid and the radius
+  // silently resolved to 0.
+  border-radius: var(--border-radius-lg);
   transition: all 0.2s ease;
 
   &:hover {

@@ -92,7 +92,7 @@ const useStyles = createStyles(({ token, css }) => {
         }
 
         .text {
-          font-weight: var(--font-weight-bold);
+          font-weight: var(--font-weight-semibold);
         }
       }
     `
@@ -100,7 +100,7 @@ const useStyles = createStyles(({ token, css }) => {
 });
 
 const TitleWrapper = styled.div`
-  font-weight: 700;
+  font-weight: 600;
   color: var(--ant-color-text);
 `;
 

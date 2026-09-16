@@ -20,11 +20,21 @@ const Chart: React.FC<{
   const resizeObserver = useRef<ResizeObserver>();
   const finished = useRef(false);
 
-  useImperativeHandle(ref, () => {
-    return {
-      chart: chart.current
-    };
-  });
+  // `chart` is exposed as a GETTER, not a snapshot. `useImperativeHandle` runs
+  // in the layout-effect phase, but the instance is created in the passive
+  // effect below — so on the first mount a plain `{ chart: chart.current }`
+  // handed the parent `{ chart: undefined }`, and because it is a value it
+  // stayed undefined until some later render happened to re-run this hook.
+  //
+  // A parent that reads the instance from its own mount effect therefore got
+  // nothing and, if that effect was its only chance to run, silently skipped
+  // its work. That is what blanked the usage donuts until the window was
+  // resized: their geometry patch ran once, found no instance, and returned.
+  useImperativeHandle(ref, () => ({
+    get chart() {
+      return chart.current;
+    }
+  }));
 
   const init = () => {
     if (container.current) {

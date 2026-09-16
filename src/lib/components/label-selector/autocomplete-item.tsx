@@ -131,6 +131,7 @@ const LabelItem: React.FC<LabelItemProps> = ({
           type="default"
           shape="circle"
           onClick={onDelete}
+          aria-label={intl.formatMessage({ id: 'common.button.delete' })}
         >
           <MinusOutlined />
         </Button>

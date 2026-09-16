@@ -4,21 +4,13 @@ import useChartConfig from '../../../lib/components/echarts/config';
 import EmptyData from '../../../lib/components/empty-data';
 import { type ChartProps } from './types';
 
-const strokeColorFunc = (percent: number) => {
-  if (percent <= 50 || percent === undefined) {
-    return 'rgb(84, 204, 152, 80%)';
-  }
-  if (percent <= 80) {
-    return 'rgba(250, 173, 20, 80%)';
-  }
-  return 'rgba(255, 77, 79, 80%)';
-};
-
 const GaugeChart: React.FC<Omit<ChartProps, 'seriesData' | 'xAxisData'>> = (
   props
 ) => {
   const {
     gaugeItemConfig,
+    gaugeThresholdColor,
+    buildGaugeThresholdMarks,
     title: titleConfig,
     chartColorMap
   } = useChartConfig();
@@ -31,14 +23,15 @@ const GaugeChart: React.FC<Omit<ChartProps, 'seriesData' | 'xAxisData'>> = (
   }
 
   const setDataOptions = () => {
-    const colorValue = color || strokeColorFunc(value);
+    // The thresholds live in `useChartConfig` now. This file used to carry its
+    // own `strokeColorFunc` with the same green/amber/red as three hardcoded
+    // `rgba(...)` literals — a fourth private copy of the product's semantic
+    // colours, and one that disagreed with the others by 20% alpha.
+    const colorValue = color || gaugeThresholdColor(value);
     const combineGaugeConfig = {
       ...gaugeItemConfig,
       ...gaugeConfig
     };
-
-    combineGaugeConfig.detail.rich.value.color = colorValue;
-    combineGaugeConfig.detail.rich.unit.color = colorValue;
 
     return {
       title: {
@@ -56,29 +49,35 @@ const GaugeChart: React.FC<Omit<ChartProps, 'seriesData' | 'xAxisData'>> = (
       series: [
         {
           ...combineGaugeConfig,
-          axisLine: {
-            ...combineGaugeConfig.axisLine,
-            lineStyle: {
-              ...combineGaugeConfig.axisLine.lineStyle,
-              color: [
-                [value / 100, colorValue],
-                [1, chartColorMap.gaugeBgColor]
-              ]
-            }
-          },
-          itemStyle: {
-            color: 'transparent'
+          z: 2,
+          // The value arc is drawn by `progress`, which is what it is for. The
+          // previous version painted it into `axisLine` as a two-stop gradient
+          // stop and then had to blank the real series out with a transparent
+          // `itemStyle` — two mechanisms fighting for one arc.
+          progress: {
+            ...combineGaugeConfig.progress,
+            itemStyle: { color: colorValue }
           },
           detail: {
             ...combineGaugeConfig.detail,
-            borderColor: colorValue,
-            lineHeight: 20,
-            height: 18,
-            width: 50,
+            rich: {
+              ...combineGaugeConfig.detail.rich,
+              // The number carries the threshold signal now that the track is
+              // neutral; the unit stays recessive.
+              value: {
+                ...combineGaugeConfig.detail.rich.value,
+                color: colorValue
+              }
+            },
             formatter: labelFormatter || gaugeItemConfig.detail.formatter
           },
           data: [{ value }]
-        }
+        },
+        // The 50 / 80 notches only mean something while the arc is threshold-
+        // coloured. A caller that forces `color` is saying this gauge is not
+        // about the utilization bands, so the marks would be annotating a
+        // boundary that no longer exists.
+        ...(color ? [] : [buildGaugeThresholdMarks(combineGaugeConfig)])
       ]
     };
   };

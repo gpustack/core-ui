@@ -244,6 +244,9 @@ const AudioPlayer: React.FC<AudioPlayerProps> = forwardRef((props, ref) => {
                       speed === speedConfig.min || speed < speedConfig.min
                     }
                     onClick={handleReduceSpeed}
+                    aria-label={intl.formatMessage({
+                      id: 'playground.audio.button.slow'
+                    })}
                   >
                     <FastBackwardOutlined style={{ fontSize: '20px' }} />
                   </Button>

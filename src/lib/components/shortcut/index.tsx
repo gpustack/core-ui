@@ -48,7 +48,9 @@ const ShortCuts: React.FC<{ intl: any }> = ({ intl }) => {
   const debounceHandleInputChange = _.debounce(handleInputChange, 300);
   return (
     <div className="short-cuts">
-      <h3 style={{ marginBottom: 20, fontWeight: 'var(--font-weight-bold)' }}>
+      <h3
+        style={{ marginBottom: 20, fontWeight: 'var(--font-weight-semibold)' }}
+      >
         {intl.formatMessage({ id: 'shortcuts.title' })}
       </h3>
       <Input

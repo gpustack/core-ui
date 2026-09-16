@@ -116,6 +116,7 @@ const FilterForm: React.FC<
               style={{
                 color: 'var(--ant-color-text-secondary)'
               }}
+              aria-label={intl.formatMessage({ id: 'common.button.close' })}
             ></Button>
           </div>
           <OverlayScroller

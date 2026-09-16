@@ -34,6 +34,16 @@ type StatusTagProps = {
     message?: string;
   };
   type?: 'tag' | 'circle';
+  /**
+   * `filled` — tinted background, no border.
+   * `outlined` — transparent background, 1px border in the status colour.
+   *
+   * Both clear WCAG AA for the tag's 12px label; `outlined` actually measures
+   * higher (5.34–6.06:1 against the container, vs 4.60–5.04:1 for `filled`),
+   * because there is no tint between the text and the surface. Pick by how much
+   * weight the state should carry on the screen it is on, not by contrast.
+   */
+  variant?: 'filled' | 'outlined';
   download?: {
     percent: number;
   };
@@ -56,7 +66,8 @@ const StatusTag: React.FC<StatusTagProps> = ({
   extra,
   actions = [],
   maxTooltipWidth = 250,
-  suffix
+  suffix,
+  variant = 'outlined'
 }) => {
   const { text, status } = statusValue;
 
@@ -64,9 +75,40 @@ const StatusTag: React.FC<StatusTagProps> = ({
     text: string;
     bg: string;
     border?: string;
+    outline?: string;
+    outlineBorder?: string;
   }>(() => {
     return StatusColorMap[status];
   }, [status]);
+
+  // `outline` when nothing sits under the label, `text` when the tint does.
+  // They are different steps of the same hue: `text` is darkened to clear AA
+  // against the state's own pale tint, and a tint is darker than the bare
+  // container, so reusing it here overshot — the outlined pills came out muddy
+  // instead of coloured. `inactive` ships no `outline` and falls back, which is
+  // correct: its ink is a neutral grey that means the same on either surface.
+  const inkColor = useMemo(() => {
+    return variant === 'outlined'
+      ? (statusColor?.outline ?? statusColor?.text)
+      : statusColor?.text;
+  }, [variant, statusColor]);
+
+  // `inactive` is the one status that ships an explicit `border`, and it needs
+  // that border in BOTH variants — its fill is nearly invisible, so without the
+  // outline the pill has no shape at all. It therefore wins over
+  // `outlineBorder`, which the four semantic states use instead.
+  const boxStyle = useMemo<React.CSSProperties>(() => {
+    if (variant === 'outlined') {
+      return {
+        backgroundColor: 'transparent',
+        border: `1px solid ${statusColor?.border || statusColor?.outlineBorder || inkColor}`
+      };
+    }
+    return {
+      backgroundColor: statusColor?.bg,
+      border: statusColor?.border ? `1px solid ${statusColor.border}` : 'none'
+    };
+  }, [variant, statusColor, inkColor]);
 
   const hasLink = useMemo(() => {
     if (!statusValue.message) return false;
@@ -160,8 +202,8 @@ const StatusTag: React.FC<StatusTagProps> = ({
         download: download?.percent
       })}
       style={{
-        color: statusColor?.text,
-        border: `1px solid ${statusColor?.border || statusColor?.text}`,
+        color: inkColor,
+        ...boxStyle,
         ...style
       }}
     >

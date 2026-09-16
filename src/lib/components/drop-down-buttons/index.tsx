@@ -68,6 +68,7 @@ const DropdownButtons: React.FC<
             size={size}
             {...headItem?.props}
             onClick={handleButtonClick}
+            aria-label={intl.formatMessage({ id: headItem?.label })}
           ></Button>
         </Tooltip>
       ) : (
@@ -101,6 +102,7 @@ const DropdownButtons: React.FC<
                   size={size}
                   icon={headItem?.icon}
                   disabled={headItem?.disabled}
+                  aria-label={intl.formatMessage({ id: headItem?.label })}
                 ></Button>
               </Tooltip>
             )}
@@ -138,6 +140,7 @@ const DropdownButtons: React.FC<
               key="menu"
               variant={variant}
               color="default"
+              aria-label={intl.formatMessage({ id: 'common.button.more' })}
               className={dropdownButtonCss[size]}
             ></Button>
           </Dropdown>

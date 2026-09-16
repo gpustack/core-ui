@@ -1,0 +1,21 @@
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  // The title tier is one weight across the product: page title, drawer title
+  // and section title are all `medium` (500). Size and ink carry the rest of
+  // the hierarchy, so nothing in the UI chrome needs to reach for 600 or 700.
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--ant-color-text);
+  margin-bottom: 12px;
+}
+
+// An inline action beside the title — a `type="link"` add button, a count, a
+// help icon. Kept flush with the title rather than pushed to the far edge:
+// at a drawer's width a right-aligned action drifts far enough from its title
+// to stop reading as part of it.
+.extra {
+  display: flex;
+  align-items: center;
+}

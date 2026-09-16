@@ -272,6 +272,15 @@ const SpeechItem: React.FC<SpeechContentProps> = forwardRef(
                   }
                   type="text"
                   size="small"
+                  aria-label={
+                    playing
+                      ? intl.formatMessage({
+                          id: 'playground.audio.button.stop'
+                        })
+                      : intl.formatMessage({
+                          id: 'playground.audio.button.play'
+                        })
+                  }
                 ></Button>
               </Tooltip>
               <Tooltip
@@ -285,6 +294,9 @@ const SpeechItem: React.FC<SpeechContentProps> = forwardRef(
                   icon={<DownloadOutlined className="font-size-16" />}
                   type="text"
                   size="small"
+                  aria-label={intl.formatMessage({
+                    id: 'playground.audio.button.download'
+                  })}
                 ></Button>
               </Tooltip>
             </div>

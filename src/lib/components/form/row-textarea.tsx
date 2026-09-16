@@ -266,6 +266,7 @@ const RowTextarea: React.FC<SystemMessageProps> = (props) => {
                 type="text"
                 icon={<DeleteOutlined></DeleteOutlined>}
                 onClick={onDelete}
+                aria-label={intl.formatMessage({ id: 'common.button.delete' })}
               ></Button>
             </Tooltip>
           </div>

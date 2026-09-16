@@ -28,7 +28,7 @@ const useStyles = createStyles(({ css, token }) => ({
     }
     .title {
       font-size: ${token.fontSize}px;
-      font-weight: var(--font-weight-medium);
+      font-weight: var(--font-weight-semibold);
     }
     .content {
       display: flex;

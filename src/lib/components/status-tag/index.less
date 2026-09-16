@@ -8,8 +8,8 @@
   min-width: 76px;
   width: max-content;
   height: 24px;
-  font-size: 12px;
-  font-weight: 400;
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-normal);
   overflow: hidden;
 
   .txt {
@@ -22,10 +22,20 @@
     }
   }
 
+  // The download tag draws its own border regardless of variant — `filled`
+  // sets `border: none` inline and `outlined` sets the status hairline, and
+  // neither is right for a pill whose whole body is a progress track. Hence
+  // `!important`, which is what beats the inline style.
+  //
+  // All three values below used to come from `--ant-color-success-*`, bypassing
+  // the status token layer, so they never picked up the measured steps.
   &.download {
-    border: 1px solid var(--ant-color-success-border-hover) !important;
+    border: 1px solid var(--color-status-success-outline-border) !important;
   }
 
+  // The bar sits on a THIRD surface: not the container, not the tint. Its old
+  // `--ant-color-success-border` (#d8f2e4) measured 1.050 against the filled
+  // variant's own tint, i.e. invisible on the default variant.
   .download {
     display: flex;
     justify-content: center;
@@ -35,13 +45,16 @@
     top: 0;
     bottom: 0;
     height: 100%;
-    background-color: var(--ant-color-success-border);
+    background-color: var(--color-status-success-progress-bg);
   }
 
+  // Its own step, not the tint's `-text`: this label crosses the bar AND the
+  // unfilled remainder, so it is solved against the bar — the hardest of the
+  // three surfaces it touches.
   .progress {
     position: relative;
     z-index: 10;
-    color: var(--ant-color-success);
+    color: var(--color-status-success-progress-text);
   }
 }
 

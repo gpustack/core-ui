@@ -17,7 +17,17 @@ import { useIntl } from '../../../lib/hooks/useIntl';
 const useStyles = createStyles(({ css }) => ({
   'delete-modal-content': css`
     display: flex;
-    font-size: var(--font-size-middle);
+    font-size: var(--font-size-base);
+    /* The semantic warning colour, NOT --color-status-warning-text.
+       That step is solved for 12px TEXT sitting on the warning TINT; this is a
+       28px filled GRAPHIC on the modal's own surface, so the step was tuned for
+       neither the size, the role, nor the background — it rendered a muddy
+       #ad4e00 at 5.43:1 where a warning glyph wants to be vivid.
+       It also disagreed with the rest of this very component, which already
+       themes its buttons from token.colorWarning.
+       3:1 does not bind here: the icon sits beside a title that states the
+       action in words, so it reinforces rather than carries. Same call as
+       StatusDot. */
     .anticon {
       font-size: 28px;
       margin-right: 12px;
@@ -26,7 +36,7 @@ const useStyles = createStyles(({ css }) => ({
     .title {
       display: flex;
       align-items: center;
-      font-weight: var(--font-weight-500);
+      font-weight: var(--font-weight-medium);
       font-size: var(--font-size-large);
     }
   `,
@@ -171,7 +181,7 @@ const DeleteModal = forwardRef((props, ref) => {
       width={460}
       styles={{
         container: {
-          borderRadius: 'var(--modal-border-radius)'
+          borderRadius: 'var(--border-radius-modal)'
         },
         footer: {
           marginTop: '20px'

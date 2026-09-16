@@ -79,6 +79,7 @@ const UploadAudio: React.FC<UploadAudioProps> = (props) => {
             icon={icon ?? <UploadOutlined />}
             type={props.type ?? 'text'}
             shape={shape}
+            aria-label={intl.formatMessage({ id: 'common.button.upload' })}
           ></Button>
         </div>
       </Upload>
