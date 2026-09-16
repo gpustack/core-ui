@@ -54,21 +54,40 @@ const DropdownButtons: React.FC<
     onSelect(headItem.key, headItem);
   };
 
+  // An item's `label` is a message id by default; `locale: false` opts out and
+  // makes it literal content. The menu items below have always honoured that,
+  // but the head item did not — it ran every label through `formatMessage`
+  // unconditionally, so a head action opting out got its literal text treated
+  // as an id and rendered as the id itself. Same rule, one place.
+  const resolveLabel = (item: any) =>
+    item?.locale || item?.locale === undefined
+      ? intl.formatMessage({ id: item?.label })
+      : item?.label;
+
   if (!items?.length) {
     return <span></span>;
   }
 
+  // Past the guard above, `items` has at least one entry, so `headItem` is
+  // defined and needs no optional chaining from here down.
+  const headLabel = resolveLabel(headItem);
+  // `aria-label` only takes a string. With `locale: false` the label is
+  // whatever the caller passed, which may be a node — there is no name to
+  // derive from that, so the attribute is left off rather than stringified into
+  // something like `[object Object]`.
+  const headLabelText = typeof headLabel === 'string' ? headLabel : undefined;
+
   return (
     <>
       {items?.length === 1 ? (
-        <Tooltip title={intl.formatMessage({ id: headItem?.label })}>
+        <Tooltip title={headLabel}>
           <Button
             className={dropdownButtonCss[size]}
-            icon={headItem?.icon}
+            icon={headItem.icon}
             size={size}
-            {...headItem?.props}
+            {...headItem.props}
             onClick={handleButtonClick}
-            aria-label={intl.formatMessage({ id: headItem?.label })}
+            aria-label={headLabelText}
           ></Button>
         </Tooltip>
       ) : (
@@ -76,33 +95,28 @@ const DropdownButtons: React.FC<
           <>
             {showText ? (
               <Button
-                {...headItem?.props}
-                disabled={headItem?.disabled || disabled}
+                {...headItem.props}
+                disabled={headItem.disabled || disabled}
                 className={dropdownButtonCss[size]}
                 onClick={handleButtonClick}
                 size={size}
-                icon={headItem?.icon}
+                icon={headItem.icon}
                 variant={variant}
                 color={color}
               >
-                {intl.formatMessage({
-                  id: headItem?.label
-                })}
+                {headLabel}
                 {extra}
               </Button>
             ) : (
-              <Tooltip
-                title={intl.formatMessage({ id: headItem?.label })}
-                key="leftButton"
-              >
+              <Tooltip title={headLabel} key="leftButton">
                 <Button
-                  {...headItem?.props}
+                  {...headItem.props}
                   className={dropdownButtonCss[size]}
                   onClick={handleButtonClick}
                   size={size}
-                  icon={headItem?.icon}
-                  disabled={headItem?.disabled}
-                  aria-label={intl.formatMessage({ id: headItem?.label })}
+                  icon={headItem.icon}
+                  disabled={headItem.disabled}
+                  aria-label={headLabelText}
                 ></Button>
               </Tooltip>
             )}
@@ -127,10 +141,7 @@ const DropdownButtons: React.FC<
                 // 单项点击回调额外触发一次（且入参是 menu info 而非 row），导致重复执行。
                 ..._.omit(item, ['label', 'locale', 'onClick']),
                 ...item.props,
-                label:
-                  item.locale || item.locale === undefined
-                    ? intl.formatMessage({ id: item.label })
-                    : item.label
+                label: resolveLabel(item)
               }))
             }}
           >
