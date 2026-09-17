@@ -13,6 +13,7 @@ const HighlightCode: React.FC<{
   height?: string | number;
   style?: React.CSSProperties;
   copyValue?: string;
+  showHeader?: boolean;
 }> = (props) => {
   const {
     style,
@@ -22,7 +23,8 @@ const HighlightCode: React.FC<{
     copyable = true,
     theme,
     height = 'auto',
-    xScrollable = false
+    xScrollable = false,
+    showHeader = true
   } = props;
 
   const currentTheme = React.useMemo(() => {
@@ -41,6 +43,7 @@ const HighlightCode: React.FC<{
           height={height}
           xScrollable={xScrollable}
           style={style}
+          showHeader={showHeader}
         />
       ) : (
         <CodeViewerLight
@@ -51,6 +54,7 @@ const HighlightCode: React.FC<{
           copyable={copyable}
           height={height}
           xScrollable={xScrollable}
+          showHeader={showHeader}
         />
       )}
     </div>
