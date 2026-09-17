@@ -21,6 +21,7 @@ interface CodeViewerProps {
   theme?: 'light' | 'dark';
   style?: React.CSSProperties;
   xScrollable?: boolean;
+  showHeader?: boolean;
 }
 
 interface CodeHeaderProps {
@@ -97,7 +98,8 @@ const CodeViewer: React.FC<CodeViewerProps> = (props) => {
     copyable = true,
     height = 'auto',
     style,
-    xScrollable = false
+    xScrollable = false,
+    showHeader = true
   } = props || {};
 
   // Flips once the full build lands, to re-run the highlight below.
@@ -175,19 +177,25 @@ const CodeViewer: React.FC<CodeViewerProps> = (props) => {
 
   return (
     <Wrapper>
-      <CodeHeader
-        copyValue={copyValue || code || ''}
-        lang={lang}
-        copyable={copyable}
-        theme={props.theme || 'light'}
-      ></CodeHeader>
+      {showHeader && (
+        <CodeHeader
+          copyValue={copyValue || code || ''}
+          lang={lang}
+          copyable={copyable}
+          theme={props.theme || 'light'}
+        ></CodeHeader>
+      )}
       <pre
         className={classNames(
           'code-pre custome-scrollbar custom-scrollbar-horizontal ',
           {
             dark: props.theme === 'dark',
             light: props.theme === 'light',
-            'x-scrollable': xScrollable
+            'x-scrollable': xScrollable,
+            // The header carries the top radius and the copy button; without it
+            // the block has to round its own top and host the button inline.
+            'no-header': !showHeader,
+            copyable: !showHeader && copyable
           }
         )}
         style={{
@@ -196,6 +204,13 @@ const CodeViewer: React.FC<CodeViewerProps> = (props) => {
           ...style
         }}
       >
+        {!showHeader && copyable && (
+          <CopyButton
+            text={copyValue || code || ''}
+            size="small"
+            style={{ color: '#abb2bf', backgroundColor: 'transparent' }}
+          ></CopyButton>
+        )}
         <code
           style={{
             minHeight: height,

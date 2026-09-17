@@ -14,6 +14,7 @@ interface ViewerProps {
   showTitle?: boolean;
   height?: number;
   lang?: string;
+  showHeader?: boolean;
   onChange?: (value: string | number) => void;
 }
 
@@ -35,6 +36,7 @@ const CommandViewer: React.FC<ViewerProps> = (props) => {
     headerHeight = 40,
     height = 380,
     showTitle = false,
+    showHeader = false,
     lang,
     onChange
   } = props || {};
@@ -76,6 +78,7 @@ const CommandViewer: React.FC<ViewerProps> = (props) => {
         code={code}
         lang={lang || value}
         copyable={false}
+        showHeader={showHeader}
       ></HighlightCode>
     </EditorWrap>
   );
