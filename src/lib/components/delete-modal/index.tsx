@@ -188,10 +188,25 @@ const DeleteModal = forwardRef((props, ref) => {
         }
       }}
       footer={
-        <Space size={20}>
+        // 16, matching ModalFooter. This dialog is the reason it is not tighter:
+        // the primary here deletes, so Cancel needs room from it.
+        //
+        // No `size`: the app runs inside `componentSize="large"`, so these
+        // inherit 40px / radius 6 like every other dialog's actions. They used
+        // to opt out to `middle`, which left the one irreversible confirmation
+        // in the product wearing its smallest action buttons, and put a radius
+        // of 4 inside a 12 modal — the widest nesting jump anywhere here.
+        //
+        // `minWidth`, not ModalFooter's fixed `width: 88`: `okText` comes from
+        // the caller and already includes 'Reset to default' and
+        // 'Delete (Recreate)'. Short labels land on the same 88 either way;
+        // long ones grow instead of breaking. It also equalises the pair —
+        // left to their natural widths, Cancel and Delete differ by 2.6px,
+        // which reads as a mistake rather than as a size.
+        <Space size={16}>
           {config.showCancel !== false && (
             <Button
-              size="middle"
+              style={{ minWidth: 88 }}
               {...config.cancelButtonProps}
               onClick={handleCancel}
             >
@@ -203,7 +218,7 @@ const DeleteModal = forwardRef((props, ref) => {
           {config.showOk !== false && (
             <Button
               type="primary"
-              size="middle"
+              style={{ minWidth: 88 }}
               danger
               {...config.okButtonProps}
               onClick={handleOk}

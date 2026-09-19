@@ -27,7 +27,10 @@ const Wrapper = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 20px;
+  /* Across-group: the description/extra slot on the left vs the button group on
+     the right. Has to stay clearly wider than the 16 inside the button group,
+     which 20 no longer was. */
+  gap: 24px;
 `;
 
 const ModalFooter: React.FC<ModalFooterProps> = ({
@@ -51,7 +54,15 @@ const ModalFooter: React.FC<ModalFooterProps> = ({
   return (
     <Wrapper style={{ ...styles?.wrapper }}>
       <div>{description}</div>
-      <Space size={20} style={{ ...style }}>
+      {/* 16. At the old 20 the pair read as two loose objects — that equalled
+          the Wrapper's across-group gap and about matched the 24 a footer sits
+          off the dialog wall, so nothing said the two buttons belonged
+          together. 12 groups them harder but this same footer is what
+          DeleteModal and every FormDrawer render, and there the primary is
+          irreversible: separation between a destructive button and its Cancel
+          is worth more than the last bit of grouping. 16 against the Wrapper's
+          24 keeps within-group clearly tighter than across-group either way. */}
+      <Space size={16} style={{ ...style }}>
         {showCancelBtn && (
           <Button
             onClick={onCancel}
