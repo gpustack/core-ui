@@ -10,7 +10,6 @@ const GaugeChart: React.FC<Omit<ChartProps, 'seriesData' | 'xAxisData'>> = (
   const {
     gaugeItemConfig,
     gaugeThresholdColor,
-    buildGaugeThresholdMarks,
     title: titleConfig,
     chartColorMap
   } = useChartConfig();
@@ -49,35 +48,49 @@ const GaugeChart: React.FC<Omit<ChartProps, 'seriesData' | 'xAxisData'>> = (
       series: [
         {
           ...combineGaugeConfig,
-          z: 2,
-          // The value arc is drawn by `progress`, which is what it is for. The
-          // previous version painted it into `axisLine` as a two-stop gradient
-          // stop and then had to blank the real series out with a transparent
-          // `itemStyle` — two mechanisms fighting for one arc.
-          progress: {
-            ...combineGaugeConfig.progress,
-            itemStyle: { color: colorValue }
+          // The value arc lives HERE, not in `progress`: `axisLine` is
+          // overwritten with two stops — the threshold colour up to the value,
+          // neutral for the remainder — which is also what lets the needle's
+          // `color: 'auto'` pick up the threshold colour, since 'auto' reads
+          // the band the value lands in. The zone track declared in the config
+          // is what this replaces.
+          axisLine: {
+            ...combineGaugeConfig.axisLine,
+            lineStyle: {
+              ...combineGaugeConfig.axisLine.lineStyle,
+              color: [
+                [value / 100, colorValue],
+                [1, chartColorMap.gaugeBgColor]
+              ]
+            }
+          },
+          // Blanks the `progress` series, which would otherwise draw a second
+          // arc on top of the one `axisLine` just painted. The needle keeps its
+          // own colour because `pointer.itemStyle.color` is set explicitly.
+          itemStyle: {
+            color: 'transparent'
           },
           detail: {
             ...combineGaugeConfig.detail,
             rich: {
               ...combineGaugeConfig.detail.rich,
-              // The number carries the threshold signal now that the track is
-              // neutral; the unit stays recessive.
               value: {
                 ...combineGaugeConfig.detail.rich.value,
                 color: colorValue
+              },
+              unit: {
+                ...combineGaugeConfig.detail.rich.unit,
+                color: colorValue
               }
             },
+            borderColor: colorValue,
+            lineHeight: 20,
+            height: 18,
+            width: 50,
             formatter: labelFormatter || gaugeItemConfig.detail.formatter
           },
           data: [{ value }]
-        },
-        // The 50 / 80 notches only mean something while the arc is threshold-
-        // coloured. A caller that forces `color` is saying this gauge is not
-        // about the utilization bands, so the marks would be annotating a
-        // boundary that no longer exists.
-        ...(color ? [] : [buildGaugeThresholdMarks(combineGaugeConfig)])
+        }
       ]
     };
   };
