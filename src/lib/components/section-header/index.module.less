@@ -1,0 +1,67 @@
+.section-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 0 0 20px;
+  padding-bottom: 12px;
+  // The rule is what this component exists to make safe. On its own a full
+  // width hairline is indistinguishable from a row separator — measured in
+  // Billing Settings, the heading's rule and the two `Divider`s inside the
+  // same card shared an identical left edge, right edge, width and 1.12:1
+  // contrast. Insetting one of them is not enough either: Preferences insets
+  // its row divider by 24px, which on an 810px line is a 3% difference nobody
+  // reads at a glance. The icon is what separates them, by giving the heading
+  // row a different SHAPE rather than a slightly different length.
+  border-bottom: 1px solid var(--ant-color-border-secondary);
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  // `colorPrimaryBg` — a real token from the primary palette, not a tint
+  // computed from the primary. The original was
+  // `linear-gradient(135deg, ${colorPrimary}12, ${colorPrimary}05)`: a
+  // 7%-to-2% gradient across 36px, which is below the threshold anyone can
+  // see, built by string-concatenating an alpha onto a token that is only a
+  // hex string by convention — and it lived on the one page whose whole job is
+  // letting an operator replace the primary colour.
+  background: var(--ant-color-primary-bg);
+  color: var(--ant-color-primary);
+  // The same 6 as the cards these headers sit inside, and as the buttons and
+  // inputs beside them. A 36px chip is not special enough to earn its own step.
+  border-radius: var(--ant-border-radius-lg);
+  font-size: 18px;
+}
+
+.body {
+  flex: 1;
+  min-width: 0;
+}
+
+.title {
+  margin: 0;
+  font-size: 16px;
+  // 500. The product's title tier is one weight — page title, drawer title,
+  // section title — see `SectionTitle`, which states the remedy when a heading
+  // needs more emphasis: more space or a rule, not more weight. This one has
+  // both a rule and an icon, so it needs neither.
+  font-weight: var(--font-weight-medium);
+  color: var(--ant-color-text);
+  line-height: 24px;
+}
+
+.description {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+  font-size: 13px;
+  // Secondary, not tertiary: 13px is normal text, so AA wants 4.5:1 and
+  // tertiary measures 3.35 in light theme.
+  color: var(--ant-color-text-secondary);
+  line-height: 20px;
+}
