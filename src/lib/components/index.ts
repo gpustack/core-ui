@@ -113,6 +113,7 @@ export { default as useFinishFailed } from './scroll-spy-tabs/use-finish-failed'
 export { default as useScrollActiveChange } from './scroll-spy-tabs/use-scroll-active-change';
 export { default as ScrollerModal } from './scroller-modal';
 export { default as GSDrawer } from './scroller-modal/gs-drawer';
+export { default as SectionHeader } from './section-header';
 export { default as SectionTitle } from './section-title';
 export { default as SegmentLine } from './segment-line';
 export { default as SelectPanel } from './select-panel';
