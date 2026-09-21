@@ -1,5 +1,17 @@
 .section-header {
   display: flex;
+  // `flex-start`, so the chip's top edge and the text block's top edge share
+  // one line. Two alternatives were built and measured, and both read worse
+  // once there is a description under the title:
+  //
+  //   * `center` — puts the chip's centre at the body's centre, which lands
+  //     in the GAP between the two lines. The chip then aligns with neither.
+  //   * `flex-start` + a negative margin centring the chip on the title's own
+  //     line — optically exact against the title, but the chip pokes above
+  //     the text block and the description sits beside nothing.
+  //
+  // What the eye actually reads at the top of a header is that shared top
+  // edge, not cap-height centring. Leave it alone.
   align-items: flex-start;
   gap: 12px;
   margin: 0 0 20px;
@@ -22,15 +34,35 @@
   flex-shrink: 0;
   width: 36px;
   height: 36px;
-  // `colorPrimaryBg` — a real token from the primary palette, not a tint
-  // computed from the primary. The original was
-  // `linear-gradient(135deg, ${colorPrimary}12, ${colorPrimary}05)`: a
-  // 7%-to-2% gradient across 36px, which is below the threshold anyone can
-  // see, built by string-concatenating an alpha onto a token that is only a
-  // hex string by convention — and it lived on the one page whose whole job is
-  // letting an operator replace the primary colour.
-  background: var(--ant-color-primary-bg);
-  color: var(--ant-color-primary);
+  // Neutral, not the primary tint this used to carry.
+  //
+  // A blue rounded square already means something on the page these headers
+  // were built for: Branding's Primary Color and Link Color are 32x32 / 4px
+  // swatches. The chip was 36x36 / 6px primary-tinted, and under a blur the
+  // two read as the same kind of object — decoration borrowing the encoding
+  // for "an editable colour value", on the one page whose subject IS colour.
+  //
+  // Tertiary is the tier antd names for this: "用于勾勒出元素形体的场景…
+  // 如无强调需求的情况下，建议使用三级填色作为默认填色" — outline the shape,
+  // no emphasis. `colorFillContent` (= colorFillSecondary) was tried first
+  // and is one step too strong; its own docs say it outlines a shape
+  // 较为明显地, i.e. it IS the emphasis tier. Quaternary is one step too far
+  // the other way — at 1.04:1 the box disappears under a blur and only the
+  // glyph is left, which removes the reason the chip exists.
+  //
+  // Going neutral this way costs nothing in weight either: 1.09:1 against the
+  // card in light and 1.26:1 in dark, against the primary tint's 1.09 / 1.30.
+  // Same presence, so the change is purely a de-colouring. (Secondary would
+  // have been 1.14 / 1.44 — heavier than what it replaced, and lopsided
+  // between the two themes.) The glyph gets clearer as a side effect: 6.72:1
+  // on its own fill, against the primary pairing's 3.60:1.
+  //
+  // (The value before the tint was
+  // `linear-gradient(135deg, ${colorPrimary}12, ${colorPrimary}05)` — a
+  // 7%-to-2% gradient across 36px, invisible, and built by concatenating an
+  // alpha onto a token that is only a hex string by convention.)
+  background: var(--ant-color-fill-tertiary);
+  color: var(--ant-color-text-secondary);
   // The same 6 as the cards these headers sit inside, and as the buttons and
   // inputs beside them. A 36px chip is not special enough to earn its own step.
   border-radius: var(--ant-border-radius-lg);
