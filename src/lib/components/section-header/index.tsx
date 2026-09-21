@@ -2,7 +2,16 @@ import classNames from 'classnames';
 import React from 'react';
 import styles from './index.module.less';
 
-interface SectionHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
+// `title` is omitted from the base rather than renamed: here it is the heading
+// CONTENT, a ReactNode, while `HTMLAttributes` means the native tooltip
+// attribute and types it `string`. Extending without the Omit is a TS2430 —
+// the two cannot coexist under one name, and the heading is the one this
+// component is about. The cost is that the wrapper div can no longer take a
+// native `title` tooltip, which no caller wants on a heading bar.
+interface SectionHeaderProps extends Omit<
+  React.HTMLAttributes<HTMLDivElement>,
+  'title'
+> {
   /**
    * Usually an `IconFont`. Optional, but see the note in the stylesheet: the
    * icon is what keeps this header's rule from reading as one more row
