@@ -21,6 +21,10 @@ interface CodeViewerProps {
   theme?: 'light' | 'dark';
   style?: React.CSSProperties;
   xScrollable?: boolean;
+  // The copy button lives in the header, so `copyable` has no effect while
+  // this is off. `CommandViewer` is the only caller that turns it off, and it
+  // passes `copyable={false}` for exactly that reason — its own `EditorWrap`
+  // header already carries the button.
   showHeader?: boolean;
 }
 
@@ -191,11 +195,7 @@ const CodeViewer: React.FC<CodeViewerProps> = (props) => {
           {
             dark: props.theme === 'dark',
             light: props.theme === 'light',
-            'x-scrollable': xScrollable,
-            // The header carries the top radius and the copy button; without it
-            // the block has to round its own top and host the button inline.
-            'no-header': !showHeader,
-            copyable: !showHeader && copyable
+            'x-scrollable': xScrollable
           }
         )}
         style={{
@@ -204,13 +204,6 @@ const CodeViewer: React.FC<CodeViewerProps> = (props) => {
           ...style
         }}
       >
-        {!showHeader && copyable && (
-          <CopyButton
-            text={copyValue || code || ''}
-            size="small"
-            style={{ color: '#abb2bf', backgroundColor: 'transparent' }}
-          ></CopyButton>
-        )}
         <code
           style={{
             minHeight: height,
