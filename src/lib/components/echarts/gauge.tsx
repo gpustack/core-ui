@@ -54,12 +54,20 @@ const GaugeChart: React.FC<Omit<ChartProps, 'seriesData' | 'xAxisData'>> = (
           // `color: 'auto'` pick up the threshold colour, since 'auto' reads
           // the band the value lands in. The zone track declared in the config
           // is what this replaces.
+          //
+          // Divided by the merged `max` rather than a literal 100, so the stop
+          // follows the scale it is drawn on instead of restating it. No clamp
+          // here: echarts already pins each stop to [0, 1] (`GaugeView`
+          // `Math.min(Math.max(colorList[i][0], 0), 1)`) and the pointer angle
+          // to the axis extent (`linearMap(..., clamp = true)`), so an
+          // out-of-range value renders as a full or empty arc with the needle
+          // parked at the end — while the readout still shows the real number.
           axisLine: {
             ...combineGaugeConfig.axisLine,
             lineStyle: {
               ...combineGaugeConfig.axisLine.lineStyle,
               color: [
-                [value / 100, colorValue],
+                [value / combineGaugeConfig.max, colorValue],
                 [1, chartColorMap.gaugeBgColor]
               ]
             }
