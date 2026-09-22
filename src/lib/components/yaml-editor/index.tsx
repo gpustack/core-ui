@@ -6,12 +6,12 @@ import React, {
   lazy,
   Suspense,
   useCallback,
-  useEffect,
   useImperativeHandle,
   useRef
 } from 'react';
 import styled from 'styled-components';
 import { useIntl } from '../../hooks/useIntl';
+import { checkYamlFile, MAX_YAML_FILE_SIZE } from './yaml-file';
 
 // `monaco-editor` is ~2.5MB parsed and it is pinned into whatever chunk
 // imports it — a static `./editor` import would make every consumer route
@@ -95,6 +95,10 @@ interface ViewerProps {
   // dropping anything pushed in through the imperative `setValue`.
   path?: string;
   isDarkTheme?: boolean;
+  // Ceiling for the Import button, in bytes. Raise it only for a consumer whose
+  // documents are genuinely bigger than the default allows — see the note on
+  // `MAX_YAML_FILE_SIZE` for what the number is paying for.
+  maxSize?: number;
   onUpload?: (content: string) => void;
   onChange?: (value: string | undefined, event: any) => void;
   onBlur?: () => void;
@@ -112,6 +116,7 @@ const YamlEditor: React.FC<ViewerProps> = forwardRef((props, ref) => {
     placeholder,
     validateMessage,
     title,
+    maxSize = MAX_YAML_FILE_SIZE,
     onUpload,
     onChange,
     onBlur,
@@ -161,14 +166,14 @@ const YamlEditor: React.FC<ViewerProps> = forwardRef((props, ref) => {
     }
   }, []);
 
+  // A picker, not an upload: returning false is what keeps antd from sending
+  // the file anywhere. A refusal returns before the read, which is what
+  // `checkYamlFile` is for — see the note there.
   const beforeUpload = (file: RcFile) => {
-    const isYaml =
-      file.type === 'application/x-yaml' ||
-      file.type === 'text/yaml' ||
-      file.name.endsWith('.yaml') ||
-      file.name.endsWith('.yml');
-    if (!isYaml) {
-      message.error('You can only upload YAML file!');
+    const rejection = checkYamlFile(file, maxSize);
+    if (rejection) {
+      message.error(intl.formatMessage({ id: rejection.id }, rejection.values));
+      return false;
     }
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -223,9 +228,10 @@ const YamlEditor: React.FC<ViewerProps> = forwardRef((props, ref) => {
     editor: editorRef.current
   }));
 
-  useEffect(() => {
-    editorRef.current?.format();
-  }, [value]);
+  // No auto-format effect here: `EditorInner` already runs one on the same
+  // `value`, and formatting is the single most expensive thing this component
+  // can do (see `AUTO_FORMAT_SIZE_LIMIT` in `./editor`), so doing it from both
+  // layers paid for it twice.
 
   return (
     <Container

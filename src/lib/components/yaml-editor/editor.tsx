@@ -34,6 +34,20 @@ interface ViewerProps {
 
 const DEFAULT_PATH = 'inmemory://model/config.yaml';
 
+// Past this, a document is shown as it arrived rather than reformatted.
+// monaco-yaml formats with prettier, whose YAML printer is superlinear in
+// document size — measured on GPUStack's own catalog document: 0.3s at 120KB,
+// 0.7s at 280KB, 1.5s at 550KB, 6.3s at 1MB, 53s at 2.4MB. Formatting is a
+// courtesy nobody asked for (the content comes from a server or from a file the
+// user just picked), so it is not worth a stall of that order, and skipping it
+// is what keeps the editor's size ceiling a question of memory rather than of
+// this curve.
+//
+// Placed above every document GPUStack publishes — the largest,
+// `community-inference-backends.yaml`, is 257KB — so nothing that arrives here
+// today stops being formatted, and below the point where the curve turns.
+const AUTO_FORMAT_SIZE_LIMIT = 512 * 1024;
+
 // monaco-yaml's diagnostics options are global to the monaco instance, so the
 // second editor to mount would otherwise replace the first one's schema and
 // silently switch off its completions. Keep every mounted editor's schema in
@@ -119,15 +133,17 @@ const EditorInner: React.FC<ViewerProps> = forwardRef((props, ref) => {
     });
   };
 
+  // The size is read off the model rather than the `value` prop: content pushed
+  // in imperatively (`setValue`, the Import button) never passes through the
+  // prop, and it is exactly the path an oversized document arrives on.
   const formatCode = () => {
     if (editorRef.current) {
       setTimeout(() => {
-        editorRef.current
-          ?.getAction?.('editor.action.formatDocument')
-          ?.run()
-          .then(() => {
-            console.log('format success');
-          });
+        const length = editorRef.current?.getModel?.()?.getValueLength?.() ?? 0;
+        if (length > AUTO_FORMAT_SIZE_LIMIT) {
+          return;
+        }
+        editorRef.current?.getAction?.('editor.action.formatDocument')?.run();
       }, 100);
     }
   };
