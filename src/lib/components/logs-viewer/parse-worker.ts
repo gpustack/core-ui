@@ -29,7 +29,7 @@ export class AnsiParser {
   private rawDataRows: number = 0;
   private uid: number = 0;
   private isProcessing: boolean = false;
-  private taskQueue: string[] = [];
+  private taskQueue: { input: string; reset: boolean }[] = [];
   private page: number = 1;
   private progress: number = 0;
   private percent: number = 0;
@@ -265,10 +265,16 @@ export class AnsiParser {
     this.isProcessing = true;
 
     while (this.taskQueue.length > 0) {
+      const task = this.taskQueue.shift()!;
+      // A reset takes effect where it was queued: output queued before it is
+      // still parsed, and emitted, on the state it arrived with.
+      if (task.reset) {
+        this.reset();
+      }
       // Prepend the carried-over remainder for both paths: in line mode it is
       // the trailing partial line, in download mode it is a partial ANSI
       // control sequence that was split across the chunk boundary.
-      const input = this.reminder + (this.taskQueue.shift() || '');
+      const input = this.reminder + task.input;
       // Clear immediately on consumption: if processing throws below, the stale
       // remainder must not be prepended again to the next chunk.
       this.reminder = '';
@@ -321,8 +327,8 @@ export class AnsiParser {
     }
   }
 
-  public enqueueData(input: string): void {
-    this.taskQueue.push(input);
+  public enqueueData(input: string, reset: boolean = false): void {
+    this.taskQueue.push({ input, reset });
     if (!this.isProcessing) {
       this.processQueue();
     }
@@ -353,11 +359,7 @@ if (
     parser.setIsCompelete(isComplete);
     parser.setChunked(chunked);
     parser.setPercent(percent);
-
-    if (reset) {
-      parser.reset();
-    }
-    parser.enqueueData(inputStr);
+    parser.enqueueData(inputStr, reset);
   };
 
   self.onerror = function (event) {
