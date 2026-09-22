@@ -34,6 +34,25 @@ async function drain() {
   }
 }
 
+describe('AnsiParser reset', () => {
+  it('starts over where the reset was queued, not when it arrived', async () => {
+    // Output still waiting to be parsed stays on its own side of a reset:
+    // neither its lines nor its unfinished last line carry into what follows.
+    const parser = new AnsiParser();
+    const messages: any[] = [];
+    parser.onMessage = (msg) => messages.push(msg);
+
+    parser.enqueueData('old-1\n');
+    parser.enqueueData('old-2\nold-par');
+    parser.enqueueData('new-1\nnew-2\n', true);
+    await drain();
+
+    const last = messages[messages.length - 1];
+    expect(last.reset).toBe(true);
+    expect(last.result).toEqual(['new-1', 'new-2']);
+  });
+});
+
 describe('AnsiParser download-mode chunk boundaries', () => {
   it('parses a control sequence split across two chunks the same as unsplit', async () => {
     // `\x1b[1;1H` homes the cursor; then "XY" overwrites the first two cells.
