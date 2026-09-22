@@ -50,8 +50,20 @@ jobs:
       - name: Build
         run: pnpm build
 
+      # Idempotent: re-running the workflow runs this step again, and npm
+      # refuses to republish a version. That is what turned v1.1.19 red — the
+      # release itself had succeeded on the first attempt, and the re-run
+      # (triggered to retry the bump job below) reported a failure for a
+      # package that was already on the registry. Being published is the
+      # outcome this step wants, however it got there.
       - name: Publish to npm
-        run: npm publish --provenance --access public --ignore-scripts
+        run: |
+          VERSION="$(node -p "require('./package.json').version")"
+          if npm view "@gpustack/core-ui@${VERSION}" version --prefer-online >/dev/null 2>&1; then
+            echo "@gpustack/core-ui@${VERSION} is already published; nothing to do."
+            exit 0
+          fi
+          npm publish --provenance --access public --ignore-scripts
 
   bump-gpustack-ui:
     needs: publish
@@ -73,18 +85,30 @@ jobs:
           node-version-file: '.nvmrc'
           cache: pnpm
 
+      # `npm publish` returning success does not mean the version resolves yet:
+      # on v1.1.19 the publish step finished at 12:02:52 and the registry only
+      # served the version at 12:06:01 — 189s later. The previous budget here
+      # was 5 attempts 20s apart (~110s) and expired 65s short.
+      #
+      # The wait asks the registry directly, with `--prefer-online` to force a
+      # staleness check, and only touches pnpm once the version is live. That
+      # ordering matters: a `pnpm add` against a version that does not exist
+      # yet caches a packument saying so, and every later attempt can be
+      # answered from that cache rather than from the registry.
       - name: Bump @gpustack/core-ui
         env:
           TAG: ${{ github.ref_name }}
         run: |
           v="${TAG#v}"
-          for i in 1 2 3 4 5; do
-            if pnpm add @gpustack/core-ui@${v} --save-prod --ignore-scripts; then
+          for i in $(seq 1 30); do
+            if npm view "@gpustack/core-ui@${v}" version --prefer-online >/dev/null 2>&1 \
+              && pnpm add "@gpustack/core-ui@${v}" --save-prod --ignore-scripts; then
               exit 0
             fi
-            echo "npm registry not ready yet, retry $i..."
-            sleep 20
+            echo "npm registry not serving @gpustack/core-ui@${v} yet ($i/30)..."
+            sleep 10
           done
+          echo "Timed out after 5 minutes waiting for @gpustack/core-ui@${v}" >&2
           exit 1
 
       - name: Open PR
