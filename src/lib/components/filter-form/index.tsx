@@ -18,8 +18,13 @@ const FilterForm: React.FC<
     onClose?: () => void;
     onValuesChange?: (ChangeValues: any, allValues: any) => void;
     styles?: {
+      title?: React.CSSProperties;
       container?: React.CSSProperties;
       wrapper?: React.CSSProperties;
+      form?: {
+        label?: React.CSSProperties;
+        content?: React.CSSProperties;
+      };
     };
   }
 > = forwardRef(
@@ -99,7 +104,7 @@ const FilterForm: React.FC<
           style={{ width: width, ...styles?.container }}
           className={filterFormCss.container}
         >
-          <div className={filterFormCss.title}>
+          <div className={filterFormCss.title} style={{ ...styles?.title }}>
             <span
               style={{
                 fontWeight: 500,
@@ -141,7 +146,8 @@ const FilterForm: React.FC<
                 },
                 content: {
                   minHeight: 0
-                }
+                },
+                ...styles?.form
               }}
             >
               {children}
