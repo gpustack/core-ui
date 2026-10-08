@@ -8,6 +8,7 @@ import {
 } from '@ant-design/icons';
 import type { SelectProps } from 'antd';
 import { Button, Input, Space } from 'antd';
+import classNames from 'classnames';
 import React, { useMemo } from 'react';
 import DropDownActions from '../../../lib/components/drop-down-actions';
 import { useIntl } from '../../../lib/hooks/useIntl';
@@ -16,12 +17,23 @@ import IconFont from '../icon-font';
 import filtersButtonCss from './filters-button.module.less';
 import pageToolsCss from './index.module.less';
 
-type PageToolsProps = {
+export type PageToolsSemanticName = 'root' | 'left' | 'right';
+export type PageToolsClassNames = Partial<
+  Record<PageToolsSemanticName, string>
+>;
+export type PageToolsStyles = Partial<
+  Record<PageToolsSemanticName, React.CSSProperties>
+>;
+
+export type PageToolsProps = {
   left?: React.ReactNode;
   right?: React.ReactNode;
   marginBottom?: number;
   marginTop?: number;
   style?: React.CSSProperties;
+  /** Optional semantic slots; defaults preserve existing layouts. */
+  classNames?: PageToolsClassNames;
+  styles?: PageToolsStyles;
 };
 
 export const FiltersButton = ({
@@ -73,7 +85,9 @@ const PageTools: React.FC<PageToolsProps> = (props) => {
     right,
     marginBottom = 0,
     marginTop = 30,
-    style: pageStyle
+    style: pageStyle,
+    classNames: customClassNames,
+    styles
   } = props;
 
   const newStyle: React.CSSProperties = useMemo(() => {
@@ -87,9 +101,22 @@ const PageTools: React.FC<PageToolsProps> = (props) => {
   }, [marginBottom, marginTop, pageStyle]);
 
   return (
-    <div className={pageToolsCss['page-tools']} style={newStyle}>
-      <div className={pageToolsCss.left}>{left}</div>
-      <div className={pageToolsCss.right}>{right}</div>
+    <div
+      className={classNames(pageToolsCss['page-tools'], customClassNames?.root)}
+      style={{ ...newStyle, ...styles?.root }}
+    >
+      <div
+        className={classNames(pageToolsCss.left, customClassNames?.left)}
+        style={styles?.left}
+      >
+        {left}
+      </div>
+      <div
+        className={classNames(pageToolsCss.right, customClassNames?.right)}
+        style={styles?.right}
+      >
+        {right}
+      </div>
     </div>
   );
 };
@@ -103,7 +130,9 @@ interface ActionItem {
   [key: string]: any;
 }
 
-interface FilterBarProps {
+export interface FilterBarProps {
+  classNames?: PageToolsClassNames;
+  styles?: PageToolsStyles;
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleSelectChange?: (value: any) => void;
   handleSearch: () => void;
@@ -165,7 +194,9 @@ export const FilterBar: React.FC<FilterBarProps> = (props) => {
     right,
     left,
     widths,
-    filtersButtonProps
+    filtersButtonProps,
+    classNames: customClassNames,
+    styles
   } = props;
   const intl = useIntl();
 
@@ -279,6 +310,8 @@ export const FilterBar: React.FC<FilterBarProps> = (props) => {
 
   return (
     <PageTools
+      classNames={customClassNames}
+      styles={styles}
       marginBottom={marginBottom}
       marginTop={0}
       left={left || renderLeft()}

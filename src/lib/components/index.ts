@@ -104,10 +104,30 @@ export {
   usePageContentStyle
 } from './page-container';
 export { FilterBar, FiltersButton, default as PageTools } from './page-tools';
+export type {
+  FilterBarProps,
+  PageToolsClassNames,
+  PageToolsProps,
+  PageToolsSemanticName,
+  PageToolsStyles
+} from './page-tools';
 export { default as Popover } from './popover';
 export { default as ProgressBar } from './progress-bar';
 export { default as RadioButtons } from './radio-buttons';
 export { default as ResizeContainer } from './resize-container';
+export {
+  FilterOptionGroup,
+  ResponsiveFilterBar,
+  default as ResponsiveFilters
+} from './responsive-filters';
+export type {
+  FilterChangeInfo,
+  FilterOption,
+  FilterOptionGroupProps,
+  FilterRenderContext,
+  ResponsiveFilterConfig,
+  ResponsiveFiltersProps
+} from './responsive-filters';
 export { default as ScrollSpyTabs } from './scroll-spy-tabs';
 export { default as useFinishFailed } from './scroll-spy-tabs/use-finish-failed';
 export { default as useScrollActiveChange } from './scroll-spy-tabs/use-scroll-active-change';
