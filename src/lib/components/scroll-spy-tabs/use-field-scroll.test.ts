@@ -66,6 +66,27 @@ describe('scroll position and bottom holder', () => {
     ).toEqual({ top: 198, holderHeight: 288 });
   });
 
+  it('measures the content end with a large number of direct children', () => {
+    setup();
+    const children = Array<HTMLElement>(200_000).fill(
+      element({ top: 16, height: 100 })
+    );
+    children[100_000] = element({
+      top: 16,
+      height: 478,
+      marginBottom: '4px'
+    });
+    const viewport = element({
+      clientHeight: 600,
+      scrollHeight: 600,
+      children,
+      paddingBottom: '16px'
+    });
+    expect(
+      getScrollPosition(element({ top: 294 }), viewport, element(), 96)
+    ).toEqual({ top: 198, holderHeight: 284 });
+  });
+
   it('does not grow the holder on repeated navigation to the same section', () => {
     setup();
     const viewport = element({
