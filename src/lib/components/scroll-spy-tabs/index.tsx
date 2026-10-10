@@ -65,13 +65,14 @@ const ScrollSpyTabs: React.FC<ScrollSpyTabsProps> = forwardRef(
       defaultTarget || segmentOptions[0]?.value || ''
     );
 
-    const { scrollToSegment, holderHeight } = useFieldScroll({
-      activeKey,
-      setActiveKey,
-      segmentOptions,
-      segmentedTop: segmentedTop,
-      getScrollElementScrollableHeight: getScrollElementScrollableHeight
-    });
+    const { scrollToSegment, holderHeight, containerRef, holderRef } =
+      useFieldScroll({
+        activeKey,
+        setActiveKey,
+        segmentOptions,
+        segmentedTop: segmentedTop,
+        getScrollElementScrollableHeight: getScrollElementScrollableHeight
+      });
 
     const throttleScrollToSegment = useMemoizedFn(
       _.throttle(
@@ -93,7 +94,7 @@ const ScrollSpyTabs: React.FC<ScrollSpyTabsProps> = forwardRef(
     }));
 
     return (
-      <div>
+      <div ref={containerRef}>
         {segmentOptions.length > 0 && (
           <SegmentedHeader $top={segmentedTop.top}>
             <SegmentLine
@@ -106,7 +107,11 @@ const ScrollSpyTabs: React.FC<ScrollSpyTabsProps> = forwardRef(
           </SegmentedHeader>
         )}
         {children}
-        <div className="holder" style={{ height: holderHeight }}></div>
+        <div
+          ref={holderRef}
+          className="holder"
+          style={{ height: holderHeight }}
+        ></div>
       </div>
     );
   }
