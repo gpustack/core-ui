@@ -49,19 +49,17 @@ export const getScrollPosition = (
     Number.parseFloat(getComputedStyle(viewport).paddingBottom) || 0;
   // scrollHeight is at least clientHeight, so it conceals empty space in a
   // short form. Measure the real content end before subtracting the old holder.
-  const contentEnd = Math.max(
-    0,
-    ...Array.from(viewport.children, (child) => {
-      const marginBottom =
-        Number.parseFloat(getComputedStyle(child).marginBottom) || 0;
-      return (
-        child.getBoundingClientRect().bottom -
-        viewportTop +
-        viewport.scrollTop +
-        marginBottom
-      );
-    })
-  );
+  let contentEnd = 0;
+  for (const child of viewport.children) {
+    const marginBottom =
+      Number.parseFloat(getComputedStyle(child).marginBottom) || 0;
+    const childBottom =
+      child.getBoundingClientRect().bottom -
+      viewportTop +
+      viewport.scrollTop +
+      marginBottom;
+    contentEnd = Math.max(contentEnd, childBottom);
+  }
   const contentHeight = Math.max(
     contentEnd + paddingBottom,
     viewport.scrollHeight > viewport.clientHeight ? viewport.scrollHeight : 0
