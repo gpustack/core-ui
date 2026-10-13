@@ -29,6 +29,8 @@ export {
   useColumnWrapperContext as useWrapperContext
 } from './column-wrapper/use-column-wrapper-context';
 export { default as CommandViewer } from './command-viewer';
+export { default as ConfirmModal } from './confirm-modal';
+export type { ConfirmModalOptions, ConfirmModalRef } from './confirm-modal';
 export { default as ContentWrapper } from './content-wrapper';
 export { default as CopyButton } from './copy-button';
 export { default as DeleteModal } from './delete-modal';
