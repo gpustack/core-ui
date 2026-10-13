@@ -17,6 +17,7 @@ export interface CellContentProps {
     | {
         valueType?: 'text' | 'number' | 'date' | 'datetime' | 'time';
         title?: React.ReactNode;
+        icon?: React.ReactNode;
       };
 }
 
@@ -45,6 +46,7 @@ export interface ColumnProps {
     | {
         valueType?: 'text' | 'number' | 'date' | 'datetime' | 'time';
         title?: React.ReactNode;
+        icon?: React.ReactNode;
       };
   valueType?: 'text' | 'number' | 'date' | 'datetime' | 'time';
   sortOrder?: 'ascend' | 'descend' | null;

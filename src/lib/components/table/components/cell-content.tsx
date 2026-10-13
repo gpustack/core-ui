@@ -93,7 +93,7 @@ const EditButtons: React.FC<EditButtonsProps> = (props) => {
           onClick={handleEdit}
           aria-label={intl.formatMessage({ id: 'common.button.edit' })}
         >
-          <FormOutlined />
+          {editable?.icon || <FormOutlined />}
         </Button>
       </Tooltip>
     </span>
