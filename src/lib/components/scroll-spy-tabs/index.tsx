@@ -1,6 +1,11 @@
 import { useMemoizedFn } from 'ahooks';
 import _ from 'lodash';
-import React, { forwardRef, useImperativeHandle } from 'react';
+import React, {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef
+} from 'react';
 import styled from 'styled-components';
 import SegmentLine from '../../../lib/components/segment-line';
 import useFieldScroll from './use-field-scroll';
@@ -16,7 +21,9 @@ const SegmentedHeader = styled.div<{ $top?: number }>`
 
 /**
  * ScrollSpyTabs component
- * defaultTarget: The default active target tab
+ * defaultTarget: The default active target tab in uncontrolled mode
+ * value: The active target tab in controlled mode
+ * onChange: Called when a tab is clicked or handleTargetChange is invoked
  * segmentedTop: { // Mostlty, It's always a constants.
  *   top: number; // The top offset for the sticky header
  *   offsetTop: number; // The offset top for the target
@@ -30,6 +37,8 @@ interface ScrollSpyTabsProps {
   ref?: any;
   children?: React.ReactNode;
   defaultTarget?: string;
+  value?: string;
+  onChange?: (value: string) => void;
   segmentedTop: {
     top: number;
     offsetTop: number;
@@ -55,6 +64,8 @@ const ScrollSpyTabs: React.FC<ScrollSpyTabsProps> = forwardRef(
       segmentedTop,
       segmentOptions,
       defaultTarget,
+      value,
+      onChange,
       activeKey,
       setActiveKey,
       children
@@ -64,6 +75,8 @@ const ScrollSpyTabs: React.FC<ScrollSpyTabsProps> = forwardRef(
     const [target, setTarget] = React.useState<string>(
       defaultTarget || segmentOptions[0]?.value || ''
     );
+    const selectedTarget = value ?? target;
+    const requestedTargetRef = useRef<string>();
 
     const { scrollToSegment, holderHeight, containerRef, holderRef } =
       useFieldScroll({
@@ -74,18 +87,37 @@ const ScrollSpyTabs: React.FC<ScrollSpyTabsProps> = forwardRef(
         getScrollElementScrollableHeight: getScrollElementScrollableHeight
       });
 
-    const throttleScrollToSegment = useMemoizedFn(
-      _.throttle(
-        async (val: string) => {
-          setTarget(val);
-          scrollToSegment(val, { offsetTop: segmentedTop.offsetTop });
-        },
-        500,
-        { trailing: true }
-      )
+    const scrollToTarget = useMemoizedFn((val: string) => {
+      if (value === undefined) {
+        setTarget(val);
+      }
+      scrollToSegment(val, { offsetTop: segmentedTop.offsetTop });
+    });
+    // Keep legacy uncontrolled selection in sync with throttled scrolling.
+    const [throttleScrollToSegment] = React.useState(() =>
+      _.throttle(scrollToTarget, 500, { trailing: true })
     );
 
-    const handleTargetChange = async (val: any) => {
+    // A parent selection or removed option supersedes queued navigation.
+    useEffect(() => {
+      const requestedTarget = requestedTargetRef.current;
+      if (
+        requestedTarget !== undefined &&
+        ((value !== undefined && value !== requestedTarget) ||
+          !segmentOptions.some((option) => option.value === requestedTarget))
+      ) {
+        throttleScrollToSegment.cancel();
+      }
+    }, [value, segmentOptions, throttleScrollToSegment]);
+
+    useEffect(
+      () => () => throttleScrollToSegment.cancel(),
+      [throttleScrollToSegment]
+    );
+
+    const handleTargetChange = (val: string) => {
+      requestedTargetRef.current = val;
+      onChange?.(val);
       throttleScrollToSegment(val);
     };
 
@@ -99,9 +131,8 @@ const ScrollSpyTabs: React.FC<ScrollSpyTabsProps> = forwardRef(
           <SegmentedHeader $top={segmentedTop.top}>
             <SegmentLine
               theme={'light'}
-              defaultValue={target}
-              value={target}
-              onChange={handleTargetChange}
+              value={selectedTarget}
+              onChange={(val) => handleTargetChange(String(val))}
               options={segmentOptions}
             />
           </SegmentedHeader>
