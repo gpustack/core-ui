@@ -109,6 +109,7 @@ beforeEach(() => {
 afterEach(() => {
   act(() => root.unmount());
   container.remove();
+  vi.useRealTimers();
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
   delete (globalThis as any).IS_REACT_ACT_ENVIRONMENT;
@@ -387,6 +388,7 @@ describe('FilterBar legacy compatibility', () => {
   });
 
   it('dispatches one original MenuInfo when selecting a legacy dropdown primary action', async () => {
+    vi.useFakeTimers();
     renderExact({
       handleInputChange: handlers.handleInputChange,
       handleSearch: handlers.handleSearch,
@@ -403,11 +405,11 @@ describe('FilterBar legacy compatibility', () => {
         }
       ]
     });
-    await act(async () => {
+    act(() => {
       button('Legacy actions').dispatchEvent(
         new MouseEvent('mouseover', { bubbles: true })
       );
-      await new Promise((resolve) => setTimeout(resolve, 250));
+      vi.advanceTimersByTime(250);
     });
     const item = Array.from(
       document.querySelectorAll<HTMLElement>('[role="menuitem"]')
