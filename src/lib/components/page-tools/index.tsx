@@ -6,7 +6,7 @@ import {
   SearchOutlined,
   SyncOutlined
 } from '@ant-design/icons';
-import type { SelectProps } from 'antd';
+import type { ButtonProps, InputProps, SelectProps, SpaceProps } from 'antd';
 import { Button, Input, Space } from 'antd';
 import classNames from 'classnames';
 import React, { useMemo } from 'react';
@@ -133,6 +133,10 @@ interface ActionItem {
 export interface FilterBarProps {
   classNames?: PageToolsClassNames;
   styles?: PageToolsStyles;
+  inputProps?: Omit<InputProps, 'onChange'>;
+  selectProps?: Omit<SelectProps, 'onChange' | 'options'>;
+  refreshButtonProps?: Omit<ButtonProps, 'onClick'>;
+  leftSpaceProps?: SpaceProps;
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleSelectChange?: (value: any) => void;
   handleSearch: () => void;
@@ -196,13 +200,17 @@ export const FilterBar: React.FC<FilterBarProps> = (props) => {
     widths,
     filtersButtonProps,
     classNames: customClassNames,
-    styles
+    styles,
+    inputProps,
+    selectProps,
+    refreshButtonProps,
+    leftSpaceProps
   } = props;
   const intl = useIntl();
 
   const renderLeft = () => {
     return (
-      <Space>
+      <Space {...leftSpaceProps}>
         {filtersButtonProps?.show && (
           <FiltersButton
             onClear={filtersButtonProps.onClear}
@@ -222,8 +230,9 @@ export const FilterBar: React.FC<FilterBarProps> = (props) => {
               id: 'common.filter.name'
             })
           }
-          style={{ width: widths?.input || 230 }}
           allowClear
+          {...inputProps}
+          style={{ width: widths?.input || 230, ...inputProps?.style }}
           onChange={handleInputChange}
         ></Input>
         {showSelect && (
@@ -231,24 +240,29 @@ export const FilterBar: React.FC<FilterBarProps> = (props) => {
             allowClear
             showSearch={select?.showSearch}
             placeholder={selectHolder}
-            style={{ width: widths?.select || 230 }}
             // No `size` — every other control in this bar (the search input,
             // the refresh button, and the primary / delete buttons on the
             // right) is the default middle size. `size="large"` made the filter
             // select the one 40px control in a row of 32px ones.
+            {...selectProps}
+            style={{ width: widths?.select || 230, ...selectProps?.style }}
             onChange={handleSelectChange}
             options={selectOptions}
           ></BaseSelect>
         )}
         <Button
           type="text"
-          style={{ color: 'var(--ant-color-text-tertiary)' }}
-          onClick={handleSearch}
           // Icon-only, so it has no accessible name of its own — and this bar
           // is on every list page in the product.
           aria-label={intl.formatMessage({ id: 'common.button.refresh' })}
           title={intl.formatMessage({ id: 'common.button.refresh' })}
           icon={<SyncOutlined></SyncOutlined>}
+          {...refreshButtonProps}
+          style={{
+            color: 'var(--ant-color-text-tertiary)',
+            ...refreshButtonProps?.style
+          }}
+          onClick={handleSearch}
         ></Button>
       </Space>
     );
