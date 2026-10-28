@@ -35,22 +35,43 @@ const DropdownButtons: React.FC<
   const intl = useIntl();
   const access = useAccess();
 
-  const items = _.filter(actions, (item: any) => {
+  const items = (actions ?? []).filter((item: any) => {
+    if (!item) {
+      return false;
+    }
     if (item?.access) {
       return access?.[item.access];
     }
     return true;
   });
 
+  const headIndex = items.findIndex((item) => item?.type !== 'divider');
+  const headItem = items[headIndex] as any;
+  // Normalize after permissions and primary-action extraction, since either
+  // can leave empty groups or a divider at the start of the dropdown.
+  const menuItems = items.slice(headIndex + 1).reduce<any[]>((result, item) => {
+    if (
+      item?.type !== 'divider' ||
+      (result.length > 0 && _.last(result)?.type !== 'divider')
+    ) {
+      result.push(item);
+    }
+    return result;
+  }, []);
+  if (_.last(menuItems)?.type === 'divider') {
+    menuItems.pop();
+  }
+
   const handleMenuClick = (item: any) => {
-    const selectItem = _.find(items, { key: item.key });
-    onSelect(item.key, selectItem);
+    const selectItem = menuItems.find(
+      (action) => action.type !== 'divider' && action.key === item.key
+    );
+    if (selectItem) {
+      onSelect(item.key, selectItem);
+    }
   };
 
-  const headItem = _.head(items) as any;
-
-  const handleButtonClick = (e: any) => {
-    const headItem = _.head(items) as any;
+  const handleButtonClick = () => {
     onSelect(headItem.key, headItem);
   };
 
@@ -64,12 +85,11 @@ const DropdownButtons: React.FC<
       ? intl.formatMessage({ id: item?.label })
       : item?.label;
 
-  if (!items?.length) {
+  if (!headItem) {
     return <span></span>;
   }
 
-  // Past the guard above, `items` has at least one entry, so `headItem` is
-  // defined and needs no optional chaining from here down.
+  // Past the guard above, `headItem` is an action rather than a divider.
   const headLabel = resolveLabel(headItem);
   // `aria-label` only takes a string. With `locale: false` the label is
   // whatever the caller passed, which may be a node — there is no name to
@@ -79,7 +99,7 @@ const DropdownButtons: React.FC<
 
   return (
     <>
-      {items?.length === 1 ? (
+      {menuItems.length === 0 ? (
         <Tooltip title={headLabel}>
           <Button
             className={dropdownButtonCss[size]}
@@ -135,14 +155,18 @@ const DropdownButtons: React.FC<
             }}
             menu={{
               onClick: handleMenuClick,
-              items: _.tail(items).map((item: any) => ({
-                // omit `onClick`: 点击只经 menu 级 onClick → handleMenuClick → onSelect
-                // 分发；若把 action 自带的 onClick 透传给 antd menu item，antd 会把它当成
-                // 单项点击回调额外触发一次（且入参是 menu info 而非 row），导致重复执行。
-                ..._.omit(item, ['label', 'locale', 'onClick']),
-                ...item.props,
-                label: resolveLabel(item)
-              }))
+              items: menuItems.map((item: any) =>
+                item.type === 'divider'
+                  ? item
+                  : {
+                      // omit `onClick`: 点击只经 menu 级 onClick → handleMenuClick → onSelect
+                      // 分发；若把 action 自带的 onClick 透传给 antd menu item，antd 会把它当成
+                      // 单项点击回调额外触发一次（且入参是 menu info 而非 row），导致重复执行。
+                      ..._.omit(item, ['label', 'locale', 'onClick']),
+                      ...item.props,
+                      label: resolveLabel(item)
+                    }
+              )
             }}
           >
             <Button

@@ -1,0 +1,25 @@
+.chart {
+  position: relative;
+  min-width: 0;
+}
+
+.actions {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.action {
+  position: absolute;
+  inset-inline: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--ant-border-radius-sm);
+  background: transparent;
+  pointer-events: none;
+
+  &:focus-visible {
+    outline: 2px solid var(--ant-color-primary);
+    outline-offset: 2px;
+  }
+}

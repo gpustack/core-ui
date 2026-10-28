@@ -1,12 +1,19 @@
+import type { ECElementEvent, EChartsType } from 'echarts/core';
 import _ from 'lodash';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import Chart from '../../../lib/components/echarts/chart';
 import useChartConfig from '../../../lib/components/echarts/config';
 import EmptyData from '../../../lib/components/empty-data';
+import styles from './h-bar.module.less';
 import { type ChartProps } from './types';
 
 const BarChart: React.FC<
-  ChartProps & { maxItems?: number; barWidth?: number }
+  ChartProps & {
+    maxItems?: number;
+    barWidth?: number;
+    onBarClick?: (index: number) => void;
+    itemAriaLabel?: (name: string, index: number) => string;
+  }
 > = (props) => {
   const {
     seriesData,
@@ -17,6 +24,9 @@ const BarChart: React.FC<
     legendData,
     maxItems,
     barWidth = 20,
+    tooltipValueFormatter,
+    onBarClick,
+    itemAriaLabel,
     title
   } = props;
   const {
@@ -29,6 +39,7 @@ const BarChart: React.FC<
     yAxis
   } = useChartConfig();
 
+  const chartRef = useRef<{ chart: EChartsType } | null>(null);
   const titleText =
     typeof title === 'string' ? title : ((title?.text as string) ?? '');
 
@@ -46,7 +57,10 @@ const BarChart: React.FC<
           : 0
       },
       tooltip: {
-        ...tooltip
+        ...tooltip,
+        confine: true,
+        formatter: (params: any) =>
+          tooltip.formatter(params, tooltipValueFormatter)
       },
       xAxis: {
         ...xAxis,
@@ -89,11 +103,12 @@ const BarChart: React.FC<
         barWidth,
         stack: 'Ad',
         barGap: '20%',
+        cursor: onBarClick ? 'pointer' : 'default',
         label: {
           show: true,
           formatter(params: any) {
             if (params.seriesIndex === 0) {
-              return `{value|${params.name}}`;
+              return `{value|${labelFormatter ? labelFormatter(params.name, params.dataIndex) : params.name}}`;
             }
             return '';
           },
@@ -109,7 +124,9 @@ const BarChart: React.FC<
           }
         },
         itemStyle: {
-          color: item.color
+          color: item.color,
+          borderRadius: token.borderRadiusSM,
+          ...item.itemStyle
         }
       };
     });
@@ -157,6 +174,9 @@ const BarChart: React.FC<
     title,
     labelFormatter,
     tooltip,
+    tooltipValueFormatter,
+    onBarClick,
+    token,
     grid,
     xAxis,
     yAxis,
@@ -171,17 +191,60 @@ const BarChart: React.FC<
     });
   }, [seriesData]);
 
+  useEffect(() => {
+    const chart = chartRef.current?.chart;
+    if (!chart || !onBarClick || isEmpty) return;
+    const handleClick = (event: ECElementEvent) => {
+      if (event.componentType === 'series' && event.seriesType === 'bar')
+        onBarClick(event.dataIndex);
+    };
+    chart.on('click', handleClick);
+    return () => {
+      chart.off('click', handleClick);
+    };
+  }, [isEmpty, onBarClick]);
+
+  const rowCount = Math.max(maxItems || xAxisData.length, xAxisData.length);
+
   return (
     <>
       {isEmpty ? (
         <EmptyData height={height} title={titleText}></EmptyData>
       ) : (
-        <Chart
-          height={height}
-          chartHeight={typeof height === 'number' ? height - 10 : undefined}
-          options={dataOptions}
-          width={width || '100%'}
-        ></Chart>
+        <div
+          className={styles.chart}
+          style={{ height, width: width || '100%' }}
+        >
+          <Chart
+            ref={chartRef}
+            height={height}
+            chartHeight={typeof height === 'number' ? height - 10 : undefined}
+            options={dataOptions}
+            width={width || '100%'}
+          />
+          {onBarClick ? (
+            <div
+              className={styles.actions}
+              style={{
+                height: typeof height === 'number' ? height - 10 : '100%'
+              }}
+            >
+              {xAxisData.map((name, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  className={styles.action}
+                  style={{
+                    top: `${(index / rowCount) * 100}%`,
+                    height: `${100 / rowCount}%`
+                  }}
+                  aria-label={itemAriaLabel?.(name, index) ?? name}
+                  onClick={() => onBarClick(index)}
+                />
+              ))}
+            </div>
+          ) : null}
+        </div>
       )}
     </>
   );
