@@ -16,7 +16,6 @@ const Chart: React.FC<{
 }> = forwardRef(({ options, width, height, chartHeight }, ref) => {
   const container = useRef<HTMLDivElement>(null);
   const chart = useRef<echarts.EChartsType>();
-  const resizeable = useRef(false);
   const resizeObserver = useRef<ResizeObserver>();
   const finished = useRef(false);
 
@@ -43,16 +42,21 @@ const Chart: React.FC<{
     }
   };
 
+  const resize = () => {
+    const host = container.current;
+    if (!host || !chart.current || !host.clientWidth || !host.clientHeight)
+      return;
+    // Resolve percentage dimensions before laying out axes and graphic overlays.
+    chart.current.resize({
+      width: host.clientWidth,
+      height: host.clientHeight
+    });
+  };
+
   const setOption = (options: ECOption) => {
     if (!chart.current) return;
-    chart.current?.clear();
-    chart.current?.setOption(options, {
-      notMerge: true,
-      lazyUpdate: true
-    });
-    if (Array.isArray(options.yAxis) && options.yAxis.length > 1) {
-      chart.current?.resize();
-    }
+    chart.current.setOption(options, { notMerge: true, lazyUpdate: false });
+    resize();
   };
 
   useEffect(() => {
@@ -124,18 +128,12 @@ const Chart: React.FC<{
   }, []);
 
   useEffect(() => {
-    resizeable.current = false;
     finished.current = false;
     setOption(options);
-    resizeable.current = true;
   }, [options]);
 
   useEffect(() => {
-    const handleResize = throttle(() => {
-      if (resizeable.current) {
-        chart.current?.resize();
-      }
-    }, 100);
+    const handleResize = throttle(resize, 100);
 
     if (container.current) {
       resizeObserver.current = new ResizeObserver(handleResize);
@@ -144,6 +142,7 @@ const Chart: React.FC<{
     return () => {
       resizeObserver.current?.disconnect();
       resizeObserver.current = undefined;
+      handleResize.cancel();
     };
   }, []);
 
