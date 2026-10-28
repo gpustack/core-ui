@@ -7,6 +7,8 @@ import AutoTooltip from '../auto-tooltip';
 type CopyButtonProps = {
   children?: React.ReactNode;
   text: string;
+  /** Optional text inside the button; omitted keeps the icon-only layout. */
+  btnText?: string;
   fontSize?: string;
   type?: 'text' | 'primary' | 'dashed' | 'link' | 'default';
   size?: 'small' | 'middle' | 'large';
@@ -27,6 +29,7 @@ type CopyButtonProps = {
 
 const CopyButton: React.FC<CopyButtonProps> = ({
   children,
+  btnText,
   tips,
   text,
   type = 'text',
@@ -166,7 +169,7 @@ const CopyButton: React.FC<CopyButtonProps> = ({
             size={size}
             onClick={handleCopy}
             style={{ ...btnStyle }}
-            aria-label={tipTitle}
+            aria-label={btnText || tipTitle}
             icon={
               copied ? (
                 <CheckCircleFilled
@@ -179,7 +182,9 @@ const CopyButton: React.FC<CopyButtonProps> = ({
                 <CopyOutlined style={{ fontSize, ...style }} />
               )
             }
-          ></Button>
+          >
+            {btnText}
+          </Button>
         </span>
       </Tooltip>
     </div>
