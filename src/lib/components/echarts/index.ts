@@ -13,11 +13,13 @@ import {
   ScatterChart
 } from 'echarts/charts';
 import type {
+  GraphicComponentOption,
   GridComponentOption,
   TitleComponentOption,
   TooltipComponentOption
 } from 'echarts/components';
 import {
+  GraphicComponent,
   GridComponent,
   LegendComponent,
   MarkAreaComponent,
@@ -35,6 +37,7 @@ type ECOption = ComposeOption<
   | LineSeriesOption
   | TitleComponentOption
   | TooltipComponentOption
+  | GraphicComponentOption
   | GridComponentOption
   | GaugeSeriesOption
   | ScatterSeriesOption
@@ -59,6 +62,7 @@ echarts.use([
   TitleComponent,
   TooltipComponent,
   GridComponent,
+  GraphicComponent,
   // Reference lines and shaded x-ranges (a target line, an overload region).
   MarkLineComponent,
   MarkAreaComponent,
