@@ -238,4 +238,27 @@ describe('DropdownButtons divider groups', () => {
     render([action('edit'), action('view'), action('delete')]);
     expect(menuEntries(await openMenu())).toEqual(['view', 'delete']);
   });
+
+  it.each([0, 42, '42'])(
+    'selects the original action once when the menu key is %j',
+    async (key) => {
+      const selectedAction = {
+        key,
+        label: 'view',
+        locale: false,
+        onClick: vi.fn()
+      };
+      render([action('edit'), divider, selectedAction]);
+      const menu = await openMenu();
+      await act(async () =>
+        menu.querySelector<HTMLElement>('[role="menuitem"]')!.click()
+      );
+      expect(onSelect).toHaveBeenCalledExactlyOnceWith(
+        String(key),
+        selectedAction
+      );
+      expect(onSelect.mock.calls[0]![1]).toBe(selectedAction);
+      expect(selectedAction.onClick).not.toHaveBeenCalled();
+    }
+  );
 });
