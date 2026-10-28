@@ -64,7 +64,8 @@ const DropdownButtons: React.FC<
 
   const handleMenuClick = (item: any) => {
     const selectItem = menuItems.find(
-      (action) => action.type !== 'divider' && action.key === item.key
+      (action) =>
+        action.type !== 'divider' && String(action.key) === String(item.key)
     );
     if (selectItem) {
       onSelect(item.key, selectItem);
