@@ -33,6 +33,10 @@
       "types": "./dist/yaml-editor.d.ts",
       "import": "./dist/yaml-editor.es.js"
     },
+    "./json-editor": {
+      "types": "./dist/json-editor.d.ts",
+      "import": "./dist/json-editor.es.js"
+    },
     "./excel": {
       "types": "./dist/excel.d.ts",
       "import": "./dist/excel.es.js"

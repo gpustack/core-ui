@@ -8,6 +8,7 @@ import IconFont from '../../../lib/components/icon-font';
 const CardStyled = styled(Card)`
   box-shadow: none !important;
   background-color: none;
+  border: 1px solid var(--ant-color-border);
   &.isOpen {
     .ant-card-head {
       border-bottom: 1px solid var(--ant-color-border-secondary);
@@ -20,6 +21,7 @@ const CardStyled = styled(Card)`
     border-bottom: none;
     border-radius: var(--ant-border-radius);
     padding: 0 16px;
+    margin-bottom: 0;
     &:hover {
       background-color: var(--ant-color-fill-secondary);
       .del-btn {
