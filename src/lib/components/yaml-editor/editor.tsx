@@ -5,10 +5,12 @@ import { yamlDefaults } from 'monaco-yaml';
 import React, {
   forwardRef,
   useEffect,
+  useId,
   useImperativeHandle,
   useRef
 } from 'react';
 import EditorWrap from '../editor-wrap';
+import type { JsonEditorProps } from '../json-editor';
 
 loader.config({
   monaco
@@ -102,6 +104,87 @@ const releaseSchema = (path: string, schema: any) => {
   if (schemaRegistry.get(monaco.Uri.parse(path).toString()) !== schema) return;
   applySchemas(path, undefined);
 };
+
+const jsonSchemas = new Map<string, Record<string, unknown>>();
+let registeredJsonSchemaUris = new Set<string>();
+
+const applyJsonSchema = (path: string, schema?: Record<string, unknown>) => {
+  const key = monaco.Uri.parse(path).toString();
+  const defaults = monaco.languages.json.jsonDefaults;
+  if (schema) {
+    if (jsonSchemas.get(key) === schema) return;
+    jsonSchemas.set(key, schema);
+  } else if (
+    !jsonSchemas.delete(key) &&
+    defaults.diagnosticsOptions.validate === true &&
+    defaults.diagnosticsOptions.allowComments === false
+  ) {
+    return;
+  }
+
+  const schemas = Array.from(jsonSchemas, ([uri, modelSchema]) => ({
+    uri: `${uri}.schema.json`,
+    fileMatch: [uri],
+    schema: modelSchema
+  }));
+  // Preserve schemas registered by other JSON consumers on the same runtime.
+  const otherSchemas = (defaults.diagnosticsOptions.schemas ?? []).filter(
+    ({ uri }) => !registeredJsonSchemaUris.has(uri)
+  );
+  registeredJsonSchemaUris = new Set(schemas.map(({ uri }) => uri));
+  defaults.setDiagnosticsOptions({
+    ...defaults.diagnosticsOptions,
+    validate: true,
+    allowComments: false,
+    schemas: [...otherSchemas, ...schemas]
+  });
+};
+
+export function JsonEditorInner({
+  value,
+  height,
+  path,
+  schema,
+  isDarkTheme,
+  options,
+  onChange
+}: JsonEditorProps) {
+  const id = useId();
+  const modelPath = path ?? `inmemory://model/json-${id}.json`;
+
+  useEffect(() => {
+    applyJsonSchema(modelPath, schema);
+    return () => {
+      const key = monaco.Uri.parse(modelPath).toString();
+      if (schema && jsonSchemas.get(key) === schema) {
+        applyJsonSchema(modelPath, undefined);
+      }
+    };
+  }, [modelPath, schema]);
+
+  return (
+    <Editor
+      language="json"
+      path={modelPath}
+      height={height}
+      theme={isDarkTheme ? 'vs-dark' : 'vs'}
+      value={value}
+      onChange={onChange}
+      loading={<LoadingOutlined style={{ fontSize: 24 }} />}
+      options={{
+        minimap: { enabled: false },
+        fontSize: 14,
+        scrollBeyondLastLine: false,
+        automaticLayout: true,
+        scrollbar: {
+          verticalScrollbarSize: 6,
+          horizontalScrollbarSize: 6
+        },
+        ...options
+      }}
+    />
+  );
+}
 
 const EditorInner: React.FC<ViewerProps> = forwardRef((props, ref) => {
   const {

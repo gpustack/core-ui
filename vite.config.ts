@@ -85,7 +85,8 @@ export default defineConfig({
         'src/utils.ts',
         'src/excel.ts',
         'src/file-readers.ts',
-        'src/yaml-editor.ts'
+        'src/yaml-editor.ts',
+        'src/json-editor.ts'
       ],
       // `include` above is whole directories, so specs would otherwise each
       // emit an (empty) declaration into dist. The JS bundles never contain
@@ -113,7 +114,8 @@ export default defineConfig({
         markdown: resolve(__dirname, 'src/markdown.ts'),
         terminal: resolve(__dirname, 'src/terminal.ts'),
         utils: resolve(__dirname, 'src/utils.ts'),
-        'yaml-editor': resolve(__dirname, 'src/yaml-editor.ts')
+        'yaml-editor': resolve(__dirname, 'src/yaml-editor.ts'),
+        'json-editor': resolve(__dirname, 'src/json-editor.ts')
       },
       name: 'CoreUI',
       formats: ['es'],
