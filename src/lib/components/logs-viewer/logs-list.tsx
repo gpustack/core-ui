@@ -9,7 +9,30 @@ import React, {
   useState
 } from 'react';
 import useOverlayScroller from '../../../lib/hooks/use-overlay-scroller';
+import { ansiToSpans } from './ansi';
 import './styles/logs-list.less';
+
+const LogLine = React.memo(function LogLine({
+  content
+}: {
+  content: string;
+}) {
+  const spans = ansiToSpans(content);
+  if (!spans) {
+    return content;
+  }
+  return spans.map((span, index) => (
+    <span
+      key={index}
+      style={{
+        color: span.color,
+        fontWeight: span.bold ? 700 : undefined
+      }}
+    >
+      {span.text}
+    </span>
+  ));
+});
 
 interface LogsListProps {
   dataList: any[];
@@ -143,7 +166,7 @@ const LogsList: React.FC<LogsListProps> = forwardRef((props, ref) => {
               className={classNames('text')}
               data-uid={item.uid}
             >
-              {item.content}
+              <LogLine content={item.content ?? ''} />
             </div>
           );
         })}
