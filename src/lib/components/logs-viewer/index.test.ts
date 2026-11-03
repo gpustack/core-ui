@@ -4,14 +4,13 @@ import { act, createElement } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import LogsViewer from './index';
-import type { LogRow } from './logs-list';
 
 const ESC = '\x1b';
 
 const runtime = vi.hoisted(() => ({
   workers: [] as any[],
-  dataList: [] as LogRow[],
-  setChunkFetch: vi.fn()
+  setChunkFetch: vi.fn(),
+  totalLines: null as string | null
 }));
 
 vi.mock('../../../lib/hooks/use-chunk-fetch', () => ({
@@ -22,12 +21,19 @@ vi.mock('../../../lib/hooks/useCoreUIContext', () => ({
   default: () => ({ config: { apiBaseUrl: '' } })
 }));
 
-vi.mock('./logs-list', async () => {
-  const { forwardRef } = await import('react');
+vi.mock('../../../lib/hooks/use-overlay-scroller', () => {
+  const instance = {};
+  const scrollEventElement = { current: null };
+  const noop = () => {};
   return {
-    default: forwardRef((props: { dataList: LogRow[] }, _ref) => {
-      runtime.dataList = props.dataList;
-      return null;
+    default: () => ({
+      initialize: noop,
+      updateScrollerPosition: noop,
+      updateScrollerPositionToTop: noop,
+      generateInstance: noop,
+      scrollEventElement,
+      instance,
+      initialized: true
     })
   };
 });
@@ -45,9 +51,10 @@ class WorkerMock {
 let root: Root;
 let container: HTMLDivElement;
 
-const renderViewer = async (isDownloading: boolean) => {
+const renderViewer = async (totalLines: string | null = null) => {
+  runtime.totalLines = totalLines;
   await act(async () => {
-    root.render(createElement(LogsViewer, { url: '/logs', isDownloading }));
+    root.render(createElement(LogsViewer, { url: '/logs' }));
     await vi.dynamicImportSettled();
   });
   expect(runtime.workers).toHaveLength(1);
@@ -55,7 +62,6 @@ const renderViewer = async (isDownloading: boolean) => {
 
 const emit = async (data: {
   result: string[];
-  spans?: Array<LogRow['spans']> | null;
   lines: number;
   append: boolean;
   reset: boolean;
@@ -65,6 +71,9 @@ const emit = async (data: {
   });
 };
 
+const renderedLines = () =>
+  Array.from(container.querySelectorAll('.text')).map((row) => row.textContent);
+
 beforeEach(() => {
   vi.useFakeTimers();
   vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
@@ -73,11 +82,12 @@ beforeEach(() => {
     'fetch',
     vi.fn().mockResolvedValue({
       ok: true,
-      headers: { get: () => null }
+      headers: { get: () => runtime.totalLines },
+      text: vi.fn().mockResolvedValue('')
     })
   );
   runtime.workers = [];
-  runtime.dataList = [];
+  runtime.totalLines = null;
   runtime.setChunkFetch.mockReset().mockReturnValue({
     current: { abort: vi.fn() }
   });
@@ -96,35 +106,8 @@ afterEach(() => {
 });
 
 describe('LogsViewer ANSI stream state', () => {
-  it('uses worker-provided spans for screen replacements', async () => {
-    await renderViewer(true);
-
-    await emit({
-      result: ['plain red'],
-      spans: [
-        [{ text: 'plain ' }, { text: 'red', color: '#e06c75', bold: true }]
-      ],
-      lines: 1,
-      append: false,
-      reset: true
-    });
-
-    const spans = [
-      { text: 'plain ' },
-      { text: 'red!', color: '#e06c75', bold: true }
-    ];
-    await emit({
-      result: ['plain red!'],
-      spans: [spans],
-      lines: 1,
-      append: false,
-      reset: false
-    });
-    expect(runtime.dataList[0]?.spans).toBe(spans);
-  });
-
   it('keeps carrying style across append-only line batches', async () => {
-    await renderViewer(false);
+    await renderViewer();
 
     await emit({
       result: [`${ESC}[31mERROR`],
@@ -139,9 +122,25 @@ describe('LogsViewer ANSI stream state', () => {
       reset: false
     });
 
-    expect(runtime.dataList.map((row) => row.spans)).toEqual([
-      [{ text: 'ERROR', color: '#e06c75' }],
-      [{ text: 'continued', color: '#e06c75' }]
-    ]);
+    const lines = container.querySelectorAll('.text');
+    expect(renderedLines()).toEqual(['ERROR', 'continued']);
+    const color = lines[0]!.querySelector('span')!.style.color;
+    expect(color).not.toBe('');
+    expect(lines[1]!.querySelector('span')!.style.color).toBe(color);
+  });
+
+  it('renders each follow batch while the buffer is shorter than a page', async () => {
+    await renderViewer('1');
+
+    await emit({ result: ['first'], lines: 1, append: true, reset: true });
+    expect(renderedLines()).toEqual(['first']);
+
+    await emit({
+      result: ['second'],
+      lines: 2,
+      append: true,
+      reset: false
+    });
+    expect(renderedLines()).toEqual(['first', 'second']);
   });
 });

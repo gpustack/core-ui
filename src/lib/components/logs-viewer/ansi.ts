@@ -43,7 +43,7 @@ const CONTROL = new RegExp(
   'g'
 );
 
-export function applySgr(spec: string, style: AnsiStyle): AnsiStyle {
+function applySgr(spec: string, style: AnsiStyle): AnsiStyle {
   const codes =
     spec.length === 0 ? [0] : spec.split(';').map((part) => Number(part) || 0);
   for (let i = 0; i < codes.length; i++) {
