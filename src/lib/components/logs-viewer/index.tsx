@@ -120,6 +120,17 @@ const LogsViewer: React.FC<LogsViewerProps> = forwardRef((props, ref) => {
     }));
   };
 
+  const parseScreenLines = (
+    lines: string[],
+    spans: Array<LogRow['spans']> | null | undefined
+  ): LogRow[] => {
+    return lines.map((content, index) => ({
+      content,
+      spans: spans?.[index] ?? null,
+      uid: ++lineIdRef.current
+    }));
+  };
+
   const debounceLoading = _.debounce(() => {
     setLoading(false);
     isLoadingMoreRef.current = false;
@@ -550,7 +561,7 @@ const LogsViewer: React.FC<LogsViewerProps> = forwardRef((props, ref) => {
     );
 
     logParseWorker.current.onmessage = (event: any) => {
-      const { result, lines, append, reset } = event.data;
+      const { result, spans: screenSpans, lines, append, reset } = event.data;
       lineCountRef.current = lines;
 
       // While a page is on its way, what arrives is the tail end of the
@@ -563,7 +574,9 @@ const LogsViewer: React.FC<LogsViewerProps> = forwardRef((props, ref) => {
         ansiStyleRef.current = {};
       }
       const resultRows: LogRow[] = Array.isArray(result)
-        ? parseLines(result)
+        ? append
+          ? parseLines(result)
+          : parseScreenLines(result, screenSpans)
         : [];
 
       if (modeRef.current === 'paged') {

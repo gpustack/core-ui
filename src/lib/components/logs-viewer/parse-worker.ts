@@ -1,3 +1,4 @@
+import { applySgr, type AnsiSpan, type AnsiStyle } from './ansi';
 import { controlSeqRegex } from './config';
 
 const removeBrackets = (str: string) => {
@@ -26,6 +27,10 @@ export class AnsiParser {
   private cursorRow: number = 0;
   private cursorCol: number = 0;
   private screen: string[][] = [['']];
+  // Overwriting an SGR marker does not cancel its rendition, so screen styles
+  // must live beside the cells rather than be recovered from the visible text.
+  private screenStyles: (AnsiStyle | undefined)[][] = [[undefined]];
+  private activeStyle: AnsiStyle = {};
   private rawDataRows: number = 0;
   private uid: number = 0;
   private isProcessing: boolean = false;
@@ -61,6 +66,8 @@ export class AnsiParser {
     this.cursorRow = 0;
     this.cursorCol = 0;
     this.screen = [['']];
+    this.screenStyles = [[undefined]];
+    this.activeStyle = {};
     this.rawDataRows = 0;
     this.uid = this.uid + 1;
     this.lines = [];
@@ -114,11 +121,19 @@ export class AnsiParser {
         this.cursorCol = 0; // back to the beginning of the line
         if (!this.screen[this.cursorRow]) {
           this.screen[this.cursorRow] = [''];
+          this.screenStyles[this.cursorRow] = [undefined];
         }
       } else {
         const currentLine =
           this.screen[this.cursorRow] || (this.screen[this.cursorRow] = ['']);
+        const currentStyles =
+          this.screenStyles[this.cursorRow] ||
+          (this.screenStyles[this.cursorRow] = [undefined]);
         currentLine[this.cursorCol] = char || '';
+        currentStyles[this.cursorCol] =
+          this.activeStyle.color || this.activeStyle.bold
+            ? this.activeStyle
+            : undefined;
         this.cursorCol++;
       }
     }
@@ -127,7 +142,8 @@ export class AnsiParser {
   private handleAnsiSequence(match: RegExpExecArray, isEnd: boolean) {
     const n = parseInt(match[1] || '1', 10);
     const m = parseInt(match[2] || '1', 10);
-    const command = match[3];
+    const sgr = match[4];
+    const command = sgr === undefined ? match[3] : 'm';
     switch (command) {
       case 'A':
         this.cursorRow = Math.max(0, this.cursorRow - n);
@@ -147,24 +163,64 @@ export class AnsiParser {
         break;
       case 'J': // clear the screen
         if (n === 2) {
+          const activeStyle = this.activeStyle;
           this.reset();
+          // Erasing the display does not reset its graphic rendition.
+          this.activeStyle = activeStyle;
         }
         break;
       case 'm':
-        // if (match[1] === '0') {
-        //   currentStyle = '';
-        // } else if (colorMap[match[1]]) {
-        //   currentStyle = `color: ${colorMap[match[1]]};`;
-        // }
+        if (sgr !== undefined && !sgr.includes(':')) {
+          // Cells share style objects; later SGR changes must not mutate the
+          // styles already attached to earlier text.
+          this.activeStyle = applySgr(sgr, { ...this.activeStyle });
+        }
         break;
     }
 
     while (this.screen.length <= this.cursorRow && !isEnd) {
       this.screen.push(['']);
+      this.screenStyles.push([undefined]);
     }
     while (this.screen[this.cursorRow]!.length <= this.cursorCol && !isEnd) {
       this.screen[this.cursorRow]!.push('');
+      this.screenStyles[this.cursorRow]!.push(undefined);
     }
+  }
+
+  private getScreenRows() {
+    return this.screen.map((row, rowIndex) => {
+      const raw = row.join('');
+      const content = removeBracketsFromLine(raw);
+      const offset = raw.length - content.length;
+      const spans: AnsiSpan[] = [];
+      let hasStyle = false;
+
+      row.forEach((char, index) => {
+        if (index < offset || !char) {
+          return;
+        }
+        const style = this.screenStyles[rowIndex]?.[index];
+        if (style?.color || style?.bold) {
+          hasStyle = true;
+        }
+        const prev = spans[spans.length - 1];
+        if (prev && prev.color === style?.color && prev.bold === style?.bold) {
+          prev.text += char;
+          return;
+        }
+        const span: AnsiSpan = { text: char };
+        if (style?.color) {
+          span.color = style.color;
+        }
+        if (style?.bold) {
+          span.bold = true;
+        }
+        spans.push(span);
+      });
+
+      return { content, spans: hasStyle ? spans : null };
+    });
   }
 
   private processInput(input: string) {
@@ -173,7 +229,7 @@ export class AnsiParser {
     // ends with "\x1b[1;2" and the terminating "H" arrives in the next chunk).
     // The held part is returned as `remainder` and re-joined with the next
     // chunk by processQueue.
-    const partialMatch = /\x1b(\[[\d;]*)?$/.exec(input);
+    const partialMatch = /\x1b(\[[\d;:]*)?$/.exec(input);
     let remainder = '';
     if (partialMatch) {
       remainder = input.slice(partialMatch.index);
@@ -199,16 +255,11 @@ export class AnsiParser {
     const remainingText = input.slice(lastIndex);
     this.handleText(remainingText);
 
-    // const result = this.screen.map((row, index) => ({
-    //   content: removeBracketsFromLine(row.join('')),
-    //   uid: `${this.page}-${index}`
-    // }));
-    const result = this.screen.map((row, index) =>
-      removeBracketsFromLine(row.join(''))
-    );
+    const rows = this.getScreenRows();
 
     return {
-      data: result,
+      data: rows.map((row) => row.content),
+      spans: rows.map((row) => row.spans),
       lines: this.rawDataRows,
       remainder
     };
@@ -225,6 +276,7 @@ export class AnsiParser {
     data: string[];
     lines: number;
     remainder: string;
+    spans: null;
   } {
     const lines = input?.split(/\r?\n/) || [];
     const remainder = lines.pop() || '';
@@ -242,7 +294,8 @@ export class AnsiParser {
     return {
       data: lines,
       lines: this.rawDataRows,
-      remainder
+      remainder,
+      spans: null
     };
   }
 
@@ -292,6 +345,7 @@ export class AnsiParser {
             // rows, so it still emits the full screen for a full replace.
             this.emit({
               result: result.data,
+              spans: result.spans,
               lines: result.lines,
               append: !this.isDownloading,
               reset: this.resetFlag
