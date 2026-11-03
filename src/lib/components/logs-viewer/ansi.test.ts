@@ -28,9 +28,11 @@ describe('ansiToSpans', () => {
       { text: ' Route: /v1/models, Methods: GET' }
     ]);
     expect(line).toContain(ESC);
-    expect(ansiToSpans(line)!.map((span) => span.text).join('')).not.toContain(
-      ESC
-    );
+    expect(
+      ansiToSpans(line)!
+        .map((span) => span.text)
+        .join('')
+    ).not.toContain(ESC);
   });
 
   it('applies bold and then lets a reset clear it', () => {
@@ -73,5 +75,44 @@ describe('ansiToSpans', () => {
     expect(ansiToSpans(`${ESC}[38;5;32;1mX`)).toEqual([
       { text: 'X', bold: true }
     ]);
+  });
+
+  it('drops colon-form extended color parameters without leaking them', () => {
+    expect(ansiToSpans(`${ESC}[38:2::255:0:0mERROR`)).toEqual([
+      { text: 'ERROR' }
+    ]);
+  });
+
+  it('drops OSC strings terminated by BEL or ST', () => {
+    expect(ansiToSpans(`before${ESC}]0;title\x07after`)).toEqual([
+      { text: 'beforeafter' }
+    ]);
+    expect(ansiToSpans(`before${ESC}]0;title${ESC}\\after`)).toEqual([
+      { text: 'beforeafter' }
+    ]);
+  });
+
+  it('parses repeated unterminated OSC prefixes in linear time', () => {
+    const input = `${ESC}]x`.repeat(32_000);
+    const startedAt = performance.now();
+    const spans = ansiToSpans(input);
+    const elapsed = performance.now() - startedAt;
+
+    expect(spans!.map((span) => span.text).join('')).toBe('x'.repeat(32_000));
+    // The old expression takes seconds here; leave ample room for slow CI.
+    expect(elapsed).toBeLessThan(500);
+  });
+
+  it('carries SGR state across lines until a reset', () => {
+    const style = {};
+
+    expect(ansiToSpans(`${ESC}[31mERROR`, style)).toEqual([
+      { text: 'ERROR', color: '#e06c75' }
+    ]);
+    expect(ansiToSpans('continued', style)).toEqual([
+      { text: 'continued', color: '#e06c75' }
+    ]);
+    expect(ansiToSpans(`${ESC}[0mdone`, style)).toEqual([{ text: 'done' }]);
+    expect(ansiToSpans('plain', style)).toBeNull();
   });
 });

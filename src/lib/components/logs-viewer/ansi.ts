@@ -4,7 +4,7 @@ export interface AnsiSpan {
   color?: string;
 }
 
-interface AnsiStyle {
+export interface AnsiStyle {
   bold?: boolean;
   color?: string;
 }
@@ -30,10 +30,13 @@ const PALETTE: Record<number, string> = {
   97: '#ffffff'
 };
 
-// SGR (`m`) first, then other CSI, OSC ended by BEL or ST, then a stray ESC.
+// SGR (`m`) first so its parameters can be applied. The other CSI expression
+// uses the parameter/intermediate/final byte ranges from ECMA-48 section 5.4.
 const SGR = /\x1b\[([\d;]*)m/;
-const CSI = /\x1b\[[\d;?]*[ -/]*[@-~]/;
-const OSC = /\x1b\][\s\S]*?(?:\x07|\x1b\\)/;
+const CSI = /\x1b\[[\x30-\x3f]*[\x20-\x2f]*[\x40-\x7e]/;
+// ESC cannot occur in an OSC command string: it starts the ST terminator.
+// Bounding failed matches there also keeps repeated unterminated OSC linear.
+const OSC = /\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)/;
 const STRAY = /\x1b[@-_]/;
 const CONTROL = new RegExp(
   [SGR.source, CSI.source, OSC.source, STRAY.source].join('|'),
@@ -43,9 +46,8 @@ const CONTROL = new RegExp(
 function applySgr(spec: string, style: AnsiStyle): AnsiStyle {
   const codes =
     spec.length === 0 ? [0] : spec.split(';').map((part) => Number(part) || 0);
-  let next = style;
   for (let i = 0; i < codes.length; i++) {
-    const code = codes[i];
+    const code = codes[i]!;
     // 38/48 open a color payload. The following numbers are that color,
     // so 38;5;1 must not be read as bold.
     if (code === 38 || code === 48) {
@@ -58,36 +60,42 @@ function applySgr(spec: string, style: AnsiStyle): AnsiStyle {
       continue;
     }
     if (code === 0) {
-      next = {};
+      style.bold = undefined;
+      style.color = undefined;
     } else if (code === 1) {
-      next = { ...next, bold: true };
+      style.bold = true;
     } else if (code === 22) {
       // undefined, not false: push merges on ===, and a span only records bold
       // when it is true.
-      next = { ...next, bold: undefined };
+      style.bold = undefined;
     } else if (code === 39) {
-      next = { ...next, color: undefined };
+      style.color = undefined;
     } else if (PALETTE[code]) {
-      next = { ...next, color: PALETTE[code] };
+      style.color = PALETTE[code];
     }
   }
-  return next;
+  return style;
 }
 
 /**
  * Split one log line into styled spans.
  *
- * Returns null when the line has no ESC, so the viewer can render it as text.
- * Every consumed control sequence is dropped; only SGR color and bold change
- * the spans that follow.
+ * Returns null when the line has no ESC and no inherited style, so the viewer
+ * can render it as text. Every consumed control sequence is dropped; only SGR
+ * color and bold change the spans that follow. Passing `style` carries SGR
+ * state across lines, as required by ECMA-48 section 8.3.117, and updates it
+ * in place.
  */
-export function ansiToSpans(input: string): AnsiSpan[] | null {
-  if (!input.includes('\x1b')) {
+export function ansiToSpans(
+  input: string,
+  style: AnsiStyle = {}
+): AnsiSpan[] | null {
+  const hasEscape = input.includes('\x1b');
+  if (!hasEscape && !style.color && !style.bold) {
     return null;
   }
 
   const spans: AnsiSpan[] = [];
-  let style: AnsiStyle = {};
   let last = 0;
   CONTROL.lastIndex = 0;
 
@@ -111,7 +119,7 @@ export function ansiToSpans(input: string): AnsiSpan[] | null {
   };
 
   let match: RegExpExecArray | null;
-  while ((match = CONTROL.exec(input)) !== null) {
+  while (hasEscape && (match = CONTROL.exec(input)) !== null) {
     push(input.slice(last, match.index));
     if (match[1] !== undefined) {
       style = applySgr(match[1], style);

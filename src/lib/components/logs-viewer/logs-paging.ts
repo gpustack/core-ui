@@ -79,8 +79,8 @@ export const parsePageInput = (
  * the page on screen; anything dropped is still a page request away, because
  * the log itself is on the worker's disk.
  */
-export class TailBuffer {
-  private buffer: string[] = [];
+export class TailBuffer<T = string> {
+  private buffer: T[] = [];
   private readonly maxPages: number;
   private readonly pageSize: number;
 
@@ -89,7 +89,7 @@ export class TailBuffer {
     this.pageSize = pageSize;
   }
 
-  push(lines: string[]) {
+  push(lines: T[]) {
     for (const line of lines) {
       this.buffer.push(line);
     }
@@ -97,7 +97,7 @@ export class TailBuffer {
   }
 
   /** Replace everything, for the screen mode where rows get rewritten. */
-  replace(lines: string[]) {
+  replace(lines: T[]) {
     this.buffer = lines.slice();
     this.trim();
   }

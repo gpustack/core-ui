@@ -14,8 +14,9 @@ import React, {
 } from 'react';
 import useSetChunkFetch from '../../../lib/hooks/use-chunk-fetch';
 import useCoreUIContext from '../../../lib/hooks/useCoreUIContext';
+import { ansiToSpans, type AnsiStyle } from './ansi';
 import { MaxBufferedPages, MeasureInterval, TotalLinesHeader } from './config';
-import LogsList from './logs-list';
+import LogsList, { type LogRow } from './logs-list';
 import LogsPagination from './logs-pagination';
 import type { ViewerMode } from './logs-paging';
 import {
@@ -62,9 +63,11 @@ const LogsViewer: React.FC<LogsViewerProps> = forwardRef((props, ref) => {
   // full accumulated log lines; kept in a ref (not state) so streaming append
   // is O(new lines) instead of copying the whole array into state each chunk.
   // Only `legacy` fills this — the other modes never hold the whole log.
-  const logsRef = useRef<string[]>([]);
-  const tailBufferRef = useRef(new TailBuffer(MaxBufferedPages, pageSize));
-  const pageLinesRef = useRef<string[]>([]);
+  const logsRef = useRef<LogRow[]>([]);
+  const tailBufferRef = useRef(
+    new TailBuffer<LogRow>(MaxBufferedPages, pageSize)
+  );
+  const pageLinesRef = useRef<LogRow[]>([]);
   const logParseWorker = useRef<any>(null);
   const tail = useRef<any>(defaultTail);
   const [loading, setLoading] = useState(false);
@@ -75,12 +78,14 @@ const LogsViewer: React.FC<LogsViewerProps> = forwardRef((props, ref) => {
   const pageRef = useRef<any>(page);
   const totalPageRef = useRef<any>(totalPage);
   const isLoadingMoreRef = useRef(false);
-  const [currentData, setCurrentPageData] = useState<any[]>([]);
+  const [currentData, setCurrentPageData] = useState<LogRow[]>([]);
   const scrollPosRef = useRef<any>({
     pos: 'bottom',
     page: 1
   });
   const lineCountRef = useRef(0);
+  const lineIdRef = useRef(0);
+  const ansiStyleRef = useRef<AnsiStyle>({});
   const clearScreen = useRef(false);
   const modeRef = useRef<ViewerMode>('legacy');
   const rangeFetchRef = useRef<AbortController | null>(null);
@@ -107,15 +112,12 @@ const LogsViewer: React.FC<LogsViewerProps> = forwardRef((props, ref) => {
     return row.startsWith('(…)') ? row.slice(3) : row;
   };
 
-  const setCurrentData = (lines: string[]) => {
-    const dataList = lines.map((line, index) => {
-      return {
-        content: line,
-        uid: `${pageRef.current}-${index}`
-      };
-    });
-
-    setCurrentPageData(dataList);
+  const parseLines = (lines: string[]): LogRow[] => {
+    return lines.map((content) => ({
+      content,
+      spans: ansiToSpans(content, ansiStyleRef.current),
+      uid: ++lineIdRef.current
+    }));
   };
 
   const debounceLoading = _.debounce(() => {
@@ -134,7 +136,7 @@ const LogsViewer: React.FC<LogsViewerProps> = forwardRef((props, ref) => {
     const end = pageRef.current * pageSize;
     const currentLogs = logsRef.current.slice(start, end);
     setPage(pageRef.current);
-    setCurrentData(currentLogs);
+    setCurrentPageData(currentLogs);
   }, [pageSize]);
 
   /**
@@ -300,7 +302,7 @@ const LogsViewer: React.FC<LogsViewerProps> = forwardRef((props, ref) => {
       });
       if (!text) {
         pageLinesRef.current = [];
-        setCurrentData([]);
+        setCurrentPageData([]);
         setLoading(false);
       }
       setScrollPos([pos, target]);
@@ -318,8 +320,9 @@ const LogsViewer: React.FC<LogsViewerProps> = forwardRef((props, ref) => {
       const message = String(error?.message || error);
       pageRef.current = target;
       setPage(target);
-      pageLinesRef.current = [message];
-      setCurrentData([message]);
+      ansiStyleRef.current = {};
+      pageLinesRef.current = parseLines([message]);
+      setCurrentPageData(pageLinesRef.current);
       setLoading(false);
     }
   };
@@ -411,6 +414,7 @@ const LogsViewer: React.FC<LogsViewerProps> = forwardRef((props, ref) => {
     measuredAtRef.current = Date.now();
     logsRef.current = [];
     pageLinesRef.current = [];
+    ansiStyleRef.current = {};
     tailBufferRef.current.reset();
     scrollPosRef.current = { pos: 'bottom', page: 1 };
     loadMoreDone.current = false;
@@ -549,19 +553,27 @@ const LogsViewer: React.FC<LogsViewerProps> = forwardRef((props, ref) => {
       const { result, lines, append, reset } = event.data;
       lineCountRef.current = lines;
 
+      // While a page is on its way, what arrives is the tail end of the
+      // stream just left, and none of it belongs on that page. Ignoring it
+      // before parsing also keeps its SGR state out of the requested page.
+      if (modeRef.current === 'paged' && pendingPageRef.current !== null) {
+        return;
+      }
+      if (reset) {
+        ansiStyleRef.current = {};
+      }
+      const resultRows: LogRow[] = Array.isArray(result)
+        ? parseLines(result)
+        : [];
+
       if (modeRef.current === 'paged') {
-        // While a page is on its way, what arrives is the tail end of the
-        // stream just left, and none of it belongs on that page.
-        if (pendingPageRef.current !== null) {
-          return;
-        }
         if (reset) {
           pageLinesRef.current = [];
         }
         pageLinesRef.current = append
-          ? pageLinesRef.current.concat(result || [])
-          : result || [];
-        setCurrentData(pageLinesRef.current);
+          ? pageLinesRef.current.concat(resultRows)
+          : resultRows;
+        setCurrentPageData(pageLinesRef.current);
         // The bottom of a page is only known once its lines are rendered.
         if (scrollPosRef.current.pos === 'bottom') {
           setScrollPos(['bottom', pageRef.current]);
@@ -577,15 +589,15 @@ const LogsViewer: React.FC<LogsViewerProps> = forwardRef((props, ref) => {
           buffer.reset();
         }
         if (append) {
-          buffer.push(result || []);
+          buffer.push(resultRows);
         } else {
-          buffer.replace(result || []);
+          buffer.replace(resultRows);
         }
 
         // The live view is the newest page worth of output. How long the log
         // is has to be asked for -- a follow stream replays as much history as
         // it sees fit, so counting what arrives says nothing about the length.
-        setCurrentData(buffer.lastLines(pageSize));
+        setCurrentPageData(buffer.lastLines(pageSize));
         measureIfStale();
         if (scrollPosRef.current.pos === 'bottom') {
           setScrollPos(['bottom', pageRef.current]);
@@ -603,11 +615,11 @@ const LogsViewer: React.FC<LogsViewerProps> = forwardRef((props, ref) => {
       }
       if (append) {
         const buffer = logsRef.current;
-        for (let i = 0; i < result.length; i++) {
-          buffer.push(result[i]);
+        for (const row of resultRows) {
+          buffer.push(row);
         }
       } else {
-        logsRef.current = result || [];
+        logsRef.current = resultRows;
       }
       const allLogs = logsRef.current;
 
@@ -643,7 +655,7 @@ const LogsViewer: React.FC<LogsViewerProps> = forwardRef((props, ref) => {
 
       setTotalPage(totalPageRef.current);
       setPage(pageRef.current);
-      setCurrentData(currentLogs);
+      setCurrentPageData(currentLogs);
       debounceLoading();
     };
 

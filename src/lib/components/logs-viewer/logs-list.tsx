@@ -9,15 +9,22 @@ import React, {
   useState
 } from 'react';
 import useOverlayScroller from '../../../lib/hooks/use-overlay-scroller';
-import { ansiToSpans } from './ansi';
+import { type AnsiSpan } from './ansi';
 import './styles/logs-list.less';
 
+export interface LogRow {
+  content: string;
+  uid: number;
+  spans: AnsiSpan[] | null;
+}
+
 const LogLine = React.memo(function LogLine({
-  content
+  content,
+  spans
 }: {
   content: string;
+  spans: AnsiSpan[] | null;
 }) {
-  const spans = ansiToSpans(content);
   if (!spans) {
     return content;
   }
@@ -35,7 +42,7 @@ const LogLine = React.memo(function LogLine({
 });
 
 interface LogsListProps {
-  dataList: any[];
+  dataList: LogRow[];
   height?: number;
   onScroll?: (data: { isTop: boolean; isBottom: boolean }) => void;
   diffHeight?: number;
@@ -159,14 +166,14 @@ const LogsList: React.FC<LogsListProps> = forwardRef((props, ref) => {
       onWheel={handleOnWheel}
     >
       <div className={classNames('content')}>
-        {_.map(dataList, (item: any, index: number) => {
+        {_.map(dataList, (item: LogRow) => {
           return (
             <div
               key={item.uid}
               className={classNames('text')}
               data-uid={item.uid}
             >
-              <LogLine content={item.content ?? ''} />
+              <LogLine content={item.content} spans={item.spans} />
             </div>
           );
         })}

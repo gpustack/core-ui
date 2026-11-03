@@ -95,4 +95,18 @@ describe('log paging', () => {
     expect(buffer.lines).toEqual(['a', 'b', 'c']);
     expect(buffer.lastLines(10)).toEqual(['a', 'b', 'c']);
   });
+
+  it('keeps retained row identities when the follow window slides', () => {
+    const buffer = new TailBuffer<{ uid: number }>(2, 2);
+    const first = { uid: 1 };
+    const second = { uid: 2 };
+    const third = { uid: 3 };
+
+    buffer.push([first, second]);
+    buffer.push([third]);
+
+    expect(buffer.lastLines(2)).toEqual([second, third]);
+    expect(buffer.lastLines(2)[0]).toBe(second);
+    expect(buffer.lastLines(2)[1]).toBe(third);
+  });
 });
