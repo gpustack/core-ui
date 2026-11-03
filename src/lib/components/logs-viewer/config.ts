@@ -1,4 +1,4 @@
-export const controlSeqRegex = /\x1b\[(\d*);?(\d*)?([A-DJKHfm])/g;
+export const controlSeqRegex = /\x1b\[(?:(\d*);?(\d*)?([A-DJKHf])|([\d;:]*)m)/g;
 export const replaceLineRegex = /\r\n/g;
 
 export const PageSize = 1000;
