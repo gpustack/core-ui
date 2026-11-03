@@ -120,17 +120,6 @@ const LogsViewer: React.FC<LogsViewerProps> = forwardRef((props, ref) => {
     }));
   };
 
-  const parseScreenLines = (
-    lines: string[],
-    spans: Array<LogRow['spans']> | null | undefined
-  ): LogRow[] => {
-    return lines.map((content, index) => ({
-      content,
-      spans: spans?.[index] ?? null,
-      uid: ++lineIdRef.current
-    }));
-  };
-
   const debounceLoading = _.debounce(() => {
     setLoading(false);
     isLoadingMoreRef.current = false;
@@ -561,7 +550,7 @@ const LogsViewer: React.FC<LogsViewerProps> = forwardRef((props, ref) => {
     );
 
     logParseWorker.current.onmessage = (event: any) => {
-      const { result, spans: screenSpans, lines, append, reset } = event.data;
+      const { result, lines, append, reset } = event.data;
       lineCountRef.current = lines;
 
       // While a page is on its way, what arrives is the tail end of the
@@ -574,9 +563,7 @@ const LogsViewer: React.FC<LogsViewerProps> = forwardRef((props, ref) => {
         ansiStyleRef.current = {};
       }
       const resultRows: LogRow[] = Array.isArray(result)
-        ? append
-          ? parseLines(result)
-          : parseScreenLines(result, screenSpans)
+        ? parseLines(result)
         : [];
 
       if (modeRef.current === 'paged') {
@@ -610,7 +597,7 @@ const LogsViewer: React.FC<LogsViewerProps> = forwardRef((props, ref) => {
         // The live view is the newest page worth of output. How long the log
         // is has to be asked for -- a follow stream replays as much history as
         // it sees fit, so counting what arrives says nothing about the length.
-        setCurrentPageData(buffer.lastLines(pageSize));
+        setCurrentPageData([...buffer.lastLines(pageSize)]);
         measureIfStale();
         if (scrollPosRef.current.pos === 'bottom') {
           setScrollPos(['bottom', pageRef.current]);

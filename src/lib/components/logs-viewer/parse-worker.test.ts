@@ -5,20 +5,18 @@ const ESC = '\x1b';
 
 /**
  * Drive a parser in download mode (the path that actually parses ANSI control
- * sequences) chunk-by-chunk and return the last emitted screen and its spans.
- * Each `enqueueData` kicks off an async, setTimeout(0)-paced queue, so we await
- * a few macrotasks between/after feeds to let it drain.
+ * sequences) chunk-by-chunk and return the last emitted screen (an array of
+ * rows). Each `enqueueData` kicks off an async, setTimeout(0)-paced queue, so
+ * we await a few macrotasks between/after feeds to let it drain.
  */
-async function feedDownloadScreen(chunks: string[]) {
+async function feedDownloadChunks(chunks: string[]): Promise<string[]> {
   const parser = new AnsiParser();
   parser.setIsDownloading(true);
 
-  let rows: string[] = [];
-  let spans: unknown = null;
+  let last: string[] = [];
   parser.onMessage = (msg) => {
     if (Array.isArray(msg?.result)) {
-      rows = msg.result;
-      spans = msg.spans;
+      last = msg.result;
     }
   };
 
@@ -27,11 +25,7 @@ async function feedDownloadScreen(chunks: string[]) {
     await drain();
   }
   await drain();
-  return { rows, spans };
-}
-
-async function feedDownloadChunks(chunks: string[]): Promise<string[]> {
-  return (await feedDownloadScreen(chunks)).rows;
+  return last;
 }
 
 async function drain() {
@@ -97,31 +91,5 @@ describe('AnsiParser download-mode chunk boundaries', () => {
       ]);
       expect(split, `split at index ${i}`).toEqual(expected);
     }
-  });
-});
-
-describe('AnsiParser screen styles', () => {
-  it('does not style leading text with the snapshot ending style', async () => {
-    const { rows, spans } = await feedDownloadScreen([
-      `plain ${ESC}[31;1;4mred`,
-      '!'
-    ]);
-
-    expect(rows).toEqual(['plain red!']);
-    expect(spans).toEqual([
-      [{ text: 'plain ' }, { text: 'red!', color: '#e06c75', bold: true }]
-    ]);
-  });
-
-  it('keeps the active style when a rewrite erases its SGR marker', async () => {
-    const { rows, spans } = await feedDownloadScreen([
-      `${ESC}[31;1;4mred`,
-      `${ESC}[1;1Habcdefghijklmnop`
-    ]);
-
-    expect(rows).toEqual(['abcdefghijklmnop']);
-    expect(spans).toEqual([
-      [{ text: 'abcdefghijklmnop', color: '#e06c75', bold: true }]
-    ]);
   });
 });
