@@ -1,21 +1,54 @@
-import { useMemoizedFn } from 'ahooks';
-import _ from 'lodash';
+import { useThrottleFn } from 'ahooks';
 import { useState } from 'react';
 import { breakpoints } from '../../lib/config';
 
-const useResponsive = ({ defaultSpan = 8 }: { defaultSpan?: number }) => {
-  const [span, setSpan] = useState(defaultSpan);
+type Breakpoint = keyof typeof breakpoints;
 
-  const getSpanByWidth = (width: number) => {
-    if (width < breakpoints.md) return 24;
-    if (width < breakpoints.lg) return 12;
-    return 8;
-  };
+export type ResponsiveSpans = Readonly<Partial<Record<Breakpoint, number>>>;
 
-  const handleResize = useMemoizedFn(
-    _.throttle((size: { width: number; height: number }) => {
-      setSpan(getSpanByWidth(size.width));
-    }, 100)
+const breakpointOrder = ['xxxl', 'xxl', 'xl', 'lg', 'md', 'sm', 'xs'] as const;
+
+const sixColumnMinWidth = 2560;
+
+const defaultResponsiveSpans: ResponsiveSpans = {
+  xs: 24,
+  md: 12,
+  lg: 8,
+  xxxl: 6
+};
+
+const getSpanByWidth = (
+  width: number,
+  spans: ResponsiveSpans | undefined,
+  defaultSpan: number
+) => {
+  if (spans === undefined && width >= sixColumnMinWidth) return 4;
+
+  const responsiveSpans = spans ?? defaultResponsiveSpans;
+  for (const point of breakpointOrder) {
+    const span = responsiveSpans[point];
+    if (width >= breakpoints[point] && span !== undefined) {
+      return span;
+    }
+  }
+  return defaultSpan;
+};
+
+const useResponsive = ({
+  defaultSpan = 8,
+  span: spans
+}: {
+  defaultSpan?: number;
+  span?: ResponsiveSpans;
+}) => {
+  const [width, setWidth] = useState<number>();
+  const span =
+    width === undefined
+      ? defaultSpan
+      : getSpanByWidth(width, spans, defaultSpan);
+  const { run: handleResize } = useThrottleFn(
+    (size: { width: number; height: number }) => setWidth(size.width),
+    { wait: 100 }
   );
   return { span, handleResize };
 };
