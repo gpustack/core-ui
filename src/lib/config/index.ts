@@ -4,7 +4,8 @@ export const breakpoints = {
   md: 768,
   lg: 992,
   xl: 1200,
-  xxl: 1600
+  xxl: 1600,
+  xxxl: 1920
 };
 
 export const WatchEventType = {
