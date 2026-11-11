@@ -6,9 +6,10 @@ import { PageSize } from './config';
  * `follow` and `paged` both rest on the log route answering line ranges: the
  * page count comes from the log on disk, and a page costs one request however
  * deep it is. `legacy` is what a worker predating ranges leaves us -- one
- * stream carrying the whole log, paged in the browser.
+ * stream carrying the whole log, paged in the browser. `download` replays
+ * the whole stream as a screen whose rows can be rewritten in place.
  */
-export type ViewerMode = 'legacy' | 'follow' | 'paged';
+export type ViewerMode = 'legacy' | 'follow' | 'paged' | 'download';
 
 /**
  * Which mode a session opens in.
