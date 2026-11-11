@@ -411,6 +411,7 @@ const LogsViewer: React.FC<LogsViewerProps> = forwardRef((props, ref) => {
     generationRef.current++;
     pendingPageRef.current = null;
     chunkRequedtRef.current?.current?.abort?.();
+    rangeFetchRef.current?.abort?.();
     measuredAtRef.current = Date.now();
     logsRef.current = [];
     pageLinesRef.current = [];
@@ -419,6 +420,18 @@ const LogsViewer: React.FC<LogsViewerProps> = forwardRef((props, ref) => {
     scrollPosRef.current = { pos: 'bottom', page: 1 };
     loadMoreDone.current = false;
     tail.current = defaultTail;
+
+    // Download progress addresses absolute screen rows. Replaying only a
+    // physical line range loses the screen those cursor positions refer to.
+    if (isDownloading && canFollow) {
+      modeRef.current = 'download';
+      pageRef.current = totalPageRef.current = 1;
+      setPage(1);
+      setTotalPage(1);
+      tail.current = -1;
+      createChunkConnection();
+      return;
+    }
 
     let totalLines: number | null = null;
     try {
@@ -566,6 +579,12 @@ const LogsViewer: React.FC<LogsViewerProps> = forwardRef((props, ref) => {
         ? parseLines(result)
         : [];
 
+      if (modeRef.current === 'download') {
+        setCurrentPageData(resultRows);
+        debounceLoading();
+        return;
+      }
+
       if (modeRef.current === 'paged') {
         if (reset) {
           pageLinesRef.current = [];
@@ -686,7 +705,7 @@ const LogsViewer: React.FC<LogsViewerProps> = forwardRef((props, ref) => {
             })}
           ></Spin>
         )}
-        {totalPage > 1 && (
+        {!(isDownloading && canFollow) && totalPage > 1 && (
           <div className="pg">
             <div
               className={classNames('pg-inner', {
