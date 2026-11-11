@@ -10,7 +10,11 @@ const ESC = '\x1b';
 const runtime = vi.hoisted(() => ({
   workers: [] as any[],
   setChunkFetch: vi.fn(),
-  totalLines: null as string | null
+  totalLines: null as string | null,
+  updateScrollerPosition: vi.fn(),
+  scrollEventElement: {
+    current: { scrollTop: 900, scrollHeight: 1000, clientHeight: 100 }
+  }
 }));
 
 vi.mock('../../../lib/hooks/use-chunk-fetch', () => ({
@@ -28,12 +32,12 @@ vi.mock('../../../lib/hooks/useCoreUIContext', () => ({
 
 vi.mock('../../../lib/hooks/use-overlay-scroller', () => {
   const instance = {};
-  const scrollEventElement = { current: null };
+  const scrollEventElement = runtime.scrollEventElement;
   const noop = () => {};
   return {
     default: () => ({
       initialize: noop,
-      updateScrollerPosition: noop,
+      updateScrollerPosition: runtime.updateScrollerPosition,
       updateScrollerPositionToTop: noop,
       generateInstance: noop,
       scrollEventElement,
@@ -96,6 +100,8 @@ beforeEach(() => {
   );
   runtime.workers = [];
   runtime.totalLines = null;
+  runtime.updateScrollerPosition.mockClear();
+  runtime.scrollEventElement.current.scrollTop = 900;
   runtime.setChunkFetch.mockReset().mockReturnValue({
     current: { abort: vi.fn() }
   });
@@ -154,6 +160,53 @@ describe('LogsViewer ANSI stream state', () => {
 });
 
 describe('LogsViewer download screen', () => {
+  it.each([{ url: '/logs/other-instance' }, { params: { worker_id: 2 } }])(
+    'resumes following after switching sessions with %j',
+    async (props) => {
+      await renderViewer(null, { isDownloading: true });
+      await emit({
+        result: ['old-file: 10%'],
+        lines: 1,
+        append: false,
+        reset: true
+      });
+
+      runtime.scrollEventElement.current.scrollTop = 100;
+      await act(async () => {
+        container
+          .querySelector('.logs-wrap')!
+          .dispatchEvent(new WheelEvent('wheel', { bubbles: true }));
+      });
+      runtime.updateScrollerPosition.mockClear();
+      await emit({
+        result: ['old-file: 20%'],
+        lines: 2,
+        append: false,
+        reset: false
+      });
+      expect(runtime.updateScrollerPosition).not.toHaveBeenCalled();
+
+      await renderViewer(null, { isDownloading: true, ...props });
+      runtime.updateScrollerPosition.mockClear();
+      await emit({
+        result: ['new-file: 10%'],
+        lines: 1,
+        append: false,
+        reset: true
+      });
+      expect(runtime.updateScrollerPosition).toHaveBeenCalledWith(0);
+
+      runtime.updateScrollerPosition.mockClear();
+      await emit({
+        result: ['new-file: 20%'],
+        lines: 2,
+        append: false,
+        reset: false
+      });
+      expect(runtime.updateScrollerPosition).toHaveBeenCalledWith(0);
+    }
+  );
+
   it('replays from the start without measuring or tailing physical lines', async () => {
     await renderViewer('1214', {
       isDownloading: true,
