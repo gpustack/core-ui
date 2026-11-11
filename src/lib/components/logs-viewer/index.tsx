@@ -581,6 +581,9 @@ const LogsViewer: React.FC<LogsViewerProps> = forwardRef((props, ref) => {
 
       if (modeRef.current === 'download') {
         setCurrentPageData(resultRows);
+        if (scrollPosRef.current.pos === 'bottom') {
+          setScrollPos(['bottom', pageRef.current]);
+        }
         debounceLoading();
         return;
       }
