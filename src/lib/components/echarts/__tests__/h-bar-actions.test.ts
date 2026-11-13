@@ -10,6 +10,7 @@ const harness = vi.hoisted(() => {
   return {
     handlers,
     options: undefined as any,
+    props: undefined as any,
     chart: {
       on: vi.fn((_name: string, handler: (event: any) => void) =>
         handlers.add(handler)
@@ -27,6 +28,7 @@ vi.mock('../chart', async () => {
   return {
     default: forwardRef((props: any, ref) => {
       harness.options = props.options;
+      harness.props = props;
       useImperativeHandle(ref, () => ({ chart: harness.chart }));
       return createElement('div');
     })
@@ -170,4 +172,120 @@ it('attaches row actions when an empty chart receives data', () => {
   render(data);
   clickBar(1);
   expect(onBarClick).toHaveBeenCalledExactlyOnceWith(1);
+});
+
+it('continues ranks across columns and updates the shared value ceiling', () => {
+  const onBarClick = vi.fn();
+  const render = (rankOffset: number, valueAxisMax: number) =>
+    act(() =>
+      root.render(
+        createElement(HBarChart, {
+          seriesData: data,
+          xAxisData: ['A', 'B'],
+          height: 98,
+          rankOffset,
+          valueAxisMax,
+          onBarClick
+        })
+      )
+    );
+
+  render(5, 400);
+  expect(harness.options.yAxis.axisLabel.formatter('A', 0)).toBe('{a|6}');
+  expect(harness.options.yAxis.axisLabel.formatter('B', 1)).toBe('{a|7}');
+  expect(harness.options.xAxis.max).toBe(400);
+  clickBar(1);
+  act(() => host.querySelectorAll<HTMLButtonElement>('button').item(0).click());
+  expect(onBarClick.mock.calls).toEqual([[1], [0]]);
+
+  render(10, 800);
+  expect(harness.options.yAxis.axisLabel.formatter('A', 0)).toBe('{a|11}');
+  expect(harness.options.xAxis.max).toBe(800);
+});
+
+it('defaults to ranks starting at one and automatic value scaling', () => {
+  act(() =>
+    root.render(
+      createElement(HBarChart, {
+        seriesData: data,
+        xAxisData: ['A', 'B'],
+        height: 98
+      })
+    )
+  );
+  expect(harness.options.yAxis.axisLabel.formatter('A', 0)).toBe('{a|1}');
+  expect(harness.options.xAxis.max).toBeUndefined();
+});
+
+it.each([
+  { maxItems: undefined, bottom: 10, rowPercent: '50%' },
+  { maxItems: 1, bottom: 10, rowPercent: '50%' },
+  { maxItems: 5, bottom: 142, rowPercent: '20%' }
+])(
+  'aligns numeric-height plot rows and controls when maxItems=$maxItems',
+  ({ maxItems, bottom, rowPercent }) => {
+    act(() =>
+      root.render(
+        createElement(HBarChart, {
+          seriesData: data,
+          xAxisData: ['A', 'B'],
+          height: 230,
+          maxItems,
+          onBarClick: vi.fn()
+        })
+      )
+    );
+    const buttons = host.querySelectorAll<HTMLButtonElement>('button');
+    expect(harness.props.height).toBe(230);
+    expect(harness.props.chartHeight).toBeUndefined();
+    expect(harness.options.grid.bottom).toBeCloseTo(bottom);
+    expect(buttons.item(0).parentElement?.style.height).toBe('220px');
+    expect(buttons.item(0).style.height).toBe(rowPercent);
+    expect(buttons.item(1).style.top).toBe(rowPercent);
+  }
+);
+
+it.each([
+  {
+    maxItems: undefined,
+    bottom: 10,
+    actionHeight: 'calc(100% - 10px)',
+    rowPercent: '50%'
+  },
+  { maxItems: 5, bottom: '60%', actionHeight: '100%', rowPercent: '20%' }
+])(
+  'aligns percentage-height plot rows and controls when maxItems=$maxItems',
+  ({ maxItems, bottom, actionHeight, rowPercent }) => {
+    act(() =>
+      root.render(
+        createElement(HBarChart, {
+          seriesData: data,
+          xAxisData: ['A', 'B'],
+          height: '100%',
+          maxItems,
+          onBarClick: vi.fn()
+        })
+      )
+    );
+    const buttons = host.querySelectorAll<HTMLButtonElement>('button');
+    expect(harness.options.grid.bottom).toBe(bottom);
+    expect(buttons.item(0).parentElement?.style.height).toBe(actionHeight);
+    expect(buttons.item(1).style.top).toBe(rowPercent);
+    expect(buttons.item(1).style.height).toBe(rowPercent);
+  }
+);
+
+it('keeps click controls nonnegative when the canvas is shorter than the gap', () => {
+  act(() =>
+    root.render(
+      createElement(HBarChart, {
+        seriesData: data,
+        xAxisData: ['A', 'B'],
+        height: 6,
+        onBarClick: vi.fn()
+      })
+    )
+  );
+  expect(harness.options.grid.bottom).toBe(6);
+  expect(host.querySelector('button')?.parentElement?.style.height).toBe('0px');
 });

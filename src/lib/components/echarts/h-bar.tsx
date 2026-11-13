@@ -7,10 +7,16 @@ import EmptyData from '../../../lib/components/empty-data';
 import styles from './h-bar.module.less';
 import { type ChartProps } from './types';
 
+const BOTTOM_GAP = 10;
+
 const BarChart: React.FC<
   ChartProps & {
     maxItems?: number;
     barWidth?: number;
+    /** Number of ranks before this chart, for rankings split across columns. */
+    rankOffset?: number;
+    /** Shared value-axis ceiling for charts showing the same metric. */
+    valueAxisMax?: number;
     onBarClick?: (index: number) => void;
     itemAriaLabel?: (name: string, index: number) => string;
   }
@@ -24,6 +30,8 @@ const BarChart: React.FC<
     legendData,
     maxItems,
     barWidth = 20,
+    rankOffset = 0,
+    valueAxisMax,
     tooltipValueFormatter,
     onBarClick,
     itemAriaLabel,
@@ -42,6 +50,21 @@ const BarChart: React.FC<
   const chartRef = useRef<{ chart: EChartsType } | null>(null);
   const titleText =
     typeof title === 'string' ? title : ((title?.text as string) ?? '');
+  const rowCount = Math.max(maxItems ?? 0, xAxisData.length);
+  const unusedRowRatio = rowCount
+    ? (rowCount - xAxisData.length) / rowCount
+    : 0;
+  const plotHeight =
+    typeof height === 'number' ? Math.max(0, height - BOTTOM_GAP) : undefined;
+  // Reserve label space inside the canvas so bars and click targets share a grid.
+  const gridBottom =
+    plotHeight !== undefined && typeof height === 'number'
+      ? height - plotHeight * (1 - unusedRowRatio)
+      : unusedRowRatio
+        ? `${unusedRowRatio * 100}%`
+        : BOTTOM_GAP;
+  const actionHeight =
+    plotHeight ?? (unusedRowRatio ? '100%' : `calc(100% - ${BOTTOM_GAP}px)`);
 
   const dataOptions = useMemo((): any => {
     const options = {
@@ -52,9 +75,7 @@ const BarChart: React.FC<
       grid: {
         ...grid,
         top: 0,
-        bottom: maxItems
-          ? `${(1 / maxItems) * (maxItems - xAxisData.length) * 100}%`
-          : 0
+        bottom: gridBottom
       },
       tooltip: {
         ...tooltip,
@@ -78,7 +99,7 @@ const BarChart: React.FC<
           ellipsis: '...',
           margin: 8,
           formatter(value: string, index: number) {
-            return `{a|${index + 1}}`;
+            return `{a|${rankOffset + index + 1}}`;
           },
           rich: {
             a: {
@@ -156,6 +177,7 @@ const BarChart: React.FC<
       xAxis: {
         ...options.xAxis,
         type: 'value',
+        max: valueAxisMax,
         splitLine: {
           show: false
         },
@@ -182,7 +204,9 @@ const BarChart: React.FC<
     yAxis,
     legend,
     barWidth,
-    maxItems
+    rankOffset,
+    valueAxisMax,
+    gridBottom
   ]);
 
   const isEmpty = useMemo(() => {
@@ -204,8 +228,6 @@ const BarChart: React.FC<
     };
   }, [isEmpty, onBarClick]);
 
-  const rowCount = Math.max(maxItems || xAxisData.length, xAxisData.length);
-
   return (
     <>
       {isEmpty ? (
@@ -218,7 +240,6 @@ const BarChart: React.FC<
           <Chart
             ref={chartRef}
             height={height}
-            chartHeight={typeof height === 'number' ? height - 10 : undefined}
             options={dataOptions}
             width={width || '100%'}
           />
@@ -226,7 +247,7 @@ const BarChart: React.FC<
             <div
               className={styles.actions}
               style={{
-                height: typeof height === 'number' ? height - 10 : '100%'
+                height: actionHeight
               }}
             >
               {xAxisData.map((name, index) => (
