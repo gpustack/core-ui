@@ -1,0 +1,93 @@
+name: Release
+run-name: >-
+  ${{ github.event_name == 'workflow_dispatch' && format('Prepare {0} release by @{1}', inputs.version_type, github.actor) || format('Tag merged release PR #{0}', github.event.pull_request.number) }}
+
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_type:
+        description: Version increment
+        required: true
+        default: patch
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+  pull_request:
+    branches: [main]
+    types: [closed]
+
+permissions:
+  contents: read
+
+jobs:
+  prepare:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: core-ui-release-pr
+      cancel-in-progress: false
+    steps:
+      - name: Check branch and PAT configuration
+        env:
+          RELEASE_PAT: ${{ secrets.GPUSTACK_UI_PAT }}
+        run: |
+          if [ "$GITHUB_REF" != refs/heads/main ]; then
+            echo "Run Release from main." >&2
+            exit 1
+          fi
+          if [ -z "$RELEASE_PAT" ]; then
+            echo "GPUSTACK_UI_PAT needs Contents and Pull requests write access to core-ui." >&2
+            exit 1
+          fi
+
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.GPUSTACK_UI_PAT }}
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+
+      - name: Test release automation
+        run: node --test .github/scripts/release.test.mjs
+
+      - name: Create version PR
+        env:
+          GH_TOKEN: ${{ secrets.GPUSTACK_UI_PAT }}
+          VERSION_TYPE: ${{ inputs.version_type }}
+        run: node .github/scripts/release.mjs prepare
+
+  tag:
+    if: >-
+      github.event_name == 'pull_request' && github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main' && github.event.pull_request.head.repo.full_name == github.repository && startsWith(github.event.pull_request.head.ref, 'feat/release-')
+
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: core-ui-release-tags
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+          fetch-depth: 0
+          token: ${{ secrets.GPUSTACK_UI_PAT }}
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+
+      - name: Test release automation
+        run: node --test .github/scripts/release.test.mjs
+
+      - name: Tag the merged version PR
+        env:
+          GH_TOKEN: ${{ secrets.GPUSTACK_UI_PAT }}
+        run: node .github/scripts/release.mjs tag
