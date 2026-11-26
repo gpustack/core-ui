@@ -8,6 +8,9 @@ interface ScrollOptions {
   offsetTop?: number;
 }
 
+const overlayViewportAttribute = 'data-overlayscrollbars-viewport';
+const overlayUpdateTimeout = 200;
+
 export const getScrollParent = (el: HTMLElement): HTMLElement => {
   let parent = el.parentElement;
   while (parent) {
@@ -15,7 +18,7 @@ export const getScrollParent = (el: HTMLElement): HTMLElement => {
     // Its viewport is still the scroll owner while the holder is being added.
     const { overflowY } = getComputedStyle(parent);
     if (
-      parent.hasAttribute('data-overlayscrollbars-viewport') ||
+      parent.hasAttribute(overlayViewportAttribute) ||
       overflowY === 'auto' ||
       overflowY === 'scroll'
     ) {
@@ -25,6 +28,23 @@ export const getScrollParent = (el: HTMLElement): HTMLElement => {
   }
   return (document.scrollingElement || document.documentElement) as HTMLElement;
 };
+
+const waitForOverlayOverflow = (viewport: HTMLElement) =>
+  new Promise<void>((resolve) => {
+    const finish = () => {
+      observer.disconnect();
+      clearTimeout(timeout);
+      resolve();
+    };
+    const observer = new MutationObserver(() => {
+      if (getComputedStyle(viewport).overflowY !== 'hidden') finish();
+    });
+    const timeout = setTimeout(finish, overlayUpdateTimeout);
+    observer.observe(viewport, {
+      attributes: true,
+      attributeFilter: [overlayViewportAttribute, 'style', 'class']
+    });
+  });
 
 export const getScrollPosition = (
   target: HTMLElement,
@@ -130,20 +150,19 @@ export default function useScrollAfterExpand({
         holder,
         segmentedTop.top + (options?.offsetTop ?? segmentedTop.offsetTop)
       );
-      const needsViewportUpdate =
-        position.holderHeight > 0 &&
-        viewport.scrollHeight <= viewport.clientHeight &&
-        viewport.hasAttribute('data-overlayscrollbars-viewport');
       setHolderHeight(position.holderHeight);
       await new Promise(requestAnimationFrame);
 
-      // OverlayScrollbars updates hidden overflow in its own animation frame.
-      // Only wait for that frame when the new holder creates the first overflow.
+      // The first overflow can come from either expanded content or the holder.
+      // OverlayScrollbars measures scroll coordinates before marking it ready.
       if (
-        needsViewportUpdate &&
+        request === scrollRequestRef.current &&
+        el.isConnected &&
+        position.top > 0 &&
+        viewport.hasAttribute(overlayViewportAttribute) &&
         getComputedStyle(viewport).overflowY === 'hidden'
       ) {
-        await new Promise(requestAnimationFrame);
+        await waitForOverlayOverflow(viewport);
       }
 
       if (request === scrollRequestRef.current && el.isConnected) {
